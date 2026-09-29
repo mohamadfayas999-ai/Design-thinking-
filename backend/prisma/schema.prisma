@@ -1,0 +1,232 @@
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Hostel {
+  id                 String              @id @default(cuid())
+  name               String              @unique // "Habitat", "Thandalam", "Girls"
+  code               String              @unique // "HABITAT", "THANDALAM", "GIRLS"
+  description        String?
+  users              User[]
+  students           StudentProfile[]
+  staff              StaffProfile[]
+  laundrySlots       LaundrySlot[]
+  rackShelfLocations RackShelfLocation[]
+  laundryOrders      LaundryOrder[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model User {
+  id             String          @id @default(cuid())
+  email          String          @unique
+  passwordHash   String
+  role           String // "STUDENT", "STAFF", "ADMIN"
+  hostelId       String?
+  hostel         Hostel?         @relation(fields: [hostelId], references: [id])
+  isActive       Boolean         @default(true)
+  studentProfile StudentProfile?
+  staffProfile   StaffProfile?
+  notifications  Notification[]
+  auditLogs      AuditLog[]      @relation("UserAuditLogs")
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  @@index([email])
+  @@index([role])
+}
+
+model StudentProfile {
+  id               String           @id @default(cuid())
+  userId           String           @unique
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  studentId        String           @unique // e.g. "2024CSD001"
+  name             String // e.g. "Student One"
+  department       String // e.g. "CSD"
+  admissionYear    Int // e.g. 2024
+  hostelId         String
+  hostel           Hostel           @relation(fields: [hostelId], references: [id])
+  permanentQrToken String           @unique // Opaque random token - no PII
+  slotBookings     SlotBooking[]
+  laundryOrders    LaundryOrder[]
+  complaints       Complaint[]
+  laundryHistories LaundryHistory[]
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  @@index([hostelId])
+}
+
+model StaffProfile {
+  id            String         @id @default(cuid())
+  userId        String         @unique
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  staffId       String         @unique // e.g. "STF-HAB-001"
+  name          String
+  hostelId      String
+  hostel        Hostel         @relation(fields: [hostelId], references: [id])
+  laundryOrders LaundryOrder[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@index([hostelId])
+}
+
+model LaundrySlot {
+  id           String        @id @default(cuid())
+  hostelId     String
+  hostel       Hostel        @relation(fields: [hostelId], references: [id])
+  date         String // YYYY-MM-DD
+  startTime    String // e.g. "09:00 AM"
+  endTime      String // e.g. "10:00 AM"
+  capacity     Int           @default(10)
+  isActive     Boolean       @default(true)
+  slotBookings SlotBooking[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([hostelId, date])
+}
+
+model SlotBooking {
+  id           String        @id @default(cuid())
+  studentId    String
+  student      StudentProfile @relation(fields: [studentId], references: [id])
+  slotId       String
+  slot         LaundrySlot   @relation(fields: [slotId], references: [id])
+  status       String        @default("BOOKED") // "BOOKED", "CANCELLED"
+  bookedAt     DateTime      @default(now())
+  cancelledAt  DateTime?
+  laundryOrder LaundryOrder?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+
+  @@index([studentId])
+  @@index([slotId])
+}
+
+model ItemCount {
+  id               String        @id @default(cuid())
+  tShirtShirtCount Int           @default(0)
+  pantsTrackCount  Int           @default(0)
+  totalCount       Int           @default(0)
+  isLocked         Boolean       @default(false)
+  lockedAt         DateTime?
+  laundryOrder     LaundryOrder?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+}
+
+model RackShelfLocation {
+  id            String         @id @default(cuid())
+  hostelId      String
+  hostel        Hostel         @relation(fields: [hostelId], references: [id])
+  rackNumber    Int
+  shelfNumber   Int
+  label         String // e.g. "Rack 1 - Shelf 2"
+  isActive      Boolean        @default(true)
+  laundryOrders LaundryOrder[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+
+  @@unique([hostelId, rackNumber, shelfNumber])
+}
+
+model LaundryOrder {
+  id          String             @id @default(cuid())
+  studentId   String
+  student     StudentProfile     @relation(fields: [studentId], references: [id])
+  bookingId   String             @unique
+  booking     SlotBooking        @relation(fields: [bookingId], references: [id])
+  hostelId    String
+  hostel      Hostel             @relation(fields: [hostelId], references: [id])
+  staffId     String?
+  staff       StaffProfile?      @relation(fields: [staffId], references: [id])
+  rackShelfId String?
+  rackShelf   RackShelfLocation? @relation(fields: [rackShelfId], references: [id])
+  itemCountId String?            @unique
+  itemCount   ItemCount?         @relation(fields: [itemCountId], references: [id])
+  status      String             @default("BOOKED") // "BOOKED", "IN_PROGRESS", "COMPLETED", "VERIFIED", "COMPLAINT", "UNDER_REVIEW", "RESOLVED"
+  submittedAt DateTime?
+  startedAt   DateTime?
+  completedAt DateTime?
+  verifiedAt  DateTime?
+  complaint   Complaint?
+  histories   LaundryHistory[]
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+
+  @@index([studentId])
+  @@index([hostelId])
+  @@index([status])
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   @default("LAUNDRY_COMPLETED")
+  title     String
+  message   String
+  isRead    Boolean  @default(false)
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Complaint {
+  id                String    @id @default(cuid())
+  laundryOrderId    String    @unique
+  laundryOrder      LaundryOrder @relation(fields: [laundryOrderId], references: [id])
+  studentId         String
+  student           StudentProfile @relation(fields: [studentId], references: [id])
+  type              String // "CLOTHES_TORN", "NUMBER_OF_CLOTHES_REDUCED", "OTHER_ISSUE"
+  additionalDetails String?
+  status            String    @default("UNDER_REVIEW") // "UNDER_REVIEW", "RESOLVED"
+  createdAt         DateTime  @default(now())
+  resolvedAt        DateTime?
+
+  @@index([studentId])
+  @@index([status])
+}
+
+model LaundryHistory {
+  id               String        @id @default(cuid())
+  studentId        String
+  student          StudentProfile @relation(fields: [studentId], references: [id])
+  laundryOrderId   String?
+  laundryOrder     LaundryOrder?  @relation(fields: [laundryOrderId], references: [id])
+  bookingDate      String
+  slotTiming       String
+  clothesCount     Int
+  processStartedAt DateTime?
+  completedAt      DateTime?
+  finalOutcome     String // "VERIFIED" or "COMPLAINT"
+  complaintType    String?
+  complaintDetails String?
+  complaintStatus  String?
+  resolvedAt       DateTime?
+  createdAt        DateTime      @default(now())
+
+  @@index([studentId])
+}
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  actorUserId String?
+  actorUser   User?    @relation("UserAuditLogs", fields: [actorUserId], references: [id])
+  action      String // e.g. "INTAKE", "COUNT_CONFIRM", "STATUS_CHANGE"
+  entityType  String // e.g. "LaundryOrder", "ItemCount"
+  entityId    String
+  oldValue    String?
+  newValue    String?
+  reason      String?
+  createdAt   DateTime @default(now())
+
+  @@index([entityType, entityId])
+}
