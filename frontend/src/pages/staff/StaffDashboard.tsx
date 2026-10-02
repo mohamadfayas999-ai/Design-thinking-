@@ -1,13 +1,15 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LogOut, Search, RefreshCw, Package, Clock, CheckCircle2,
   AlertCircle, ChevronDown, ChevronUp, Shirt, ArrowRight,
   Loader2, Layers, User, Calendar,
-  ClipboardList, Inbox, X, CheckCheck, TriangleAlert
+  ClipboardList, Inbox, X, CheckCheck, TriangleAlert, Volume2, VolumeX
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
+import { isSoundEnabled, toggleSound } from '../../utils/sound';
 import {
   StaffDashboard as StaffDashboardData,
   StaffBooking,
@@ -15,6 +17,15 @@ import {
   LaundryOrderDetail,
   TodaySlot
 } from '../../types';
+import {
+  smoothEase,
+  staggerContainerVariants,
+  staggerItemVariants,
+  modalBackdropVariants,
+  modalDialogVariants,
+  successIconVariants
+} from '../../utils/animations';
+import { PageTransition } from '../../components/common/PageTransition';
 
 // ── Status helpers ────────────────────────────────────────────
 
@@ -30,6 +41,18 @@ const statusConfig: Record<string, { label: string; cls: string }> = {
   COMPLETED: {
     label: 'Completed',
     cls: 'bg-emerald-50 text-emerald-700 border border-emerald-200',
+  },
+  VERIFIED: {
+    label: 'Verified',
+    cls: 'bg-teal-50 text-teal-700 border border-teal-200',
+  },
+  UNDER_REVIEW: {
+    label: 'Under Review',
+    cls: 'bg-rose-50 text-rose-700 border border-rose-200',
+  },
+  RESOLVED: {
+    label: 'Resolved',
+    cls: 'bg-purple-50 text-purple-700 border border-purple-200',
   },
   CANCELLED: {
     label: 'Cancelled',
@@ -59,7 +82,11 @@ interface StatCardProps {
 
 function StatCard({ label, value, icon, accent, sub }: StatCardProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4">
+    <motion.div
+      variants={staggerItemVariants}
+      whileHover={{ y: -2, transition: { duration: 0.15, ease: smoothEase } }}
+      className="bg-white rounded-xl border border-slate-200 p-4 flex items-center gap-4 hover:border-slate-300 hover:shadow-sm transition-all"
+    >
       <div className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${accent}`}>
         {icon}
       </div>
@@ -68,7 +95,7 @@ function StatCard({ label, value, icon, accent, sub }: StatCardProps) {
         <div className="text-xs text-slate-500 mt-0.5">{label}</div>
         {sub && <div className="text-[10px] text-slate-400 mt-0.5">{sub}</div>}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -98,10 +125,11 @@ function StorageGrid({
                 const isSelected = selectedId === loc.id;
                 const isOccupied = loc.isOccupied;
                 return (
-                  <button
+                  <motion.button
                     key={loc.id}
                     type="button"
                     disabled={isOccupied}
+                    whileTap={!isOccupied ? { scale: 0.96 } : undefined}
                     onClick={() => !isOccupied && onSelect(loc.id)}
                     title={isOccupied ? `Occupied by ${loc.occupiedBy?.studentName}` : loc.label}
                     className={`
@@ -118,7 +146,7 @@ function StorageGrid({
                     <div className={`text-[9px] mt-0.5 font-medium ${isOccupied ? 'text-slate-400' : isSelected ? 'text-water-600' : 'text-emerald-600'}`}>
                       {isOccupied ? 'OCCUPIED' : isSelected ? 'SELECTED' : 'AVAIL'}
                     </div>
-                  </button>
+                  </motion.button>
                 );
               })}
             </div>
@@ -139,45 +167,40 @@ interface IntakeModalProps {
 }
 
 function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps) {
-  const [step, setStep] = useState<'count' | 'storage' | 'review' | 'submitting'>('count');
-  const [shirts, setShirts] = useState(booking.laundryOrder?.itemCount?.tShirtShirtCount ?? 0);
-  const [pants, setPants] = useState(booking.laundryOrder?.itemCount?.pantsTrackCount ?? 0);
+  const [step, setStep] = useState<'verify' | 'storage' | 'confirm' | 'submitting'>('verify');
+  const [hasDiscrepancy, setHasDiscrepancy] = useState(false);
   const [selectedRackShelf, setSelectedRackShelf] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // Student declared counts (immutable source of truth)
+  const shirts = booking.laundryOrder?.itemCount?.tShirtShirtCount ?? 0;
+  const pants = booking.laundryOrder?.itemCount?.pantsTrackCount ?? 0;
   const total = shirts + pants;
-  const bookedShirts = booking.laundryOrder?.itemCount?.tShirtShirtCount;
-  const bookedPants = booking.laundryOrder?.itemCount?.pantsTrackCount;
-  const bookedTotal = (bookedShirts ?? 0) + (bookedPants ?? 0);
   const selectedLoc = storage.find((s) => s.id === selectedRackShelf);
 
-  function handleCountNext() {
+  function handleVerifyProceed() {
     setError(null);
-    if (shirts < 0 || pants < 0) {
-      setError('Clothing counts cannot be negative.');
+    if (hasDiscrepancy) {
+      setError('Cannot proceed with intake while clothing count discrepancy is unresolved.');
       return;
     }
     if (total < 1) {
-      setError('Please enter at least 1 clothing item.');
-      return;
-    }
-    if (total > 20) {
-      setError('Maximum 20 clothes are allowed per laundry submission.');
+      setError('Invalid booking count: booking must have at least 1 item.');
       return;
     }
     setStep('storage');
   }
 
-  function handleStorageNext() {
+  function handleStorageProceed() {
     setError(null);
     if (!selectedRackShelf) {
       setError('Please select a rack and shelf location.');
       return;
     }
-    setStep('review');
+    setStep('confirm');
   }
 
-  async function handleConfirm() {
+  async function handleFinalConfirm() {
     setError(null);
     setStep('submitting');
     try {
@@ -189,20 +212,35 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
       onSuccess(res.order);
     } catch (e: any) {
       setError(e.message || 'Intake failed. Please try again.');
-      setStep('review');
+      setStep('confirm');
     }
   }
 
-  const countDiff = total !== bookedTotal && bookedTotal > 0;
-
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        variants={modalBackdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+
+      {/* Dialog */}
+      <motion.div
+        variants={modalDialogVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200"
+      >
         {/* Header */}
         <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-6 py-4 flex items-start justify-between">
           <div>
             <div className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-              Laundry Intake
+              Laundry Intake &bull; Count Verification
             </div>
             <div className="text-white font-bold text-base leading-tight">
               {booking.student.name}
@@ -220,117 +258,96 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
           </button>
         </div>
 
+
         {/* Step indicator */}
         <div className="flex border-b border-slate-100">
-          {['count', 'storage', 'review'].map((s, i) => {
-            const stepIdx = ['count', 'storage', 'review', 'submitting'].indexOf(step);
+          {[
+            { id: 'verify', label: '1. Verify Booked Count' },
+            { id: 'storage', label: '2. Allocate Rack' },
+            { id: 'confirm', label: '3. Confirmation' },
+          ].map((s, i) => {
+            const stepIdx = ['verify', 'storage', 'confirm', 'submitting'].indexOf(step);
             const done = stepIdx > i;
-            const active = stepIdx === i;
+            const active = stepIdx === i || (step === 'submitting' && i === 2);
             return (
-              <div key={s} className={`flex-1 py-2 text-center text-[11px] font-semibold transition-colors ${
-                active ? 'text-water-700 border-b-2 border-water-600' :
+              <div key={s.id} className={`flex-1 py-2 text-center text-[11px] font-semibold transition-colors ${
+                active ? 'text-water-700 border-b-2 border-water-600 bg-water-50/30' :
                 done ? 'text-slate-400' : 'text-slate-300'
               }`}>
-                {i + 1}. {s === 'count' ? 'Clothing Count' : s === 'storage' ? 'Rack & Shelf' : 'Confirm'}
+                {s.label}
               </div>
             );
           })}
         </div>
 
         <div className="p-6">
-          {/* Step: Count */}
-          {step === 'count' && (
+          {/* Step 1: Verify Booked Count */}
+          {step === 'verify' && (
             <div className="space-y-4">
-              {bookedTotal > 0 && (
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-200">
-                  <div className="text-[10px] font-semibold uppercase tracking-wider text-slate-400 mb-2">
-                    Student Declared (Booking)
-                  </div>
-                  <div className="flex gap-4 text-sm text-slate-600">
-                    <span>Shirts: <strong>{bookedShirts}</strong></span>
-                    <span>Pants: <strong>{bookedPants}</strong></span>
-                    <span>Total: <strong>{bookedTotal}</strong></span>
-                  </div>
+              <div className="bg-blue-50/70 border border-blue-200 rounded-xl p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[11px] font-bold uppercase tracking-wider text-blue-800">
+                    Student Declared Booking
+                  </span>
+                  <span className="text-[10px] font-semibold bg-blue-200 text-blue-800 px-2 py-0.5 rounded-full">
+                    Immutable
+                  </span>
                 </div>
-              )}
+                <div className="text-xs text-blue-900 mb-3">
+                  Staff cannot modify student booking quantities. Verify that the clothes received physically match the counts below:
+                </div>
 
-              <div>
-                <div className="text-sm font-semibold text-slate-700 mb-3">
-                  Actual Clothes Received
+                <div className="grid grid-cols-2 gap-3 mb-3">
+                  <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
+                    <div className="text-xs text-slate-500">T-shirt / Shirt</div>
+                    <div className="text-xl font-bold text-slate-900 mt-0.5">{shirts}</div>
+                  </div>
+                  <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
+                    <div className="text-xs text-slate-500">Pants / Track</div>
+                    <div className="text-xl font-bold text-slate-900 mt-0.5">{pants}</div>
+                  </div>
                 </div>
-                <div className="space-y-3">
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      T-shirt / Shirt
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setShirts(Math.max(0, shirts - 1))}
-                        className="w-9 h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-lg transition-colors"
-                      >–</button>
-                      <input
-                        type="number"
-                        min={0}
-                        max={20}
-                        value={shirts}
-                        onChange={(e) => setShirts(Math.max(0, Math.min(20, parseInt(e.target.value) || 0)))}
-                        className="w-20 h-9 text-center border border-slate-300 rounded-lg text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-water-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setShirts(Math.min(20, shirts + 1))}
-                        className="w-9 h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-lg transition-colors"
-                      >+</button>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1">
-                      Pants / Track
-                    </label>
-                    <div className="flex items-center gap-3">
-                      <button
-                        type="button"
-                        onClick={() => setPants(Math.max(0, pants - 1))}
-                        className="w-9 h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-lg transition-colors"
-                      >–</button>
-                      <input
-                        type="number"
-                        min={0}
-                        max={20}
-                        value={pants}
-                        onChange={(e) => setPants(Math.max(0, Math.min(20, parseInt(e.target.value) || 0)))}
-                        className="w-20 h-9 text-center border border-slate-300 rounded-lg text-slate-900 font-bold text-base focus:outline-none focus:ring-2 focus:ring-water-400"
-                      />
-                      <button
-                        type="button"
-                        onClick={() => setPants(Math.min(20, pants + 1))}
-                        className="w-9 h-9 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 flex items-center justify-center font-bold text-lg transition-colors"
-                      >+</button>
-                    </div>
-                  </div>
+
+                <div className="bg-white rounded-lg px-4 py-2.5 border border-blue-100 flex items-center justify-between">
+                  <span className="text-sm font-semibold text-slate-700">Total Booked Quantity:</span>
+                  <span className="text-base font-bold text-water-700">{total} Items</span>
                 </div>
               </div>
 
-              {/* Total bar */}
-              <div className={`rounded-xl p-3 flex items-center justify-between ${
-                total > 20 ? 'bg-red-50 border border-red-200' : 'bg-water-50 border border-water-200'
-              }`}>
-                <span className="text-sm font-medium text-slate-700">Total</span>
-                <span className={`text-lg font-bold ${total > 20 ? 'text-red-600' : 'text-water-700'}`}>
-                  {total} / 20
-                </span>
-              </div>
-
-              {countDiff && (
-                <div className="flex items-start gap-2 p-2.5 rounded-lg bg-amber-50 border border-amber-200">
-                  <TriangleAlert className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                  <p className="text-xs text-amber-700">
-                    Count differs from student's booking declaration ({bookedTotal} vs {total}).
-                    This is the actual physical count you are recording.
-                  </p>
+              {/* Discrepancy toggle / report */}
+              <div className="border border-slate-200 rounded-xl p-3 bg-slate-50">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <div className="text-xs font-semibold text-slate-800">Count Discrepancy?</div>
+                    <div className="text-[11px] text-slate-500">Does physical count differ from {total} items?</div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHasDiscrepancy(!hasDiscrepancy);
+                      setError(null);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                      hasDiscrepancy
+                        ? 'bg-rose-100 border-rose-300 text-rose-800'
+                        : 'bg-white border-slate-300 text-slate-600 hover:bg-slate-100'
+                    }`}
+                  >
+                    {hasDiscrepancy ? 'Count Mismatch Reported' : 'Count does not match'}
+                  </button>
                 </div>
-              )}
+
+                {hasDiscrepancy && (
+                  <div className="mt-3 p-3 rounded-lg bg-rose-50 border border-rose-200 text-xs text-rose-800 flex items-start gap-2">
+                    <TriangleAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <span className="font-semibold block mb-0.5">Intake Blocked Due to Count Mismatch</span>
+                      Physical count does not match the student's booking ({total} items). Per system policy, staff cannot alter the booking quantity.
+                      Please have the student adjust their submission or consult the hostel administrator before intake can be completed.
+                    </div>
+                  </div>
+                )}
+              </div>
 
               {error && (
                 <div className="flex items-start gap-2 p-2.5 rounded-lg bg-red-50 border border-red-200">
@@ -339,7 +356,7 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                 </div>
               )}
 
-              <div className="flex gap-2 pt-1">
+              <div className="flex gap-2 pt-2">
                 <button
                   type="button"
                   onClick={onClose}
@@ -349,24 +366,26 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                 </button>
                 <button
                   type="button"
-                  onClick={handleCountNext}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-water-700 text-white text-sm font-semibold hover:bg-water-800 transition-colors flex items-center justify-center gap-1.5"
+                  onClick={handleVerifyProceed}
+                  disabled={hasDiscrepancy}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-water-700 text-white text-sm font-semibold hover:bg-water-800 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                  Select Storage <ArrowRight className="w-4 h-4" />
+                  <CheckCheck className="w-4 h-4" />
+                  Verify & Allocate Rack
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step: Storage */}
+          {/* Step 2: Allocate Rack & Shelf */}
           {step === 'storage' && (
             <div className="space-y-4">
               <div>
-                <div className="text-sm font-semibold text-slate-700 mb-1">
+                <div className="text-sm font-semibold text-slate-700 mb-0.5">
                   Select Rack & Shelf
                 </div>
                 <p className="text-xs text-slate-500">
-                  Choose an available location to store the laundry.
+                  Assign an available storage compartment for this verified booking ({total} clothes).
                 </p>
               </div>
 
@@ -380,7 +399,7 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                 <div className="flex items-center gap-2 p-2.5 rounded-lg bg-water-50 border border-water-200">
                   <Layers className="w-4 h-4 text-water-600" />
                   <span className="text-sm font-semibold text-water-700">
-                    Selected: {selectedLoc.label}
+                    Allocated Location: {selectedLoc.label}
                   </span>
                 </div>
               )}
@@ -395,45 +414,63 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
               <div className="flex gap-2 pt-1">
                 <button
                   type="button"
-                  onClick={() => setStep('count')}
+                  onClick={() => setStep('verify')}
                   className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
                 >
-                  ← Back
+                  &larr; Back to Counts
                 </button>
                 <button
                   type="button"
-                  onClick={handleStorageNext}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-water-700 text-white text-sm font-semibold hover:bg-water-800 transition-colors flex items-center justify-center gap-1.5"
+                  onClick={handleStorageProceed}
+                  disabled={!selectedRackShelf}
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-water-700 text-white text-sm font-semibold hover:bg-water-800 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
                 >
-                  Review <ArrowRight className="w-4 h-4" />
+                  Continue to Confirmation <ArrowRight className="w-4 h-4" />
                 </button>
               </div>
             </div>
           )}
 
-          {/* Step: Review */}
-          {(step === 'review' || step === 'submitting') && (
+          {/* Step 3: Confirmation required by CHANGE 2 */}
+          {(step === 'confirm' || step === 'submitting') && (
             <div className="space-y-4">
-              <div className="text-sm font-semibold text-slate-700">Intake Summary</div>
+              <div className="border-b border-slate-100 pb-2">
+                <h3 className="text-base font-bold text-slate-800">Verify Clothes Received</h3>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Confirm that the received clothing count matches the student's booking.
+                </p>
+              </div>
 
-              <div className="rounded-xl border border-slate-200 divide-y divide-slate-100 overflow-hidden">
-                {[
-                  { label: 'Student', value: booking.student.name },
-                  { label: 'Student ID', value: booking.student.studentId },
-                  { label: 'Slot', value: `${booking.slot.startTime} – ${booking.slot.endTime}` },
-                  { label: 'Date', value: new Date(booking.slot.date).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' }) },
-                  { label: 'T-shirt / Shirt', value: shirts },
-                  { label: 'Pants / Track', value: pants },
-                  { label: 'Total Clothes', value: `${total} / 20`, highlight: true },
-                  { label: 'Storage Location', value: selectedLoc?.label || '—', highlight: true },
-                ].map((row) => (
-                  <div key={row.label} className="flex items-center justify-between px-4 py-2.5">
-                    <span className="text-xs text-slate-500">{row.label}</span>
-                    <span className={`text-sm font-semibold ${row.highlight ? 'text-water-700' : 'text-slate-800'}`}>
-                      {row.value}
-                    </span>
+              <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2.5">
+                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Student booked:
+                </div>
+                <div className="space-y-1.5 text-sm text-slate-700 pl-1">
+                  <div className="flex justify-between">
+                    <span>&bull; T-shirts / Shirts:</span>
+                    <span className="font-bold text-slate-900">{shirts}</span>
                   </div>
-                ))}
+                  <div className="flex justify-between">
+                    <span>&bull; Pants / Track:</span>
+                    <span className="font-bold text-slate-900">{pants}</span>
+                  </div>
+                  <div className="flex justify-between pt-1 border-t border-slate-200">
+                    <span className="font-semibold text-slate-800">Total:</span>
+                    <span className="font-bold text-water-700">{total} items</span>
+                  </div>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200 flex justify-between items-center text-xs">
+                  <span className="text-slate-500">Allocated Rack:</span>
+                  <span className="font-semibold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+                    {selectedLoc?.label}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-800 leading-relaxed">
+                <strong>Confirmation notice:</strong> Staff is verifying the received quantity matches the booking.
+                Staff cannot edit quantities; this will lock the count and transition the order to <strong>IN PROGRESS</strong>.
               </div>
 
               {error && (
@@ -450,23 +487,23 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                   disabled={step === 'submitting'}
                   className="flex-1 px-4 py-2.5 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors disabled:opacity-50"
                 >
-                  ← Back
+                  Cancel
                 </button>
                 <button
                   type="button"
-                  onClick={handleConfirm}
+                  onClick={handleFinalConfirm}
                   disabled={step === 'submitting'}
-                  className="flex-1 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-70"
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors flex items-center justify-center gap-1.5 disabled:opacity-70 shadow-sm"
                 >
                   {step === 'submitting' ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      Confirming...
+                      Allocating...
                     </>
                   ) : (
                     <>
                       <CheckCheck className="w-4 h-4" />
-                      Confirm Intake
+                      Confirm & Allocate Rack
                     </>
                   )}
                 </button>
@@ -474,7 +511,7 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
             </div>
           )}
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -483,11 +520,33 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
 
 function IntakeSuccessModal({ order, onClose }: { order: LaundryOrderDetail; onClose: () => void }) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center">
-        <div className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop */}
+      <motion.div
+        variants={modalBackdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+
+      {/* Dialog */}
+      <motion.div
+        variants={modalDialogVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-md p-8 text-center border border-slate-200"
+      >
+        <motion.div
+          variants={successIconVariants}
+          initial="hidden"
+          animate="visible"
+          className="w-14 h-14 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4"
+        >
           <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-        </div>
+        </motion.div>
         <h2 className="text-xl font-bold text-slate-900 mb-1">Intake Confirmed</h2>
         <p className="text-sm text-slate-500 mb-6">
           Laundry is now <strong className="text-blue-600">IN PROGRESS</strong>
@@ -509,11 +568,11 @@ function IntakeSuccessModal({ order, onClose }: { order: LaundryOrderDetail; onC
         <button
           type="button"
           onClick={onClose}
-          className="w-full px-4 py-3 rounded-xl bg-water-700 text-white font-semibold text-sm hover:bg-water-800 transition-colors"
+          className="w-full px-4 py-3 rounded-xl bg-water-700 text-white font-semibold text-sm hover:bg-water-800 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-water-400"
         >
           Done
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }
@@ -529,17 +588,23 @@ function BookingRow({
   onIntake: (b: StaffBooking) => void;
   onComplete: (orderId: string) => void;
 }) {
-  const isWaiting = booking.status === 'BOOKED' && !booking.laundryOrder?.status?.includes('IN_PROGRESS');
-  const isInProgress = booking.laundryOrder?.status === 'IN_PROGRESS';
-  const isCompleted = booking.laundryOrder?.status === 'COMPLETED';
-  const effectiveStatus =
-    isCompleted ? 'COMPLETED' :
-    isInProgress ? 'IN_PROGRESS' :
-    booking.status;
+  const orderStatus = booking.laundryOrder?.status;
+  const isWaiting = booking.status === 'BOOKED' && (!orderStatus || orderStatus === 'BOOKED');
+  const isInProgress = orderStatus === 'IN_PROGRESS';
+  const isCompleted = orderStatus === 'COMPLETED';
+  const isVerified = orderStatus === 'VERIFIED';
+  const isUnderReview = orderStatus === 'UNDER_REVIEW';
+  const isResolved = orderStatus === 'RESOLVED';
+  const effectiveStatus = orderStatus || booking.status;
   const total = booking.laundryOrder?.itemCount?.totalCount;
 
   return (
-    <div className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all">
+    <motion.div
+      initial={{ opacity: 0, y: 6 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.2, ease: smoothEase }}
+      className="flex items-center gap-3 px-4 py-3 bg-white rounded-xl border border-slate-200 hover:border-slate-300 hover:shadow-sm transition-all"
+    >
       {/* Student info */}
       <div className="w-8 h-8 rounded-full bg-water-100 flex items-center justify-center flex-shrink-0">
         <User className="w-4 h-4 text-water-600" />
@@ -575,12 +640,12 @@ function BookingRow({
       </div>
 
       {/* Action */}
-      <div className="w-32 flex justify-end">
+      <div className="w-36 flex justify-end">
         {isWaiting ? (
           <button
             type="button"
             onClick={() => onIntake(booking)}
-            className="px-3 py-1.5 rounded-lg bg-water-700 text-white text-xs font-semibold hover:bg-water-800 transition-colors whitespace-nowrap"
+            className="px-3 py-1.5 rounded-lg bg-water-700 text-white text-xs font-semibold hover:bg-water-800 active:scale-95 transition-all whitespace-nowrap shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-water-400"
           >
             Start Intake
           </button>
@@ -588,21 +653,36 @@ function BookingRow({
           <button
             type="button"
             onClick={() => booking.laundryOrder && onComplete(booking.laundryOrder.id)}
-            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors whitespace-nowrap flex items-center gap-1"
+            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 active:scale-95 transition-all whitespace-nowrap flex items-center gap-1 shadow-sm hover:shadow focus:outline-none focus:ring-2 focus:ring-emerald-400"
           >
             <CheckCheck className="w-3.5 h-3.5" />
             Mark Done
           </button>
         ) : isCompleted ? (
-          <span className="text-xs font-semibold text-emerald-700 whitespace-nowrap flex items-center gap-1">
+          <span className="text-xs font-semibold text-emerald-700 whitespace-nowrap flex items-center gap-1 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
             <CheckCircle2 className="w-3.5 h-3.5" />
-            Completed
+            Laundry Completed
+          </span>
+        ) : isVerified ? (
+          <span className="text-xs font-semibold text-teal-700 whitespace-nowrap flex items-center gap-1 bg-teal-50 px-2.5 py-1 rounded-md border border-teal-200">
+            <CheckCheck className="w-3.5 h-3.5" />
+            Verified
+          </span>
+        ) : isUnderReview ? (
+          <span className="text-xs font-semibold text-rose-700 whitespace-nowrap flex items-center gap-1 bg-rose-50 px-2.5 py-1 rounded-md border border-rose-200">
+            <AlertCircle className="w-3.5 h-3.5" />
+            Under Review
+          </span>
+        ) : isResolved ? (
+          <span className="text-xs font-semibold text-purple-700 whitespace-nowrap flex items-center gap-1 bg-purple-50 px-2.5 py-1 rounded-md border border-purple-200">
+            <CheckCircle2 className="w-3.5 h-3.5" />
+            Resolved
           </span>
         ) : (
           <span className="text-xs text-slate-400">—</span>
         )}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -628,6 +708,7 @@ export const StaffDashboard: React.FC = () => {
   // Phase 4: complete order state
   const [isCompleting, setIsCompleting] = useState<string | null>(null); // orderId being completed
   const [completeSuccess, setCompleteSuccess] = useState<string | null>(null); // success message
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
 
   const today = new Date().toISOString().split('T')[0];
 
@@ -701,19 +782,19 @@ export const StaffDashboard: React.FC = () => {
     }
   }
 
-  // Filter bookings client-side for IN_PROGRESS (backend returns BOOKED slot status, but order may be IN_PROGRESS)
+  // Filter bookings client-side for IN_PROGRESS and truly waiting BOOKED status
   const displayedBookings = bookings.filter((b) => {
     if (statusFilter === 'IN_PROGRESS') {
       return b.laundryOrder?.status === 'IN_PROGRESS';
     }
     if (statusFilter === 'BOOKED') {
-      return b.status === 'BOOKED' && b.laundryOrder?.status !== 'IN_PROGRESS';
+      return b.status === 'BOOKED' && (!b.laundryOrder?.status || b.laundryOrder?.status === 'BOOKED');
     }
     return true;
   });
 
   const waitingBookings = displayedBookings.filter(
-    (b) => b.status === 'BOOKED' && b.laundryOrder?.status !== 'IN_PROGRESS'
+    (b) => b.status === 'BOOKED' && (!b.laundryOrder?.status || b.laundryOrder?.status === 'BOOKED')
   );
   const inProgressBookings = displayedBookings.filter(
     (b) => b.laundryOrder?.status === 'IN_PROGRESS'
@@ -741,6 +822,18 @@ export const StaffDashboard: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => {
+                const next = toggleSound();
+                setSoundOn(next);
+              }}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-slate-200 text-xs font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+              title={soundOn ? 'Disable Sound Effects' : 'Enable Sound Effects'}
+            >
+              {soundOn ? <Volume2 className="w-3.5 h-3.5 text-water-600" /> : <VolumeX className="w-3.5 h-3.5 text-slate-400" />}
+              <span className="hidden sm:inline">{soundOn ? 'Sound ON' : 'Muted'}</span>
+            </button>
             <div className="text-right hidden sm:block">
               <div className="text-xs font-semibold text-slate-700">{user.name || 'Staff'}</div>
               <div className="text-[10px] text-slate-400">Laundry Staff</div>
@@ -757,6 +850,7 @@ export const StaffDashboard: React.FC = () => {
         </div>
       </header>
 
+      <PageTransition>
       <main className="max-w-6xl mx-auto px-4 py-6 space-y-6">
         {error && (
           <div className="flex items-start gap-2 p-3 rounded-xl bg-red-50 border border-red-200">
@@ -794,7 +888,12 @@ export const StaffDashboard: React.FC = () => {
             ))}
           </div>
         ) : dashboard && (
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <motion.div
+            variants={staggerContainerVariants}
+            initial="hidden"
+            animate="visible"
+            className="grid grid-cols-2 md:grid-cols-4 gap-3"
+          >
             <StatCard
               label="Today's Bookings"
               value={dashboard.stats.todayBookings}
@@ -821,7 +920,7 @@ export const StaffDashboard: React.FC = () => {
               accent="bg-emerald-100"
               sub={`of ${dashboard.stats.totalStorage} total`}
             />
-          </div>
+          </motion.div>
         )}
 
         {/* Today's slot breakdown — collapsible */}
@@ -1041,24 +1140,27 @@ export const StaffDashboard: React.FC = () => {
           </div>
         </div>
       </main>
+      </PageTransition>
 
-      {/* Intake Modal */}
-      {intakeBooking && (
-        <IntakeModal
-          booking={intakeBooking}
-          storage={storage}
-          onClose={() => setIntakeBooking(null)}
-          onSuccess={handleIntakeSuccess}
-        />
-      )}
-
-      {/* Success Modal */}
-      {successOrder && (
-        <IntakeSuccessModal
-          order={successOrder}
-          onClose={() => setSuccessOrder(null)}
-        />
-      )}
+      {/* Intake & Success Modals */}
+      <AnimatePresence>
+        {intakeBooking && (
+          <IntakeModal
+            key="intake-modal"
+            booking={intakeBooking}
+            storage={storage}
+            onClose={() => setIntakeBooking(null)}
+            onSuccess={handleIntakeSuccess}
+          />
+        )}
+        {successOrder && (
+          <IntakeSuccessModal
+            key="success-modal"
+            order={successOrder}
+            onClose={() => setSuccessOrder(null)}
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 };

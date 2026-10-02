@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   CheckCircle2,
   Shirt,
@@ -12,6 +13,13 @@ import { CompletionNotification, ComplaintType } from '../../types';
 import { Button } from './Button';
 import { ErrorAlert } from './ErrorAlert';
 import { api } from '../../services/api';
+import {
+  modalBackdropVariants,
+  modalDialogVariants,
+  successIconVariants,
+  stepVariants,
+  smoothEase,
+} from '../../utils/animations';
 
 // ── Helpers ───────────────────────────────────────────────────
 
@@ -118,11 +126,13 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({
         <p className="text-xs font-bold text-slate-700 mb-3">Select Complaint Type</p>
         <div className="space-y-2">
           {COMPLAINT_OPTIONS.map((opt) => (
-            <label
+            <motion.label
               key={opt.value}
+              whileTap={{ scale: 0.99 }}
+              transition={{ duration: 0.15, ease: smoothEase }}
               className={`flex items-start gap-3 p-3 rounded-xl border cursor-pointer transition-all ${
                 selectedType === opt.value
-                  ? 'border-red-300 bg-red-50'
+                  ? 'border-red-400 bg-red-50/90 shadow-xs'
                   : 'border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50'
               }`}
             >
@@ -140,7 +150,7 @@ const ComplaintForm: React.FC<ComplaintFormProps> = ({
                 </p>
                 <p className="text-xs text-slate-500 mt-0.5">{opt.description}</p>
               </div>
-            </label>
+            </motion.label>
           ))}
         </div>
       </div>
@@ -211,9 +221,14 @@ const VerifyConfirm: React.FC<VerifyConfirmProps> = ({ orderId, clothesCount, on
   return (
     <div className="space-y-4">
       <div className="flex flex-col items-center text-center py-2">
-        <div className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3">
+        <motion.div
+          variants={successIconVariants}
+          initial="initial"
+          animate="animate"
+          className="w-14 h-14 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mb-3"
+        >
           <PackageCheck className="w-7 h-7 text-emerald-600" />
-        </div>
+        </motion.div>
         <p className="text-sm text-slate-600 leading-relaxed max-w-xs">
           Confirm that you received your laundry and everything is correct?
         </p>
@@ -282,13 +297,27 @@ export const CompletionPopup: React.FC<CompletionPopupProps> = ({
     return 'Laundry Completed';
   };
 
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Laundry completed notification">
       {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm" />
+      <motion.div
+        variants={modalBackdropVariants}
+        initial="initial"
+        animate="animate"
+        exit="exit"
+        className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm"
+      />
 
       {/* Panel */}
-      <div className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 z-10 overflow-hidden">
+      <motion.div
+        variants={shouldReduceMotion ? undefined : modalDialogVariants}
+        initial={shouldReduceMotion ? false : 'initial'}
+        animate="animate"
+        exit="exit"
+        className="relative w-full max-w-md bg-white rounded-2xl shadow-xl border border-slate-200 z-10 overflow-hidden"
+      >
         {/* Header */}
         <div className={`px-6 pt-5 pb-4 border-b border-slate-100 flex items-center gap-3 ${
           step === 'verified' ? 'bg-emerald-50' :
@@ -307,7 +336,15 @@ export const CompletionPopup: React.FC<CompletionPopupProps> = ({
             )}
           </div>
           <div className="flex-1">
-            <h2 className="text-base font-bold text-slate-900">{getTitle()}</h2>
+            <motion.h2
+              key={getTitle()}
+              initial={shouldReduceMotion ? false : { opacity: 0, y: -2 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.2, ease: smoothEase }}
+              className="text-base font-bold text-slate-900"
+            >
+              {getTitle()}
+            </motion.h2>
             {step === 'main' && (
               <p className="text-xs text-slate-500 mt-0.5">Action required</p>
             )}
@@ -316,7 +353,7 @@ export const CompletionPopup: React.FC<CompletionPopupProps> = ({
           {step === 'main' && (
             <button
               onClick={onDismiss}
-              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
+              className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-1 focus:ring-slate-300"
               aria-label="Later"
             >
               <X className="w-4 h-4" />
@@ -326,134 +363,183 @@ export const CompletionPopup: React.FC<CompletionPopupProps> = ({
 
         {/* Body */}
         <div className="px-6 py-5">
-          {step === 'main' && (
-            <div className="space-y-5">
-              <p className="text-sm text-slate-600 leading-relaxed">
-                Your laundry has been processed and is ready for pickup at the laundry area.
-              </p>
+          <AnimatePresence mode="wait">
+            {step === 'main' && (
+              <motion.div
+                key="step-main"
+                variants={shouldReduceMotion ? undefined : stepVariants}
+                initial={shouldReduceMotion ? false : 'initial'}
+                animate="animate"
+                exit="exit"
+                className="space-y-5"
+              >
+                <p className="text-sm text-slate-600 leading-relaxed">
+                  Your laundry has been processed and is ready for pickup at the laundry area.
+                </p>
 
-              {/* Completion details */}
-              {order && (
-                <div className="grid grid-cols-2 gap-3">
-                  {order.completedAt && (
-                    <>
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                          <Calendar className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wide">Completed</span>
+                {/* Completion details */}
+                {order && (
+                  <div className="grid grid-cols-2 gap-3">
+                    {order.completedAt && (
+                      <>
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                          <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+                            <Calendar className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-semibold uppercase tracking-wide">Completed</span>
+                          </div>
+                          <p className="text-xs font-bold text-slate-800">{formatDate(order.completedAt)}</p>
                         </div>
-                        <p className="text-xs font-bold text-slate-800">{formatDate(order.completedAt)}</p>
-                      </div>
-                      <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
-                        <div className="flex items-center gap-1.5 text-slate-400 mb-1">
-                          <Clock className="w-3.5 h-3.5" />
-                          <span className="text-[10px] font-semibold uppercase tracking-wide">Time</span>
+                        <div className="p-3 rounded-xl bg-slate-50 border border-slate-100">
+                          <div className="flex items-center gap-1.5 text-slate-400 mb-1">
+                            <Clock className="w-3.5 h-3.5" />
+                            <span className="text-[10px] font-semibold uppercase tracking-wide">Time</span>
+                          </div>
+                          <p className="text-xs font-bold text-slate-800">{formatTime(order.completedAt)}</p>
                         </div>
-                        <p className="text-xs font-bold text-slate-800">{formatTime(order.completedAt)}</p>
+                      </>
+                    )}
+                    <div className="p-3 rounded-xl bg-water-50 border border-water-100 col-span-2">
+                      <div className="flex items-center gap-1.5 text-water-500 mb-1">
+                        <Shirt className="w-3.5 h-3.5" />
+                        <span className="text-[10px] font-semibold uppercase tracking-wide">Total Clothes</span>
                       </div>
-                    </>
-                  )}
-                  <div className="p-3 rounded-xl bg-water-50 border border-water-100 col-span-2">
-                    <div className="flex items-center gap-1.5 text-water-500 mb-1">
-                      <Shirt className="w-3.5 h-3.5" />
-                      <span className="text-[10px] font-semibold uppercase tracking-wide">Total Clothes</span>
+                      <p className="text-lg font-extrabold text-water-900">{order.clothesCount} items</p>
                     </div>
-                    <p className="text-lg font-extrabold text-water-900">{order.clothesCount} items</p>
+                  </div>
+                )}
+
+                <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-800 leading-relaxed">
+                  Please go to the laundry area to collect your clothes, then confirm below.
+                </div>
+
+                {/* Action buttons */}
+                <div className="space-y-2">
+                  <p className="text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                    After collecting your laundry:
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    <button
+                      onClick={() => setStep('verify')}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:border-emerald-400 hover:bg-emerald-100 transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400 cursor-pointer"
+                    >
+                      <CheckCircle2 className="w-7 h-7 text-emerald-500 group-hover:text-emerald-600 transition-colors" />
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-emerald-700">Verify</p>
+                        <p className="text-[10px] text-emerald-600 mt-0.5">Everything is correct</p>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setStep('complaint')}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-red-200 bg-red-50 hover:border-red-400 hover:bg-red-100 transition-all group focus:outline-none focus:ring-2 focus:ring-red-400 cursor-pointer"
+                    >
+                      <AlertTriangle className="w-7 h-7 text-red-400 group-hover:text-red-500 transition-colors" />
+                      <div className="text-center">
+                        <p className="text-sm font-bold text-red-700">Complain</p>
+                        <p className="text-[10px] text-red-600 mt-0.5">There is an issue</p>
+                      </div>
+                    </button>
                   </div>
                 </div>
-              )}
+              </motion.div>
+            )}
 
-              <div className="p-3 rounded-xl bg-blue-50 border border-blue-100 text-xs text-blue-800 leading-relaxed">
-                Please go to the laundry area to collect your clothes, then confirm below.
-              </div>
+            {step === 'verify' && order && (
+              <motion.div
+                key="step-verify"
+                variants={shouldReduceMotion ? undefined : stepVariants}
+                initial={shouldReduceMotion ? false : 'initial'}
+                animate="animate"
+                exit="exit"
+              >
+                <VerifyConfirm
+                  orderId={order.id}
+                  clothesCount={order.clothesCount}
+                  onBack={() => setStep('main')}
+                  onSuccess={handleVerifySuccess}
+                />
+              </motion.div>
+            )}
 
-              {/* Action buttons */}
-              <div className="space-y-2">
-                <p className="text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
-                  After collecting your laundry:
-                </p>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    onClick={() => setStep('verify')}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-emerald-200 bg-emerald-50 hover:border-emerald-400 hover:bg-emerald-100 transition-all group focus:outline-none focus:ring-2 focus:ring-emerald-400"
-                  >
-                    <CheckCircle2 className="w-7 h-7 text-emerald-500 group-hover:text-emerald-600" />
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-emerald-700">Verify</p>
-                      <p className="text-[10px] text-emerald-600 mt-0.5">Everything is correct</p>
-                    </div>
-                  </button>
-                  <button
-                    onClick={() => setStep('complaint')}
-                    className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-red-200 bg-red-50 hover:border-red-400 hover:bg-red-100 transition-all group focus:outline-none focus:ring-2 focus:ring-red-400"
-                  >
-                    <AlertTriangle className="w-7 h-7 text-red-400 group-hover:text-red-500" />
-                    <div className="text-center">
-                      <p className="text-sm font-bold text-red-700">Complain</p>
-                      <p className="text-[10px] text-red-600 mt-0.5">There is an issue</p>
-                    </div>
-                  </button>
+            {step === 'complaint' && order && (
+              <motion.div
+                key="step-complaint"
+                variants={shouldReduceMotion ? undefined : stepVariants}
+                initial={shouldReduceMotion ? false : 'initial'}
+                animate="animate"
+                exit="exit"
+              >
+                <ComplaintForm
+                  orderId={order.id}
+                  clothesCount={order.clothesCount}
+                  bookingDate={order.slot.date}
+                  slotTiming={`${order.slot.startTime} – ${order.slot.endTime}`}
+                  completedAt={order.completedAt}
+                  onBack={() => setStep('main')}
+                  onSuccess={handleComplaintSuccess}
+                />
+              </motion.div>
+            )}
+
+            {step === 'verified' && (
+              <motion.div
+                key="step-verified"
+                variants={shouldReduceMotion ? undefined : stepVariants}
+                initial={shouldReduceMotion ? false : 'initial'}
+                animate="animate"
+                exit="exit"
+                className="flex flex-col items-center text-center py-4 space-y-3"
+              >
+                <motion.div
+                  variants={shouldReduceMotion ? undefined : successIconVariants}
+                  initial="initial"
+                  animate="animate"
+                  className="w-16 h-16 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center"
+                >
+                  <CheckCircle2 className="w-8 h-8 text-emerald-600" />
+                </motion.div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Laundry Verified</h3>
+                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                    Your laundry has been successfully verified.
+                  </p>
                 </div>
-              </div>
-            </div>
-          )}
+                <p className="text-xs text-slate-400">This will close automatically…</p>
+              </motion.div>
+            )}
 
-          {step === 'verify' && order && (
-            <VerifyConfirm
-              orderId={order.id}
-              clothesCount={order.clothesCount}
-              onBack={() => setStep('main')}
-              onSuccess={handleVerifySuccess}
-            />
-          )}
-
-          {step === 'complaint' && order && (
-            <ComplaintForm
-              orderId={order.id}
-              clothesCount={order.clothesCount}
-              bookingDate={order.slot.date}
-              slotTiming={`${order.slot.startTime} – ${order.slot.endTime}`}
-              completedAt={order.completedAt}
-              onBack={() => setStep('main')}
-              onSuccess={handleComplaintSuccess}
-            />
-          )}
-
-          {step === 'verified' && (
-            <div className="flex flex-col items-center text-center py-4 space-y-3">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 border-2 border-emerald-300 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Laundry Verified</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
-                  Your laundry has been successfully verified.
-                </p>
-              </div>
-              <p className="text-xs text-slate-400">This will close automatically…</p>
-            </div>
-          )}
-
-          {step === 'complained' && (
-            <div className="flex flex-col items-center text-center py-4 space-y-3">
-              <div className="w-16 h-16 rounded-full bg-amber-100 border-2 border-amber-300 flex items-center justify-center">
-                <AlertTriangle className="w-8 h-8 text-amber-600" />
-              </div>
-              <div>
-                <h3 className="text-base font-bold text-slate-900">Complaint Submitted</h3>
-                <p className="text-sm text-slate-500 mt-1 leading-relaxed">
-                  Your complaint is under review. We will look into it.
-                </p>
-                <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-bold text-amber-700">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                  UNDER REVIEW
+            {step === 'complained' && (
+              <motion.div
+                key="step-complained"
+                variants={shouldReduceMotion ? undefined : stepVariants}
+                initial={shouldReduceMotion ? false : 'initial'}
+                animate="animate"
+                exit="exit"
+                className="flex flex-col items-center text-center py-4 space-y-3"
+              >
+                <motion.div
+                  variants={shouldReduceMotion ? undefined : successIconVariants}
+                  initial="initial"
+                  animate="animate"
+                  className="w-16 h-16 rounded-full bg-amber-100 border-2 border-amber-300 flex items-center justify-center"
+                >
+                  <AlertTriangle className="w-8 h-8 text-amber-600" />
+                </motion.div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Complaint Submitted</h3>
+                  <p className="text-sm text-slate-500 mt-1 leading-relaxed">
+                    Your complaint is under review. We will look into it.
+                  </p>
+                  <div className="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 border border-amber-200 text-xs font-bold text-amber-700">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    UNDER REVIEW
+                  </div>
                 </div>
-              </div>
-              <p className="text-xs text-slate-400">This will close automatically…</p>
-            </div>
-          )}
+                <p className="text-xs text-slate-400">This will close automatically…</p>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

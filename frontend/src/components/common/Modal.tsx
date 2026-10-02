@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import { X } from 'lucide-react';
+import { modalBackdropVariants, modalDialogVariants } from '../../utils/animations';
 
 export interface ModalProps {
   isOpen: boolean;
@@ -18,6 +20,8 @@ export const Modal: React.FC<ModalProps> = ({
   footer,
   maxWidth = 'md',
 }) => {
+  const shouldReduceMotion = useReducedMotion();
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
@@ -32,8 +36,6 @@ export const Modal: React.FC<ModalProps> = ({
     };
   }, [isOpen, onClose]);
 
-  if (!isOpen) return null;
-
   const maxWidthStyles = {
     sm: 'max-w-sm',
     md: 'max-w-md',
@@ -42,41 +44,53 @@ export const Modal: React.FC<ModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
-      <div
-        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm transition-opacity"
-        onClick={onClose}
-      />
-
-      {/* Modal Dialog */}
-      <div
-        className={`relative w-full ${maxWidthStyles[maxWidth]} bg-white rounded-2xl shadow-hover border border-slate-200 z-10 overflow-hidden animate-in fade-in zoom-in-95 duration-150`}
-        role="dialog"
-        aria-modal="true"
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-          <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-          <button
+    <AnimatePresence>
+      {isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <motion.div
+            className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm"
+            variants={modalBackdropVariants}
+            initial="initial"
+            animate="animate"
+            exit="exit"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-100 transition-colors"
-            aria-label="Close"
+          />
+
+          {/* Modal Dialog */}
+          <motion.div
+            className={`relative w-full ${maxWidthStyles[maxWidth]} bg-white rounded-2xl shadow-hover border border-slate-200 z-10 overflow-hidden`}
+            role="dialog"
+            aria-modal="true"
+            variants={shouldReduceMotion ? undefined : modalDialogVariants}
+            initial={shouldReduceMotion ? { opacity: 0 } : 'initial'}
+            animate={shouldReduceMotion ? { opacity: 1 } : 'animate'}
+            exit={shouldReduceMotion ? { opacity: 0 } : 'exit'}
           >
-            <X className="w-5 h-5" />
-          </button>
+            {/* Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+              <h3 className="text-base font-semibold text-slate-900">{title}</h3>
+              <button
+                onClick={onClose}
+                className="text-slate-400 hover:text-slate-600 p-1.5 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300"
+                aria-label="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="px-6 py-5 max-h-[calc(85vh-8rem)] overflow-y-auto">{children}</div>
+
+            {/* Footer */}
+            {footer && (
+              <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
+                {footer}
+              </div>
+            )}
+          </motion.div>
         </div>
-
-        {/* Body */}
-        <div className="px-6 py-5">{children}</div>
-
-        {/* Footer */}
-        {footer && (
-          <div className="flex items-center justify-end gap-3 px-6 py-4 bg-slate-50 border-t border-slate-100">
-            {footer}
-          </div>
-        )}
-      </div>
-    </div>
+      )}
+    </AnimatePresence>
   );
 };

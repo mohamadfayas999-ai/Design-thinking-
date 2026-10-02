@@ -1,0 +1,235 @@
+- generic [ref=f6e3]:
+  - banner [ref=f6e4]:
+    - generic [ref=f6e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f6e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f6e11]:
+          - generic [ref=f6e12]:
+            - generic [ref=f6e13]: WASHWISE
+            - generic [ref=f6e14]: REC
+          - paragraph [ref=f6e15]: Campus Laundry Management
+      - generic [ref=f6e16]:
+        - button "Toggle Sound Effects" [active] [ref=f6e17] [cursor=pointer]:
+          - generic [ref=f6e22]: Muted
+        - generic [ref=f6e23]:
+          - generic [ref=f6e71]:
+            - generic [ref=f6e72]: College Laundry Administrator
+            - generic [ref=f6e73]: ADMIN
+          - generic [ref=f6e74]: ADMIN
+          - button "Logout" [ref=f6e80] [cursor=pointer]
+  - main [ref=f6e27]:
+    - generic [ref=f6e86]:
+      - generic [ref=f6e87]:
+        - generic [ref=f6e88]:
+          - generic [ref=f6e89]:
+            - generic [ref=f6e90]:
+              - generic [ref=f6e91]: Administrative Portal
+              - generic [ref=f6e93]: Campus-wide Laundry Operations
+            - heading "WASHWISE Command Center" [level=1] [ref=f6e94]
+            - paragraph [ref=f6e95]: Cross-hostel monitoring, real-time demand analytics, storage audits, and student dispute resolution.
+          - generic [ref=f6e96]:
+            - generic [ref=f6e97]:
+              - generic [ref=f6e98]: "Hostel:"
+              - combobox [ref=f6e102] [cursor=pointer]:
+                - option "All Hostels (Campus-wide)" [selected]
+                - option "Girls (GIRLS)"
+                - option "Habitat (HABITAT)"
+                - option "Thandalam (THANDALAM)"
+            - button "Refresh" [ref=f6e103] [cursor=pointer]
+            - button "Sign Out" [ref=f6e110] [cursor=pointer]
+        - generic [ref=f6e115]:
+          - generic [ref=f6e116]:
+            - generic [ref=f6e117]: Active Admin
+            - text: admin@rajalakshmi.edu.in
+          - generic [ref=f6e119]:
+            - generic [ref=f6e120]: Hostels Covered
+            - text: Habitat (Boys), Thandalam (Boys), Girls Hostel
+          - generic [ref=f6e122]:
+            - generic [ref=f6e123]: System Integrity
+            - generic [ref=f6e124]: Role Guard & Storage Enforced
+      - generic [ref=f6e128]:
+        - button "Overview & Analytics" [ref=f6e129] [cursor=pointer]
+        - button "Laundry Orders" [ref=f6e132] [cursor=pointer]
+        - button "Complaints Management" [ref=f6e135] [cursor=pointer]
+        - button "Storage Capacity" [ref=f6e138] [cursor=pointer]
+        - button "Students & Staff" [ref=f6e142] [cursor=pointer]
+        - button "Audit Logs" [ref=f6e148] [cursor=pointer]
+      - generic [ref=f6e551]:
+        - generic [ref=f6e552]:
+          - generic [ref=f6e553]:
+            - text: Total Capacity
+            - generic [ref=f6e554]: "36"
+            - text: Rack / shelf locations
+          - generic [ref=f6e555]:
+            - text: Occupied
+            - generic [ref=f6e556]: "1"
+            - text: Holding student laundry
+          - generic [ref=f6e557]:
+            - text: Available
+            - generic [ref=f6e558]: "35"
+            - text: Ready for incoming intake
+          - generic [ref=f6e559]:
+            - text: Utilization
+            - generic [ref=f6e560]: 3%
+            - text: Campus occupancy rate
+        - generic [ref=f6e561]:
+          - heading "Physical Storage Racks Layout" [level=4] [ref=f6e562]
+          - paragraph [ref=f6e563]: Occupancy state across designated hostel shelves (remains occupied until final verification).
+          - generic [ref=f6e564]:
+            - generic [ref=f6e565]:
+              - generic [ref=f6e566]: GIRLS
+              - generic [ref=f6e569]: Rack 1 - Shelf 1
+              - generic [ref=f6e570]: Available
+            - generic [ref=f6e571]:
+              - generic [ref=f6e572]: GIRLS
+              - generic [ref=f6e575]: Rack 1 - Shelf 2
+              - generic [ref=f6e576]: Available
+            - generic [ref=f6e577]:
+              - generic [ref=f6e578]: GIRLS
+              - generic [ref=f6e581]: Rack 1 - Shelf 3
+              - generic [ref=f6e582]: Available
+            - generic [ref=f6e583]:
+              - generic [ref=f6e584]: GIRLS
+              - generic [ref=f6e587]: Rack 1 - Shelf 4
+              - generic [ref=f6e588]: Available
+            - generic [ref=f6e589]:
+              - generic [ref=f6e590]: GIRLS
+              - generic [ref=f6e593]: Rack 2 - Shelf 1
+              - generic [ref=f6e594]: Available
+            - generic [ref=f6e595]:
+              - generic [ref=f6e596]: GIRLS
+              - generic [ref=f6e599]: Rack 2 - Shelf 2
+              - generic [ref=f6e600]: Available
+            - generic [ref=f6e601]:
+              - generic [ref=f6e602]: GIRLS
+              - generic [ref=f6e605]: Rack 2 - Shelf 3
+              - generic [ref=f6e606]: Available
+            - generic [ref=f6e607]:
+              - generic [ref=f6e608]: GIRLS
+              - generic [ref=f6e611]: Rack 2 - Shelf 4
+              - generic [ref=f6e612]: Available
+            - generic [ref=f6e613]:
+              - generic [ref=f6e614]: GIRLS
+              - generic [ref=f6e617]: Rack 3 - Shelf 1
+              - generic [ref=f6e618]: Available
+            - generic [ref=f6e619]:
+              - generic [ref=f6e620]: GIRLS
+              - generic [ref=f6e623]: Rack 3 - Shelf 2
+              - generic [ref=f6e624]: Available
+            - generic [ref=f6e625]:
+              - generic [ref=f6e626]: GIRLS
+              - generic [ref=f6e629]: Rack 3 - Shelf 3
+              - generic [ref=f6e630]: Available
+            - generic [ref=f6e631]:
+              - generic [ref=f6e632]: GIRLS
+              - generic [ref=f6e635]: Rack 3 - Shelf 4
+              - generic [ref=f6e636]: Available
+            - generic [ref=f6e637]:
+              - generic [ref=f6e638]: HABITAT
+              - generic [ref=f6e641]: Rack 1 - Shelf 1
+              - generic [ref=f6e642]:
+                - generic [ref=f6e643]: Student Two
+                - generic [ref=f6e644]: 2024CSE002
+                - generic [ref=f6e645]: COMPLETED
+            - generic [ref=f6e646]:
+              - generic [ref=f6e647]: HABITAT
+              - generic [ref=f6e650]: Rack 1 - Shelf 2
+              - generic [ref=f6e651]: Available
+            - generic [ref=f6e652]:
+              - generic [ref=f6e653]: HABITAT
+              - generic [ref=f6e656]: Rack 1 - Shelf 3
+              - generic [ref=f6e657]: Available
+            - generic [ref=f6e658]:
+              - generic [ref=f6e659]: HABITAT
+              - generic [ref=f6e662]: Rack 1 - Shelf 4
+              - generic [ref=f6e663]: Available
+            - generic [ref=f6e664]:
+              - generic [ref=f6e665]: HABITAT
+              - generic [ref=f6e668]: Rack 2 - Shelf 1
+              - generic [ref=f6e669]: Available
+            - generic [ref=f6e670]:
+              - generic [ref=f6e671]: HABITAT
+              - generic [ref=f6e674]: Rack 2 - Shelf 2
+              - generic [ref=f6e675]: Available
+            - generic [ref=f6e676]:
+              - generic [ref=f6e677]: HABITAT
+              - generic [ref=f6e680]: Rack 2 - Shelf 3
+              - generic [ref=f6e681]: Available
+            - generic [ref=f6e682]:
+              - generic [ref=f6e683]: HABITAT
+              - generic [ref=f6e686]: Rack 2 - Shelf 4
+              - generic [ref=f6e687]: Available
+            - generic [ref=f6e688]:
+              - generic [ref=f6e689]: HABITAT
+              - generic [ref=f6e692]: Rack 3 - Shelf 1
+              - generic [ref=f6e693]: Available
+            - generic [ref=f6e694]:
+              - generic [ref=f6e695]: HABITAT
+              - generic [ref=f6e698]: Rack 3 - Shelf 2
+              - generic [ref=f6e699]: Available
+            - generic [ref=f6e700]:
+              - generic [ref=f6e701]: HABITAT
+              - generic [ref=f6e704]: Rack 3 - Shelf 3
+              - generic [ref=f6e705]: Available
+            - generic [ref=f6e706]:
+              - generic [ref=f6e707]: HABITAT
+              - generic [ref=f6e710]: Rack 3 - Shelf 4
+              - generic [ref=f6e711]: Available
+            - generic [ref=f6e712]:
+              - generic [ref=f6e713]: THANDALAM
+              - generic [ref=f6e716]: Rack 1 - Shelf 1
+              - generic [ref=f6e717]: Available
+            - generic [ref=f6e718]:
+              - generic [ref=f6e719]: THANDALAM
+              - generic [ref=f6e722]: Rack 1 - Shelf 2
+              - generic [ref=f6e723]: Available
+            - generic [ref=f6e724]:
+              - generic [ref=f6e725]: THANDALAM
+              - generic [ref=f6e728]: Rack 1 - Shelf 3
+              - generic [ref=f6e729]: Available
+            - generic [ref=f6e730]:
+              - generic [ref=f6e731]: THANDALAM
+              - generic [ref=f6e734]: Rack 1 - Shelf 4
+              - generic [ref=f6e735]: Available
+            - generic [ref=f6e736]:
+              - generic [ref=f6e737]: THANDALAM
+              - generic [ref=f6e740]: Rack 2 - Shelf 1
+              - generic [ref=f6e741]: Available
+            - generic [ref=f6e742]:
+              - generic [ref=f6e743]: THANDALAM
+              - generic [ref=f6e746]: Rack 2 - Shelf 2
+              - generic [ref=f6e747]: Available
+            - generic [ref=f6e748]:
+              - generic [ref=f6e749]: THANDALAM
+              - generic [ref=f6e752]: Rack 2 - Shelf 3
+              - generic [ref=f6e753]: Available
+            - generic [ref=f6e754]:
+              - generic [ref=f6e755]: THANDALAM
+              - generic [ref=f6e758]: Rack 2 - Shelf 4
+              - generic [ref=f6e759]: Available
+            - generic [ref=f6e760]:
+              - generic [ref=f6e761]: THANDALAM
+              - generic [ref=f6e764]: Rack 3 - Shelf 1
+              - generic [ref=f6e765]: Available
+            - generic [ref=f6e766]:
+              - generic [ref=f6e767]: THANDALAM
+              - generic [ref=f6e770]: Rack 3 - Shelf 2
+              - generic [ref=f6e771]: Available
+            - generic [ref=f6e772]:
+              - generic [ref=f6e773]: THANDALAM
+              - generic [ref=f6e776]: Rack 3 - Shelf 3
+              - generic [ref=f6e777]: Available
+            - generic [ref=f6e778]:
+              - generic [ref=f6e779]: THANDALAM
+              - generic [ref=f6e782]: Rack 3 - Shelf 4
+              - generic [ref=f6e783]: Available
+  - contentinfo [ref=f6e61]:
+    - generic [ref=f6e62]:
+      - generic [ref=f6e63]:
+        - generic [ref=f6e64]: WASHWISE
+        - generic [ref=f6e65]: "-"
+        - generic [ref=f6e66]: Rajalakshmi Engineering College
+      - generic [ref=f6e67]:
+        - generic [ref=f6e68]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f6e69]: "-"
+        - generic [ref=f6e70]: Campus Laundry Services

@@ -1,12 +1,22 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Droplets, LogOut, ShieldCheck, UserCheck } from 'lucide-react';
+import { Droplets, LogOut, ShieldCheck, UserCheck, Volume2, VolumeX } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { Badge } from '../common/Badge';
+import { isSoundEnabled, toggleSound } from '../../utils/sound';
 
 export const Navbar: React.FC = () => {
   const { user, isAuthenticated, logout } = useAuth();
   const navigate = useNavigate();
+  const [soundOn, setSoundOn] = useState(isSoundEnabled());
+
+  useEffect(() => {
+    const onSoundChange = (e: any) => {
+      setSoundOn(e.detail?.enabled ?? isSoundEnabled());
+    };
+    window.addEventListener('washwise-sound-changed', onSoundChange);
+    return () => window.removeEventListener('washwise-sound-changed', onSoundChange);
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -36,6 +46,23 @@ export const Navbar: React.FC = () => {
 
         {/* Right side navigation / user state */}
         <div className="flex items-center gap-3">
+          {/* Sound Toggle Button */}
+          <button
+            type="button"
+            onClick={() => setSoundOn(toggleSound())}
+            className="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1.5 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-slate-600 transition-colors"
+            title={soundOn ? 'Water Bubble Sounds: ON (Click to mute)' : 'Water Bubble Sounds: OFF (Click to unmute)'}
+            aria-label="Toggle Sound Effects"
+          >
+            {soundOn ? (
+              <Volume2 className="w-3.5 h-3.5 text-water-600" />
+            ) : (
+              <VolumeX className="w-3.5 h-3.5 text-slate-400" />
+            )}
+            <span className="hidden sm:inline text-[11px] font-semibold">
+              {soundOn ? 'Sound ON' : 'Muted'}
+            </span>
+          </button>
           {isAuthenticated && user ? (
             <div className="flex items-center gap-3">
               <div className="hidden md:flex flex-col items-end">

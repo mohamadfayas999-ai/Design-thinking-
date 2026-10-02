@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, useReducedMotion } from 'framer-motion';
 import {
   QrCode,
   Calendar,
@@ -25,6 +26,8 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { Modal } from '../../components/common/Modal';
 import { CompletionPopup } from '../../components/common/CompletionPopup';
+import { PageTransition } from '../../components/common/PageTransition';
+import { staggerContainerVariants, staggerItemVariants } from '../../utils/animations';
 
 // ── Helper ────────────────────────────────────────
 
@@ -59,7 +62,7 @@ const UsageRing: React.FC<{ used: number; max: number }> = ({ used, max }) => {
     <div className="relative w-20 h-20 flex-shrink-0">
       <svg className="w-20 h-20 -rotate-90" viewBox="0 0 80 80">
         <circle cx="40" cy="40" r={radius} fill="none" className="stroke-slate-100" strokeWidth="8" />
-        <circle
+        <motion.circle
           cx="40"
           cy="40"
           r={radius}
@@ -68,8 +71,9 @@ const UsageRing: React.FC<{ used: number; max: number }> = ({ used, max }) => {
           strokeLinecap="round"
           stroke={isMaxed ? '#ef4444' : isWarning ? '#f59e0b' : '#0ea5e9'}
           strokeDasharray={circumference}
-          strokeDashoffset={dashOffset}
-          className="transition-all duration-700"
+          initial={{ strokeDashoffset: circumference }}
+          animate={{ strokeDashoffset: dashOffset }}
+          transition={{ duration: 0.75, ease: [0.16, 1, 0.3, 1] }}
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
@@ -258,8 +262,10 @@ export const StudentDashboard: React.FC = () => {
     navigate('/');
   };
 
+  const shouldReduceMotion = useReducedMotion();
+
   return (
-    <div className="space-y-6">
+    <PageTransition className="space-y-6">
       {/* Phase 4: Completion Popup — renders above everything */}
       {completionNotification && (
         <CompletionPopup
@@ -338,11 +344,16 @@ export const StudentDashboard: React.FC = () => {
       )}
 
       {/* ── Main Grid ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
+      <motion.div
+        variants={staggerContainerVariants}
+        initial={shouldReduceMotion ? false : 'initial'}
+        animate="animate"
+        className="grid grid-cols-1 lg:grid-cols-3 gap-6"
+      >
         {/* ── Left Column: QR ── */}
-        <Card className="lg:col-span-1 border-slate-200">
-          <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-4">
+        <motion.div variants={staggerItemVariants} className="lg:col-span-1">
+          <Card className="border-slate-200">
+            <div className="flex items-center gap-2.5 pb-4 border-b border-slate-100 mb-4">
             <div className="w-8 h-8 rounded-lg bg-water-50 text-water-600 flex items-center justify-center border border-water-100">
               <QrCode className="w-4 h-4" />
             </div>
@@ -378,9 +389,10 @@ export const StudentDashboard: React.FC = () => {
             <p>This QR permanently identifies you. It is display-only and cannot be scanned.</p>
           </div>
         </Card>
+        </motion.div>
 
         {/* ── Right Columns ── */}
-        <div className="lg:col-span-2 space-y-5">
+        <motion.div variants={staggerItemVariants} className="lg:col-span-2 space-y-5">
 
           {/* Monthly Usage */}
           <Card className="border-slate-200">
@@ -526,8 +538,8 @@ export const StudentDashboard: React.FC = () => {
               <ArrowRight className="w-4 h-4 text-water-500 group-hover:translate-x-0.5 transition-transform" />
             </button>
           )}
-        </div>
-      </div>
+        </motion.div>
+      </motion.div>
 
       {/* ── Cancel Confirmation Modal ── */}
       <Modal
@@ -593,6 +605,6 @@ export const StudentDashboard: React.FC = () => {
           </div>
         )}
       </Modal>
-    </div>
+    </PageTransition>
   );
 };

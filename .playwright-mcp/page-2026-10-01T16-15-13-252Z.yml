@@ -1,0 +1,61 @@
+- generic [ref=f5e3]:
+  - banner [ref=f5e4]:
+    - generic [ref=f5e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f5e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f5e11]:
+          - generic [ref=f5e12]:
+            - generic [ref=f5e13]: WASHWISE
+            - generic [ref=f5e14]: REC
+          - paragraph [ref=f5e15]: Campus Laundry Management
+      - generic [ref=f5e16]:
+        - button "Toggle Sound Effects" [ref=f5e17] [cursor=pointer]:
+          - generic [ref=f5e22]: Sound ON
+        - generic [ref=f5e23]:
+          - generic [ref=f5e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=f5e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=f5e27]:
+    - generic [ref=f5e28]:
+      - button "Back to Hostel Selection" [ref=f5e64] [cursor=pointer]
+      - generic [ref=f5e66]:
+        - generic [ref=f5e67]:
+          - generic [ref=f5e71]:
+            - heading "Laundry Staff Login" [level=1] [ref=f5e72]
+            - paragraph [ref=f5e73]: Habitat Hostel Unit
+          - button "Change" [ref=f5e74] [cursor=pointer]
+        - generic [ref=f5e75]:
+          - generic [ref=f5e76]:
+            - generic [ref=f5e77]: "Assigned Hostel:"
+            - generic [ref=f5e78]: Habitat Hostel
+          - generic [ref=f5e82]:
+            - generic [ref=f5e83]: Staff Email Address*
+            - textbox "Staff Email Address*" [ref=f5e85]:
+              - /placeholder: habitatstaff1@rajalakshmi.edu.in
+          - generic [ref=f5e86]:
+            - generic [ref=f5e87]: Password*
+            - textbox "Password*" [ref=f5e89]:
+              - /placeholder: ••••••••
+          - button "Sign In to Staff Operations" [ref=f5e91] [cursor=pointer]
+        - generic [ref=f5e93]:
+          - paragraph [ref=f5e94]: "Demo Staff Quick Fill:"
+          - generic [ref=f5e95]:
+            - button "Habitat Staff 1" [ref=f5e96] [cursor=pointer]:
+              - generic [ref=f5e97]: Habitat
+              - text: Staff 1
+            - button "Thandalam Staff 1" [ref=f5e98] [cursor=pointer]:
+              - generic [ref=f5e99]: Thandalam
+              - text: Staff 1
+            - button "Girls Staff 1" [ref=f5e100] [cursor=pointer]:
+              - generic [ref=f5e101]: Girls
+              - text: Staff 1
+  - contentinfo [ref=f5e54]:
+    - generic [ref=f5e55]:
+      - generic [ref=f5e56]:
+        - generic [ref=f5e57]: WASHWISE
+        - generic [ref=f5e58]: "-"
+        - generic [ref=f5e59]: Rajalakshmi Engineering College
+      - generic [ref=f5e60]:
+        - generic [ref=f5e61]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f5e62]: "-"
+        - generic [ref=f5e63]: Campus Laundry Services

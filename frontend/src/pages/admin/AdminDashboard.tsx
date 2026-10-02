@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from 'framer-motion';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
 import {
@@ -19,6 +20,12 @@ import { Badge } from '../../components/common/Badge';
 import { Button } from '../../components/common/Button';
 import { Modal } from '../../components/common/Modal';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { PageTransition } from '../../components/common/PageTransition';
+import {
+  smoothEase,
+  staggerContainerVariants,
+  tabContentVariants,
+} from '../../utils/animations';
 import {
   Activity,
   Users,
@@ -252,7 +259,8 @@ export const AdminDashboard: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <PageTransition>
+      <div className="space-y-6 pb-12">
       {/* ── Top Header Banner ────────────────────────────────────────────── */}
       <div className="rounded-2xl bg-gradient-to-r from-slate-900 via-ocean-900 to-water-950 text-white p-6 sm:p-8 shadow-card border border-white/10 relative overflow-hidden">
         {/* Subtle Water Reflection Effect */}
@@ -458,14 +466,25 @@ export const AdminDashboard: React.FC = () => {
           <LoadingSpinner text="Retrieving operational data from database..." />
         </div>
       ) : (
-        <>
+        <motion.div
+          key={activeTab}
+          variants={tabContentVariants}
+          initial="hidden"
+          animate="visible"
+          transition={{ duration: 0.22, ease: smoothEase }}
+        >
           {/* ═══════════════════════════════════════════════════════════════════
               TAB 1: OVERVIEW & ANALYTICS
              ═══════════════════════════════════════════════════════════════════ */}
           {activeTab === 'overview' && summaryData && (
             <div className="space-y-6">
               {/* Summary Metric Cards */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+              <motion.div
+                variants={staggerContainerVariants}
+                initial="hidden"
+                animate="visible"
+                className="grid grid-cols-2 sm:grid-cols-4 gap-4"
+              >
                 <Card className="border-slate-200">
                   <div className="flex items-center justify-between text-slate-500 mb-1">
                     <span className="text-[11px] font-bold uppercase tracking-wider">Students</span>
@@ -555,7 +574,7 @@ export const AdminDashboard: React.FC = () => {
                     {summaryData.summary.occupiedStorageLocations} / {summaryData.summary.totalStorageLocations} Shelves
                   </div>
                 </Card>
-              </div>
+              </motion.div>
 
               {/* 3 Hostels Comparative Overview */}
               <div>
@@ -1315,7 +1334,7 @@ export const AdminDashboard: React.FC = () => {
               )}
             </Card>
           )}
-        </>
+        </motion.div>
       )}
 
       {/* ── MODAL: RESOLVE COMPLAINT ─────────────────────────────────────── */}
@@ -1461,6 +1480,7 @@ export const AdminDashboard: React.FC = () => {
           </div>
         </Modal>
       )}
-    </div>
+      </div>
+    </PageTransition>
   );
 };

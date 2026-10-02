@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Calendar,
   Clock,
@@ -16,6 +17,13 @@ import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
+import { PageTransition } from '../../components/common/PageTransition';
+import {
+  stepVariants,
+  successIconVariants,
+  loginCardVariants,
+  staggerContainerVariants,
+} from '../../utils/animations';
 
 // ── Types ──────────────────────────────────────
 
@@ -148,6 +156,7 @@ const SlotCard: React.FC<SlotCardProps> = ({ slot, isSelected, onSelect }) => {
 
 export const BookLaundryPage: React.FC = () => {
   const navigate = useNavigate();
+  const shouldReduceMotion = useReducedMotion();
 
   // Data
   const [slots, setSlots] = useState<LaundrySlot[]>([]);
@@ -294,52 +303,66 @@ export const BookLaundryPage: React.FC = () => {
 
   if (step === 4 && confirmedBooking) {
     return (
-      <div className="max-w-md mx-auto py-8">
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4 border-4 border-emerald-200">
+      <PageTransition className="max-w-md mx-auto py-8">
+        <motion.div
+          variants={staggerContainerVariants}
+          initial={shouldReduceMotion ? false : 'initial'}
+          animate="animate"
+          className="text-center mb-8"
+        >
+          <motion.div
+            variants={shouldReduceMotion ? undefined : successIconVariants}
+            className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4 border-4 border-emerald-200"
+          >
             <CheckCircle2 className="w-8 h-8 text-emerald-600" />
-          </div>
+          </motion.div>
           <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">Booking Confirmed</h1>
           <p className="text-sm text-slate-500 mt-1.5">Your laundry slot has been successfully booked.</p>
-        </div>
+        </motion.div>
 
-        <Card className="border-emerald-200 bg-emerald-50/40 mb-6">
-          <div className="space-y-3">
-            <div className="flex items-center justify-between py-2 border-b border-emerald-100">
-              <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Status</span>
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-                BOOKED
-              </span>
+        <motion.div
+          variants={shouldReduceMotion ? undefined : loginCardVariants}
+          initial={shouldReduceMotion ? false : 'initial'}
+          animate="animate"
+        >
+          <Card className="border-emerald-200 bg-emerald-50/40 mb-6">
+            <div className="space-y-3">
+              <div className="flex items-center justify-between py-2 border-b border-emerald-100">
+                <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Status</span>
+                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                  BOOKED
+                </span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-emerald-100">
+                <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Date</span>
+                <span className="text-sm font-semibold text-slate-800">{formatDate(confirmedBooking.slot.date)}</span>
+              </div>
+              <div className="flex items-center justify-between py-2 border-b border-emerald-100">
+                <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Time</span>
+                <span className="text-sm font-semibold text-slate-800">
+                  {confirmedBooking.slot.startTime} – {confirmedBooking.slot.endTime}
+                </span>
+              </div>
+              {confirmedBooking.itemCount && (
+                <>
+                  <div className="flex items-center justify-between py-2 border-b border-emerald-100">
+                    <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">T-shirt / Shirt</span>
+                    <span className="text-sm font-semibold text-slate-800">{confirmedBooking.itemCount.tShirtShirtCount} items</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2 border-b border-emerald-100">
+                    <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Pants / Track</span>
+                    <span className="text-sm font-semibold text-slate-800">{confirmedBooking.itemCount.pantsTrackCount} items</span>
+                  </div>
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Total Clothes</span>
+                    <span className="text-sm font-bold text-water-700">{confirmedBooking.itemCount.totalCount} / 20</span>
+                  </div>
+                </>
+              )}
             </div>
-            <div className="flex items-center justify-between py-2 border-b border-emerald-100">
-              <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Date</span>
-              <span className="text-sm font-semibold text-slate-800">{formatDate(confirmedBooking.slot.date)}</span>
-            </div>
-            <div className="flex items-center justify-between py-2 border-b border-emerald-100">
-              <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Time</span>
-              <span className="text-sm font-semibold text-slate-800">
-                {confirmedBooking.slot.startTime} – {confirmedBooking.slot.endTime}
-              </span>
-            </div>
-            {confirmedBooking.itemCount && (
-              <>
-                <div className="flex items-center justify-between py-2 border-b border-emerald-100">
-                  <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">T-shirt / Shirt</span>
-                  <span className="text-sm font-semibold text-slate-800">{confirmedBooking.itemCount.tShirtShirtCount} items</span>
-                </div>
-                <div className="flex items-center justify-between py-2 border-b border-emerald-100">
-                  <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Pants / Track</span>
-                  <span className="text-sm font-semibold text-slate-800">{confirmedBooking.itemCount.pantsTrackCount} items</span>
-                </div>
-                <div className="flex items-center justify-between py-2">
-                  <span className="text-xs text-slate-500 uppercase tracking-wide font-semibold">Total Clothes</span>
-                  <span className="text-sm font-bold text-water-700">{confirmedBooking.itemCount.totalCount} / 20</span>
-                </div>
-              </>
-            )}
-          </div>
-        </Card>
+          </Card>
+        </motion.div>
 
         <Button
           variant="primary"
@@ -349,12 +372,12 @@ export const BookLaundryPage: React.FC = () => {
         >
           View Dashboard
         </Button>
-      </div>
+      </PageTransition>
     );
   }
 
   return (
-    <div className="max-w-2xl mx-auto py-6 space-y-6">
+    <PageTransition className="max-w-2xl mx-auto py-6 space-y-6">
       {/* Header */}
       <div>
         <button
@@ -411,9 +434,17 @@ export const BookLaundryPage: React.FC = () => {
         </div>
       )}
 
-      {/* STEP 1: Select Slot */}
-      {step === 1 && (
-        <div className="space-y-6">
+      <AnimatePresence mode="wait">
+        {/* STEP 1: Select Slot */}
+        {step === 1 && (
+          <motion.div
+            key="step-1"
+            variants={shouldReduceMotion ? undefined : stepVariants}
+            initial={shouldReduceMotion ? false : 'initial'}
+            animate="animate"
+            exit="exit"
+            className="space-y-6"
+          >
           {!usage?.canBook ? (
             <Card className="border-red-200 bg-red-50/40 text-center py-8">
               <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-3" />
@@ -467,12 +498,19 @@ export const BookLaundryPage: React.FC = () => {
               {selectedSlot ? `Continue with ${selectedSlot.startTime} – ${selectedSlot.endTime}` : 'Select a Slot to Continue'}
             </Button>
           )}
-        </div>
-      )}
+          </motion.div>
+        )}
 
-      {/* STEP 2: Clothing Count */}
-      {step === 2 && selectedSlot && (
-        <div className="space-y-5">
+        {/* STEP 2: Clothing Count */}
+        {step === 2 && selectedSlot && (
+          <motion.div
+            key="step-2"
+            variants={shouldReduceMotion ? undefined : stepVariants}
+            initial={shouldReduceMotion ? false : 'initial'}
+            animate="animate"
+            exit="exit"
+            className="space-y-5"
+          >
           {/* Selected slot reminder */}
           <div className="flex items-center gap-3 p-3 rounded-xl bg-water-50 border border-water-200">
             <Clock className="w-4 h-4 text-water-600 flex-shrink-0" />
@@ -600,12 +638,19 @@ export const BookLaundryPage: React.FC = () => {
           >
             Review Booking
           </Button>
-        </div>
+        </motion.div>
       )}
 
       {/* STEP 3: Review */}
       {step === 3 && selectedSlot && (
-        <div className="space-y-5">
+        <motion.div
+          key="step-3"
+          variants={shouldReduceMotion ? undefined : stepVariants}
+          initial={shouldReduceMotion ? false : 'initial'}
+          animate="animate"
+          exit="exit"
+          className="space-y-5"
+        >
           <Card className="border-slate-200">
             <h3 className="text-sm font-bold text-slate-900 mb-4 pb-3 border-b border-slate-100">
               Booking Summary
@@ -656,8 +701,9 @@ export const BookLaundryPage: React.FC = () => {
           >
             Confirm Booking
           </Button>
-        </div>
+        </motion.div>
       )}
-    </div>
+      </AnimatePresence>
+    </PageTransition>
   );
 };

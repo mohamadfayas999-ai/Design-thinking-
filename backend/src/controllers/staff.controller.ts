@@ -491,11 +491,23 @@ export async function performIntake(
     }
 
     // ── 6. Already processed check ──
-    if (booking.laundryOrder && booking.laundryOrder.status === 'IN_PROGRESS') {
+    if (booking.laundryOrder && booking.laundryOrder.status !== 'BOOKED') {
       return res.status(400).json({
         success: false,
-        message: 'This booking has already been taken into processing.',
+        message: `This booking is already in status ${booking.laundryOrder.status} and cannot be taken into intake again.`,
       });
+    }
+
+    // ── 6b. Discrepancy protection: Staff cannot alter student booked quantities ──
+    if (booking.laundryOrder?.itemCount) {
+      const bookedT = booking.laundryOrder.itemCount.tShirtShirtCount;
+      const bookedP = booking.laundryOrder.itemCount.pantsTrackCount;
+      if (tCount !== bookedT || pCount !== bookedP) {
+        return res.status(400).json({
+          success: false,
+          message: 'Received clothing count does not match student booking. Staff cannot alter booked clothing quantities.',
+        });
+      }
     }
 
     // ── 7. Validate rack/shelf ──

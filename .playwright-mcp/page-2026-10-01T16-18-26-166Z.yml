@@ -1,0 +1,101 @@
+- generic [ref=f5e112]:
+  - banner [ref=f5e113]:
+    - generic [ref=f5e114]:
+      - generic [ref=f5e119]:
+        - text: WASHWISE
+        - generic [ref=f5e120]: Habitat Laundry
+      - generic [ref=f5e121]:
+        - button "Sound ON" [ref=f5e122] [cursor=pointer]
+        - generic [ref=f5e128]:
+          - generic [ref=f5e129]: Habitat Laundry Staff
+          - generic [ref=f5e130]: Laundry Staff
+        - button "Logout" [ref=f5e131] [cursor=pointer]
+  - main [ref=f5e136]:
+    - generic [ref=f5e137]:
+      - generic [ref=f5e142]:
+        - generic [ref=f5e143]: "0"
+        - generic [ref=f5e144]: Today's Bookings
+      - generic [ref=f5e150]:
+        - generic [ref=f5e151]: "1"
+        - generic [ref=f5e152]: Waiting for Intake
+        - generic [ref=f5e153]: Need action
+      - generic [ref=f5e160]:
+        - generic [ref=f5e161]: "0"
+        - generic [ref=f5e162]: In Progress
+      - generic [ref=f5e169]:
+        - generic [ref=f5e170]: "11"
+        - generic [ref=f5e171]: Storage Available
+        - generic [ref=f5e172]: of 12 total
+    - button "Today's Slot Summary (your hostel only)" [ref=f5e174] [cursor=pointer]:
+      - generic [ref=f5e175]:
+        - text: Today's Slot Summary
+        - generic [ref=f5e179]: (your hostel only)
+    - generic [ref=f5e182]:
+      - generic [ref=f5e183]:
+        - textbox "Search student name or student ID..." [ref=f5e185]
+        - generic [ref=f5e186]:
+          - generic [ref=f5e187]:
+            - button "Today" [ref=f5e188] [cursor=pointer]
+            - button "All Dates" [ref=f5e189] [cursor=pointer]
+          - generic [ref=f5e190]:
+            - button "All" [ref=f5e191] [cursor=pointer]
+            - button "Waiting" [ref=f5e192] [cursor=pointer]
+            - button "In Progress" [ref=f5e193] [cursor=pointer]
+          - button "Refresh" [ref=f5e194] [cursor=pointer]
+      - generic [ref=f5e200]:
+        - generic [ref=f5e201]:
+          - generic [ref=f5e202]: Waiting for Intake
+          - paragraph [ref=f5e209]: No bookings waiting for intake.
+        - generic [ref=f5e210]:
+          - generic [ref=f5e211]: In Progress
+          - paragraph [ref=f5e219]: No laundry currently in progress.
+    - generic [ref=f5e220]:
+      - generic [ref=f5e221]:
+        - generic [ref=f5e222]: Storage Overview
+        - button [ref=f5e227] [cursor=pointer]
+      - generic [ref=f5e234]:
+        - generic [ref=f5e235]:
+          - generic [ref=f5e236]: Rack 1
+          - generic [ref=f5e237]:
+            - generic "Student Two (2024CSE002)" [ref=f5e238]:
+              - generic [ref=f5e239]: S1
+              - generic [ref=f5e240]: OCCUPIED
+            - generic "Available" [ref=f5e241]:
+              - generic [ref=f5e242]: S2
+              - generic [ref=f5e243]: AVAIL
+            - generic "Available" [ref=f5e244]:
+              - generic [ref=f5e245]: S3
+              - generic [ref=f5e246]: AVAIL
+            - generic "Available" [ref=f5e247]:
+              - generic [ref=f5e248]: S4
+              - generic [ref=f5e249]: AVAIL
+        - generic [ref=f5e250]:
+          - generic [ref=f5e251]: Rack 2
+          - generic [ref=f5e252]:
+            - generic "Available" [ref=f5e253]:
+              - generic [ref=f5e254]: S1
+              - generic [ref=f5e255]: AVAIL
+            - generic "Available" [ref=f5e256]:
+              - generic [ref=f5e257]: S2
+              - generic [ref=f5e258]: AVAIL
+            - generic "Available" [ref=f5e259]:
+              - generic [ref=f5e260]: S3
+              - generic [ref=f5e261]: AVAIL
+            - generic "Available" [ref=f5e262]:
+              - generic [ref=f5e263]: S4
+              - generic [ref=f5e264]: AVAIL
+        - generic [ref=f5e265]:
+          - generic [ref=f5e266]: Rack 3
+          - generic [ref=f5e267]:
+            - generic "Available" [ref=f5e268]:
+              - generic [ref=f5e269]: S1
+              - generic [ref=f5e270]: AVAIL
+            - generic "Available" [ref=f5e271]:
+              - generic [ref=f5e272]: S2
+              - generic [ref=f5e273]: AVAIL
+            - generic "Available" [ref=f5e274]:
+              - generic [ref=f5e275]: S3
+              - generic [ref=f5e276]: AVAIL
+            - generic "Available" [ref=f5e277]:
+              - generic [ref=f5e278]: S4
+              - generic [ref=f5e279]: AVAIL

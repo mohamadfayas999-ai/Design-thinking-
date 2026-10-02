@@ -1,0 +1,47 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f1e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]:
+            - generic [ref=f1e13]: WASHWISE
+            - generic [ref=f1e14]: REC
+          - paragraph [ref=f1e15]: Campus Laundry Management
+      - generic [ref=f1e16]:
+        - button "Toggle Sound Effects" [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e22]: Sound ON
+        - generic [ref=f1e23]:
+          - generic [ref=f1e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=f1e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=f1e27]:
+    - generic [ref=f1e28]:
+      - button "Back to Portal Selection" [ref=f1e29] [cursor=pointer]
+      - generic [ref=f1e34]:
+        - generic [ref=f1e41]:
+          - heading "Select Your Hostel" [level=1] [ref=f1e42]
+          - paragraph [ref=f1e43]: Rajalakshmi Engineering College
+        - paragraph [ref=f1e44]: "Laundry services and slots are allocated exclusively per hostel. Choose your assigned hostel to log in:"
+        - generic [ref=f1e45]:
+          - paragraph [ref=f1e46]: "Demo Student Quick Fill:"
+          - generic [ref=f1e47]:
+            - button "Habitat Student One" [ref=f1e48] [cursor=pointer]:
+              - generic [ref=f1e49]: Habitat
+              - text: Student One
+            - button "Thandalam Student Four" [ref=f1e50] [cursor=pointer]:
+              - generic [ref=f1e51]: Thandalam
+              - text: Student Four
+            - button "Girls Student Seven" [ref=f1e52] [cursor=pointer]:
+              - generic [ref=f1e53]: Girls
+              - text: Student Seven
+  - contentinfo [ref=f1e54]:
+    - generic [ref=f1e55]:
+      - generic [ref=f1e56]:
+        - generic [ref=f1e57]: WASHWISE
+        - generic [ref=f1e58]: "-"
+        - generic [ref=f1e59]: Rajalakshmi Engineering College
+      - generic [ref=f1e60]:
+        - generic [ref=f1e61]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f1e62]: "-"
+        - generic [ref=f1e63]: Campus Laundry Services
