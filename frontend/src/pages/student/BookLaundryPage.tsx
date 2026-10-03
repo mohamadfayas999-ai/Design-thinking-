@@ -10,14 +10,17 @@ import {
   AlertCircle,
   Users,
   ArrowLeft,
+  Camera,
+  Sparkles,
 } from 'lucide-react';
 import { api } from '../../services/api';
-import { LaundrySlot, MonthlyUsage, ActiveBooking } from '../../types';
+import { LaundrySlot, MonthlyUsage, ActiveBooking, AiLaundryEstimate } from '../../types';
 import { Button } from '../../components/common/Button';
 import { Card } from '../../components/common/Card';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { PageTransition } from '../../components/common/PageTransition';
+import { AiLaundryScannerModal } from '../../components/common/AiLaundryScannerModal';
 import {
   stepVariants,
   successIconVariants,
@@ -69,6 +72,34 @@ function getDateLabel(dateStr: string): string {
   if (isToday(dateStr)) return 'Today';
   if (isTomorrow(dateStr)) return 'Tomorrow';
   return formatShortDate(dateStr);
+}
+
+function parseSlotDateTime(dateStr: string, timeStr: string): Date {
+  const [yearStr, monthStr, dayStr] = dateStr.split('-');
+  const year = parseInt(yearStr, 10);
+  const month = parseInt(monthStr, 10) - 1;
+  const day = parseInt(dayStr, 10);
+
+  let hours = 0;
+  let minutes = 0;
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i);
+  if (match) {
+    hours = parseInt(match[1], 10);
+    minutes = parseInt(match[2], 10);
+    const meridiem = match[3]?.toUpperCase();
+    if (meridiem === 'PM' && hours < 12) {
+      hours += 12;
+    } else if (meridiem === 'AM' && hours === 12) {
+      hours = 0;
+    }
+  }
+
+  return new Date(year, month, day, hours, minutes, 0, 0);
+}
+
+function isSlotInFuture(dateStr: string, startTimeStr: string, now: Date = new Date()): boolean {
+  const slotDate = parseSlotDateTime(dateStr, startTimeStr);
+  return slotDate.getTime() > now.getTime();
 }
 
 // ── Slot Card ────────────────────────────────────
@@ -170,13 +201,20 @@ export const BookLaundryPage: React.FC = () => {
   const [counts, setCounts] = useState<ClothingCounts>({ tShirtShirt: 0, pantsTrack: 0 });
   const [countError, setCountError] = useState<string | null>(null);
 
+  // AI Scanner state (optional)
+  const [isScannerOpen, setIsScannerOpen] = useState(false);
+  const [aiScanId, setAiScanId] = useState<string | null>(null);
+  const [aiScanData, setAiScanData] = useState<AiLaundryEstimate | null>(null);
+
   // Submission
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<ActiveBooking | null>(null);
 
-  // Group slots by date
-  const slotsByDate = slots.reduce<Record<string, LaundrySlot[]>>((acc, slot) => {
+  // Group slots by date (only slots whose start time is in the future)
+  const futureSlots = slots.filter((slot) => isSlotInFuture(slot.date, slot.startTime));
+
+  const slotsByDate = futureSlots.reduce<Record<string, LaundrySlot[]>>((acc, slot) => {
     if (!acc[slot.date]) acc[slot.date] = [];
     acc[slot.date].push(slot);
     return acc;
@@ -190,7 +228,10 @@ export const BookLaundryPage: React.FC = () => {
         api.getAvailableSlots(),
         api.getStudentUsage(),
       ]);
-      setSlots(slotsRes.slots || []);
+      const activeFutureSlots = (slotsRes.slots || []).filter((s) =>
+        isSlotInFuture(s.date, s.startTime)
+      );
+      setSlots(activeFutureSlots);
       setUsage(usageRes.usage || null);
     } catch (err: any) {
       setDataError(err.message || 'Failed to load booking data.');
@@ -266,6 +307,7 @@ export const BookLaundryPage: React.FC = () => {
         slotId: selectedSlot.id,
         tShirtShirtCount: counts.tShirtShirt,
         pantsTrackCount: counts.pantsTrack,
+        aiScanId: aiScanId || undefined,
       });
       if (res.success && res.booking) {
         setConfirmedBooking(res.booking);
@@ -522,6 +564,81 @@ export const BookLaundryPage: React.FC = () => {
             </div>
           </div>
 
+          {/* Optional AI Laundry Scanner entry point */}
+          <div className="p-4 rounded-xl border border-cyan-200 bg-gradient-to-r from-cyan-50/80 via-sky-50/50 to-white shadow-2xs">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-cyan-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                  <Camera className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-bold text-slate-800">AI Laundry Scanner</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider bg-cyan-100 text-cyan-800 px-2 py-0.5 rounded-full">
+                      Optional
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Optional — analyze your clothes before booking.
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsScannerOpen(true)}
+                className="px-3.5 py-2 rounded-xl bg-white border border-cyan-300 text-xs font-bold text-cyan-800 hover:bg-cyan-50 hover:border-cyan-400 transition-all flex items-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+                <span>{aiScanData ? 'Re-scan Photo' : 'Scan Clothes'}</span>
+              </button>
+            </div>
+
+            {/* If AI scan was performed, show transparent AI Estimate summary */}
+            {aiScanData && (
+              <div className="mt-3 pt-3 border-t border-cyan-100 space-y-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+                    <span className="text-xs font-bold text-cyan-950">AI Scan Attached</span>
+                    <span className="text-[9px] font-extrabold uppercase bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded">
+                      AI Estimate
+                    </span>
+                  </div>
+                  <span className="text-[11px] text-cyan-800 font-medium">
+                    Staff verification required
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div className="bg-white p-2 rounded-lg border border-cyan-100">
+                    <span className="text-[10px] text-slate-400 block">AI Visible Estimate</span>
+                    <span className="font-bold text-slate-800">{aiScanData.visibleClothingCount} items</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-100">
+                    <span className="text-[10px] text-slate-400 block">Clothing Type</span>
+                    <span className="font-bold text-slate-800">{aiScanData.clothingType}</span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-100">
+                    <span className="text-[10px] text-slate-400 block">Color / Stain</span>
+                    <span className="font-bold text-slate-800">
+                      {aiScanData.mainColor} &middot; {aiScanData.stainSeverity}
+                    </span>
+                  </div>
+                  <div className="bg-white p-2 rounded-lg border border-cyan-100">
+                    <span className="text-[10px] text-slate-400 block">Care Mode</span>
+                    <span className="font-bold text-slate-800">{aiScanData.recommendation.washMode}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between text-[11px] text-slate-600 bg-white/70 px-3 py-1.5 rounded-lg border border-cyan-100">
+                  <span><strong>Student booked:</strong> {totalClothes} clothes</span>
+                  <span><strong>AI visible estimate:</strong> {aiScanData.visibleClothingCount} clothes</span>
+                  <span className="text-amber-700 font-semibold">Staff will physically count at intake</span>
+                </div>
+              </div>
+            )}
+          </div>
+
           <Card className="border-slate-200">
             <h3 className="text-sm font-bold text-slate-900 mb-1 flex items-center gap-2">
               <Shirt className="w-4 h-4 text-water-600" />
@@ -685,6 +802,41 @@ export const BookLaundryPage: React.FC = () => {
                 After this booking: <strong className="text-slate-800">{usage.usedCount + 1} / {usage.maxCount}</strong> uses for {usage.month}.
               </div>
             )}
+            {/* Attached AI Scan in Review */}
+            {aiScanData && (
+              <div className="mt-4 p-3.5 rounded-xl bg-gradient-to-r from-cyan-50/90 to-sky-50/70 border border-cyan-200 text-xs">
+                <div className="flex items-center justify-between font-bold text-cyan-950 mb-1.5 pb-1 border-b border-cyan-100">
+                  <span className="flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
+                    Attached AI Laundry Scan
+                  </span>
+                  <span className="text-[10px] font-extrabold bg-cyan-200 text-cyan-900 px-2 py-0.5 rounded">
+                    AI Estimate
+                  </span>
+                </div>
+                <div className="text-slate-600 space-y-1 text-[11px]">
+                  <div className="flex justify-between">
+                    <span>AI Visible Estimate:</span>
+                    <strong className="text-slate-800">{aiScanData.visibleClothingCount} items (Booked: {totalClothes})</strong>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Clothing Type:</span>
+                    <span className="font-semibold text-slate-800">{aiScanData.clothingType}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Possible Stain:</span>
+                    <span className="font-semibold text-slate-800">{aiScanData.possibleStain} ({aiScanData.stainSeverity})</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>Recommended Mode:</span>
+                    <span className="font-semibold text-slate-800">{aiScanData.recommendation.washMode}</span>
+                  </div>
+                  <div className="text-[10px] text-amber-800 font-medium pt-1">
+                    &bull; Note: Laundry staff will physically verify clothes count and condition at intake.
+                  </div>
+                </div>
+              </div>
+            )}
           </Card>
 
           {submitError && (
@@ -704,6 +856,16 @@ export const BookLaundryPage: React.FC = () => {
         </motion.div>
       )}
       </AnimatePresence>
+
+      {/* Optional AI Laundry Scanner Modal */}
+      <AiLaundryScannerModal
+        isOpen={isScannerOpen}
+        onClose={() => setIsScannerOpen(false)}
+        onScanComplete={(scanId, estimate) => {
+          setAiScanId(scanId);
+          setAiScanData(estimate);
+        }}
+      />
     </PageTransition>
   );
 };

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   History,
@@ -11,6 +12,7 @@ import {
   RefreshCw,
   ChevronDown,
   ChevronUp,
+  ArrowLeft,
 } from 'lucide-react';
 import { api, ApiError } from '../../services/api';
 import { LaundryHistoryItem, ComplaintInfo, OrderStatus } from '../../types';
@@ -232,6 +234,7 @@ function HistoryCard({ item, index }: { item: LaundryHistoryItem; index: number 
 // ── Main Page ─────────────────────────────────────────────────
 
 export const LaundryHistoryPage: React.FC = () => {
+  const navigate = useNavigate();
   const [history, setHistory] = useState<LaundryHistoryItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -260,6 +263,18 @@ export const LaundryHistoryPage: React.FC = () => {
   return (
     <PageTransition>
       <div className="max-w-2xl mx-auto space-y-6">
+        {/* Top-Left Back Button */}
+        <div>
+          <button
+            onClick={() => navigate('/student/dashboard')}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-water-700 transition-colors focus:outline-none focus:ring-2 focus:ring-water-400 rounded-lg py-1 px-1 -ml-1"
+            aria-label="Back to Dashboard"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back
+          </button>
+        </div>
+
         {/* Page header */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">

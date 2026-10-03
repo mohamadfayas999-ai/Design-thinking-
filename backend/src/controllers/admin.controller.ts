@@ -385,6 +385,7 @@ export async function getAdminOrders(
             resolvedAt: true,
           },
         },
+        aiScan: true,
       },
       orderBy: { createdAt: 'desc' },
       take: 100,
@@ -408,6 +409,7 @@ export async function getAdminOrders(
         rackShelf: o.rackShelf, // Visible to admin
         staff: o.staff, // Visible to admin
         complaint: o.complaint,
+        aiScan: o.aiScan || null,
       })),
     });
   } catch (error) {

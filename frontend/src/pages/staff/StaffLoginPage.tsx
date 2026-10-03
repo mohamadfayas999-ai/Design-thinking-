@@ -12,6 +12,21 @@ import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { PageTransition } from '../../components/common/PageTransition';
 import { stepVariants } from '../../utils/animations';
 
+const DEMO_STAFF: Record<string, { email: string; name: string }> = {
+  HABITAT: {
+    email: 'habitatstaff1@rajalakshmi.edu.in',
+    name: 'Habitat Staff 1',
+  },
+  THANDALAM: {
+    email: 'thandalamstaff1@rajalakshmi.edu.in',
+    name: 'Thandalam Staff 1',
+  },
+  GIRLS: {
+    email: 'girlsstaff1@rajalakshmi.edu.in',
+    name: 'Girls Staff 1',
+  },
+};
+
 export const StaffLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -73,17 +88,6 @@ export const StaffLoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const autofillDemoStaff = (hostelCode: string, staffEmail: string) => {
-    const target = hostels.find((h) => h.code === hostelCode);
-    if (target) {
-      setSelectedHostelId(target.id);
-    }
-    setEmail(staffEmail);
-    setPassword('laundrystaff123');
-    setError(null);
-    setStep('login');
   };
 
   return (
@@ -168,39 +172,6 @@ export const StaffLoginPage: React.FC = () => {
                   );
                 })}
               </div>
-
-              {/* Demo Staff Quick-Fill helper */}
-              <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                  Demo Staff Quick Fill:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStaff('HABITAT', 'habitatstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Habitat</span>
-                    <span>Staff 1</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStaff('THANDALAM', 'thandalamstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Thandalam</span>
-                    <span>Staff 1</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStaff('GIRLS', 'girlsstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Girls</span>
-                    <span>Staff 1</span>
-                  </button>
-                </div>
-              </div>
             </Card>
           </motion.div>
         )}
@@ -272,38 +243,35 @@ export const StaffLoginPage: React.FC = () => {
                 </div>
               </form>
 
-              {/* Demo Credentials Quick-Fill helper */}
-              <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                  Demo Staff Quick Fill:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
+              {/* Demo Credentials Quick-Fill helper — Hostel-scoped */}
+              {selectedHostel && DEMO_STAFF[selectedHostel.code] && (
+                <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
+                    {selectedHostel.name} Staff Demo Credentials:
+                  </p>
                   <button
                     type="button"
-                    onClick={() => autofillDemoStaff('HABITAT', 'habitatstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
+                    onClick={() => {
+                      setEmail(DEMO_STAFF[selectedHostel.code].email);
+                      setPassword('laundrystaff123');
+                      setError(null);
+                    }}
+                    className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-xs text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 flex items-center justify-between"
                   >
-                    <span className="font-bold text-slate-800 block">Habitat</span>
-                    <span>Staff 1</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStaff('THANDALAM', 'thandalamstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Thandalam</span>
-                    <span>Staff 1</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStaff('GIRLS', 'girlsstaff1@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Girls</span>
-                    <span>Staff 1</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">
+                        {DEMO_STAFF[selectedHostel.code].name} ({selectedHostel.name})
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {DEMO_STAFF[selectedHostel.code].email}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-1 rounded-md border border-amber-200">
+                      Auto-fill
+                    </span>
                   </button>
                 </div>
-              </div>
+              )}
             </Card>
           </motion.div>
         )}

@@ -202,8 +202,10 @@ export async function getStaffBookings(
             hostelId: true,
           },
         },
+        aiScan: true,
         laundryOrder: {
           include: {
+            aiScan: true,
             itemCount: {
               select: {
                 tShirtShirtCount: true,
@@ -240,6 +242,7 @@ export async function getStaffBookings(
         cancelledAt: b.cancelledAt,
         student: b.student,
         slot: b.slot,
+        aiScan: b.aiScan || b.laundryOrder?.aiScan || null,
         laundryOrder: b.laundryOrder
           ? {
               id: b.laundryOrder.id,
@@ -291,10 +294,12 @@ export async function getBookingDetail(
           },
         },
         slot: true,
+        aiScan: true,
         laundryOrder: {
           include: {
             itemCount: true,
             rackShelf: true,
+            aiScan: true,
             staff: {
               select: { name: true, staffId: true },
             },
@@ -415,7 +420,7 @@ export async function performIntake(
     }
 
     const { id: bookingId } = req.params;
-    const { tShirtShirtCount, pantsTrackCount, rackShelfId } = req.body;
+    const { tShirtShirtCount, pantsTrackCount, rackShelfId, aiScanConfirmation } = req.body;
 
     // ── 1. Rack/shelf required ──
     if (!rackShelfId) {
@@ -458,8 +463,9 @@ export async function performIntake(
       include: {
         slot: true,
         student: true,
+        aiScan: true,
         laundryOrder: {
-          include: { itemCount: true },
+          include: { itemCount: true, aiScan: true },
         },
       },
     });
@@ -632,6 +638,26 @@ export async function performIntake(
       // The LaundryOrder.status reflects actual progress
       // We keep SlotBooking as BOOKED since it was successfully booked
       // (the order status is what shows IN_PROGRESS)
+
+      // If staff confirmed or corrected AI observations, update AiScan
+      const targetAiScan = booking.aiScan || booking.laundryOrder?.aiScan;
+      if (aiScanConfirmation && targetAiScan) {
+        await tx.aiScan.update({
+          where: { id: targetAiScan.id },
+          data: {
+            staffConfirmed: true,
+            confirmedType: aiScanConfirmation.confirmedType || targetAiScan.clothingType,
+            confirmedColor: aiScanConfirmation.confirmedColor || targetAiScan.mainColor,
+            confirmedStain: aiScanConfirmation.confirmedStain || targetAiScan.possibleStain,
+            confirmedSeverity: aiScanConfirmation.confirmedSeverity || targetAiScan.stainSeverity,
+            confirmedRecommendation:
+              aiScanConfirmation.confirmedRecommendation ||
+              `${targetAiScan.washMode} (${targetAiScan.preTreatment})`,
+            confirmedAt: now,
+            confirmedByStaffId: staff.id,
+          },
+        });
+      }
 
       // Create AuditLog
       await tx.auditLog.create({

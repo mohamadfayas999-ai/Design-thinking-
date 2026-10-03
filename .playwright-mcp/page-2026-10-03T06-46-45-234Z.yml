@@ -1,0 +1,57 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: WASHWISE
+            - generic [ref=e14]: REC
+          - paragraph [ref=e15]: Campus Laundry Management
+      - generic [ref=e16]:
+        - button "Toggle Sound Effects" [ref=e17] [cursor=pointer]:
+          - generic [ref=e22]: Sound ON
+        - generic [ref=e23]:
+          - generic [ref=e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=e27]:
+    - generic [ref=e127]:
+      - button "Back to Hostel Selection" [ref=e169] [cursor=pointer]
+      - generic [ref=e171]:
+        - generic [ref=e172]:
+          - generic [ref=e177]:
+            - heading "Student Portal Login" [level=1] [ref=e178]
+            - paragraph [ref=e179]: Habitat Hostel
+          - button "Change" [ref=e180] [cursor=pointer]
+        - generic [ref=e181]:
+          - generic [ref=e182]:
+            - generic [ref=e183]: "Assigned Hostel:"
+            - generic [ref=e184]: Habitat Hostel
+          - generic [ref=e188]:
+            - generic [ref=e189]: Student Email Address*
+            - textbox "Student Email Address*" [ref=e191]:
+              - /placeholder: student.one.2024.csd@rajalakshmi.edu.in
+            - paragraph [ref=e192]: "Format: <name>.<initial>.<admissionyear>.<dept>@rajalakshmi.edu.in"
+          - generic [ref=e193]:
+            - generic [ref=e194]: Password*
+            - textbox "Password*" [ref=e196]:
+              - /placeholder: ••••••••
+          - button "Sign In to Student Dashboard" [ref=e198] [cursor=pointer]
+        - generic [ref=e200]:
+          - paragraph [ref=e201]: "Habitat Student Demo Credentials:"
+          - button "Student One (Habitat) student.one.2024.csd@rajalakshmi.edu.in Auto-fill" [ref=e202] [cursor=pointer]:
+            - generic [ref=e203]:
+              - generic [ref=e204]: Student One (Habitat)
+              - text: student.one.2024.csd@rajalakshmi.edu.in
+            - generic [ref=e205]: Auto-fill
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]: WASHWISE
+        - generic [ref=e121]: "-"
+        - generic [ref=e122]: Rajalakshmi Engineering College
+      - generic [ref=e123]:
+        - generic [ref=e124]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=e125]: "-"
+        - generic [ref=e126]: Campus Laundry Services

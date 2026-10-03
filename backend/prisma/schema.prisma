@@ -1,5 +1,5 @@
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
@@ -103,6 +103,7 @@ model SlotBooking {
   bookedAt     DateTime      @default(now())
   cancelledAt  DateTime?
   laundryOrder LaundryOrder?
+  aiScan       AiScan?
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
 
@@ -158,6 +159,7 @@ model LaundryOrder {
   verifiedAt  DateTime?
   complaint   Complaint?
   histories   LaundryHistory[]
+  aiScan      AiScan?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
 
@@ -229,4 +231,46 @@ model AuditLog {
   createdAt   DateTime @default(now())
 
   @@index([entityType, entityId])
+}
+
+model AiScan {
+  id                      String        @id @default(cuid())
+  studentId               String
+  hostelId                String
+  bookingId               String?       @unique
+  slotBooking             SlotBooking?  @relation(fields: [bookingId], references: [id])
+  laundryOrderId          String?       @unique
+  laundryOrder            LaundryOrder? @relation(fields: [laundryOrderId], references: [id])
+
+  // AI Estimates
+  visibleClothingCount    Int
+  clothingType            String        // "T-Shirt/Shirt", "Pants/Track", or "UNKNOWN"
+  mainColor               String        // e.g. "Blue", "Black", "White", etc.
+  possibleStain           String        // e.g. "Possible food stain", "None visible"
+  stainSeverity           String        // "None", "Low", "Medium", "High", "Unknown"
+  confidence              String        @default("Medium") // "High", "Medium", "Low"
+  itemsJson               String?
+
+  // Deterministic Recommendations
+  washMode                String
+  preTreatment            String
+  detergentLevel          String
+
+  // Staff Confirmation
+  staffConfirmed          Boolean       @default(false)
+  confirmedType           String?
+  confirmedColor          String?
+  confirmedStain          String?
+  confirmedSeverity       String?
+  confirmedWashMode       String?
+  confirmedPreTreatment   String?
+  confirmedRecommendation String?
+  confirmedAt             DateTime?
+  confirmedByStaffId      String?
+
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  @@index([studentId])
+  @@index([hostelId])
 }

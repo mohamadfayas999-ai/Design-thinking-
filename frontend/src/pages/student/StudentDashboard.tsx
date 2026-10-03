@@ -15,6 +15,8 @@ import {
   CheckCircle2,
   ArrowRight,
   History,
+  AlertTriangle,
+  ShieldCheck,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -86,6 +88,12 @@ const UsageRing: React.FC<{ used: number; max: number }> = ({ used, max }) => {
   );
 };
 
+const COMPLAINT_LABELS: Record<string, string> = {
+  CLOTHES_TORN: 'Clothes Torn',
+  NUMBER_OF_CLOTHES_REDUCED: 'Number of Clothes Reduced',
+  OTHER_ISSUE: 'Other Issue',
+};
+
 // ── Active Booking Card ───────────────────────────
 
 interface ActiveBookingCardProps {
@@ -94,70 +102,150 @@ interface ActiveBookingCardProps {
   isCancelling: boolean;
 }
 
-const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel, isCancelling }) => (
-  <Card className="border-water-200 bg-gradient-to-br from-white to-water-50/50">
-    <div className="flex items-start justify-between gap-3 mb-4">
-      <div>
-        <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-          <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-          Active Booking
-        </h3>
-        <p className="text-xs text-slate-500 mt-0.5">Your upcoming laundry session</p>
-      </div>
-      <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex-shrink-0">
-        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-        {booking.status}
-      </span>
-    </div>
+const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel, isCancelling }) => {
+  const isComplaint =
+    booking.orderStatus === 'UNDER_REVIEW' ||
+    booking.orderStatus === 'COMPLAINT' ||
+    Boolean(booking.complaint);
+  const isInProgress = booking.orderStatus === 'IN_PROGRESS';
+  const isCompleted = booking.orderStatus === 'COMPLETED';
 
-    <div className="grid grid-cols-2 gap-3 mb-4">
-      <div className="p-3 rounded-xl bg-white border border-slate-200">
-        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-          <Calendar className="w-3.5 h-3.5" />
-          <span className="text-[11px] font-semibold uppercase tracking-wide">Date</span>
-        </div>
-        <p className="text-xs font-bold text-slate-800">{formatDate(booking.slot.date)}</p>
-      </div>
-      <div className="p-3 rounded-xl bg-white border border-slate-200">
-        <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-          <Clock className="w-3.5 h-3.5" />
-          <span className="text-[11px] font-semibold uppercase tracking-wide">Time</span>
-        </div>
-        <p className="text-xs font-bold text-slate-800">
-          {booking.slot.startTime} – {booking.slot.endTime}
-        </p>
-      </div>
-    </div>
-
-    {booking.itemCount && (
-      <div className="grid grid-cols-3 gap-2 mb-4">
-        <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
-          <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Shirts</p>
-          <p className="text-sm font-extrabold text-water-900">{booking.itemCount.tShirtShirtCount}</p>
-        </div>
-        <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
-          <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Pants</p>
-          <p className="text-sm font-extrabold text-water-900">{booking.itemCount.pantsTrackCount}</p>
-        </div>
-        <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-          <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Total</p>
-          <p className="text-sm font-extrabold text-slate-900">{booking.itemCount.totalCount}</p>
-        </div>
-      </div>
-    )}
-
-    <Button
-      variant="outline"
-      size="sm"
-      className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
-      onClick={onCancel}
-      isLoading={isCancelling}
-      icon={<XCircle className="w-3.5 h-3.5" />}
+  return (
+    <Card
+      className={`transition-all ${
+        isComplaint
+          ? 'border-amber-300 bg-gradient-to-br from-white to-amber-50/40 shadow-sm'
+          : 'border-water-200 bg-gradient-to-br from-white to-water-50/50'
+      }`}
     >
-      Cancel Booking
-    </Button>
-  </Card>
-);
+      <div className="flex items-start justify-between gap-3 mb-4">
+        <div>
+          <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+            {isComplaint ? (
+              <AlertTriangle className="w-4 h-4 text-amber-600" />
+            ) : isInProgress ? (
+              <RefreshCw className="w-4 h-4 text-blue-500 animate-spin" />
+            ) : (
+              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
+            )}
+            {isComplaint ? 'Active Laundry' : 'Active Booking'}
+          </h3>
+          <p className="text-xs text-slate-500 mt-0.5">
+            {isComplaint
+              ? 'Complaint submitted · under administrative review'
+              : isInProgress
+              ? 'Your laundry is currently being processed'
+              : isCompleted
+              ? 'Laundry completed'
+              : 'Your upcoming laundry session'}
+          </p>
+        </div>
+
+        {/* Status Badge */}
+        {isComplaint ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-bold flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+            COMPLAINT UNDER REVIEW
+          </span>
+        ) : isInProgress ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+            IN PROGRESS
+          </span>
+        ) : isCompleted ? (
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-water-100 text-water-800 text-[11px] font-bold flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-water-500" />
+            COMPLETED
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex-shrink-0">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+            {booking.status}
+          </span>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-3 mb-4">
+        <div className="p-3 rounded-xl bg-white border border-slate-200">
+          <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+            <Calendar className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-wide">Date</span>
+          </div>
+          <p className="text-xs font-bold text-slate-800">{formatDate(booking.slot.date)}</p>
+        </div>
+        <div className="p-3 rounded-xl bg-white border border-slate-200">
+          <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+            <Clock className="w-3.5 h-3.5" />
+            <span className="text-[11px] font-semibold uppercase tracking-wide">Time</span>
+          </div>
+          <p className="text-xs font-bold text-slate-800">
+            {booking.slot.startTime} – {booking.slot.endTime}
+          </p>
+        </div>
+      </div>
+
+      {booking.itemCount && (
+        <div className="grid grid-cols-3 gap-2 mb-4">
+          <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
+            <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Shirts</p>
+            <p className="text-sm font-extrabold text-water-900">{booking.itemCount.tShirtShirtCount}</p>
+          </div>
+          <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
+            <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Pants</p>
+            <p className="text-sm font-extrabold text-water-900">{booking.itemCount.pantsTrackCount}</p>
+          </div>
+          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
+            <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Total</p>
+            <p className="text-sm font-extrabold text-slate-900">{booking.itemCount.totalCount}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Complaint details box if under review / complained */}
+      {isComplaint && (
+        <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2 mb-4">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+            <span className="text-xs font-bold text-amber-900">
+              Complaint Status: Under Review
+            </span>
+            <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200/80 text-amber-800">
+              <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
+              UNDER REVIEW
+            </span>
+          </div>
+          {booking.complaint?.type && (
+            <p className="text-xs text-amber-800">
+              <span className="font-semibold">Issue:</span>{' '}
+              {COMPLAINT_LABELS[booking.complaint.type] || booking.complaint.type}
+            </p>
+          )}
+          {booking.complaint?.additionalDetails && (
+            <p className="text-xs text-amber-700 italic pl-2 border-l-2 border-amber-300">
+              "{booking.complaint.additionalDetails}"
+            </p>
+          )}
+          <p className="text-[11px] text-amber-700 leading-relaxed">
+            Your complaint has been submitted and is currently under review by campus administration.
+          </p>
+        </div>
+      )}
+
+      {booking.canCancel && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300"
+          onClick={onCancel}
+          isLoading={isCancelling}
+          icon={<XCircle className="w-3.5 h-3.5" />}
+        >
+          Cancel Booking
+        </Button>
+      )}
+    </Card>
+  );
+};
 
 // ── Main Dashboard ────────────────────────────────
 
@@ -219,16 +307,20 @@ export const StudentDashboard: React.FC = () => {
     };
   }, [checkNotifications]);
 
+  const [complaints, setComplaints] = useState<any[]>([]);
+
   const loadDashboardData = useCallback(async () => {
     setIsLoadingDashboard(true);
     setDashboardError(null);
     try {
-      const [bookingRes, usageRes] = await Promise.all([
+      const [bookingRes, usageRes, complaintsRes] = await Promise.all([
         api.getMyActiveBooking(),
         api.getStudentUsage(),
+        api.getStudentComplaints().catch(() => ({ complaints: [] })),
       ]);
       setActiveBooking(bookingRes.booking);
       setUsage(usageRes.usage || null);
+      setComplaints(complaintsRes.complaints || []);
     } catch (err: any) {
       setDashboardError(err.message || 'Failed to load dashboard data.');
     } finally {
@@ -435,7 +527,7 @@ export const StudentDashboard: React.FC = () => {
             ) : null}
           </Card>
 
-          {/* Active Booking / Book CTA */}
+          {/* Active Booking / Book CTA / Complaint Card */}
           {isLoadingDashboard ? (
             <div className="p-5 rounded-2xl border border-slate-200 bg-white animate-pulse h-40" />
           ) : activeBooking ? (
@@ -444,6 +536,42 @@ export const StudentDashboard: React.FC = () => {
               onCancel={() => setShowCancelModal(true)}
               isCancelling={isCancelling}
             />
+          ) : complaints.some((c) => c.status === 'UNDER_REVIEW') ? (
+            /* Fallback if complaint exists without active booking slot */
+            (() => {
+              const activeC = complaints.find((c) => c.status === 'UNDER_REVIEW');
+              return (
+                <Card className="border-amber-300 bg-gradient-to-br from-white to-amber-50/40 p-5 shadow-sm">
+                  <div className="flex items-start justify-between gap-3 mb-4">
+                    <div>
+                      <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                        <AlertTriangle className="w-4 h-4 text-amber-600" />
+                        Active Laundry
+                      </h3>
+                      <p className="text-xs text-slate-500 mt-0.5">Complaint submitted · under administrative review</p>
+                    </div>
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-bold flex-shrink-0">
+                      <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+                      COMPLAINT UNDER REVIEW
+                    </span>
+                  </div>
+
+                  <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2">
+                    <p className="text-xs text-amber-800">
+                      <span className="font-semibold">Issue:</span> {COMPLAINT_LABELS[activeC?.type] || activeC?.type}
+                    </p>
+                    {activeC?.additionalDetails && (
+                      <p className="text-xs text-amber-700 italic pl-2 border-l-2 border-amber-300">
+                        "{activeC.additionalDetails}"
+                      </p>
+                    )}
+                    <p className="text-[11px] text-amber-700 leading-relaxed">
+                      Your complaint is currently under review by campus administration.
+                    </p>
+                  </div>
+                </Card>
+              );
+            })()
           ) : (
             <Card className="border-slate-200 text-center py-6">
               <div className="w-12 h-12 rounded-full bg-water-50 border border-water-100 flex items-center justify-center mx-auto mb-3">
@@ -470,8 +598,19 @@ export const StudentDashboard: React.FC = () => {
             </Card>
           )}
 
+          {/* Recently resolved complaint notice (if any) */}
+          {!activeBooking && complaints.length > 0 && complaints[0]?.status === 'RESOLVED' && (
+            <div className="flex items-center gap-2.5 p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+              <ShieldCheck className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+              <span>
+                Your laundry complaint regarding <strong>{COMPLAINT_LABELS[complaints[0].type] || complaints[0].type}</strong> has been{' '}
+                <strong>RESOLVED</strong> by administration.
+              </span>
+            </div>
+          )}
+
           {/* Quick Actions */}
-          {activeBooking && usage?.canBook && (
+          {activeBooking && activeBooking.canCancel && usage?.canBook && (
             <div className="p-4 rounded-xl border border-dashed border-slate-300 bg-slate-50/50">
               <p className="text-xs text-slate-500 mb-1 font-medium">You have an active booking above. Cancel it first to book a new slot.</p>
             </div>

@@ -1,0 +1,71 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: WASHWISE
+            - generic [ref=e14]: REC
+          - paragraph [ref=e15]: Campus Laundry Management
+      - generic [ref=e16]:
+        - button "Toggle Sound Effects" [ref=e17] [cursor=pointer]:
+          - generic [ref=e22]: Sound ON
+        - generic [ref=e23]:
+          - generic [ref=e357]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=e359] [cursor=pointer]:
+            - /url: /
+  - main [ref=e27]:
+    - generic [ref=e360]:
+      - generic [ref=e362]:
+        - generic [ref=e363]: Rajalakshmi Engineering College Hostels
+        - heading "WASHWISE" [level=1] [ref=e368]
+        - paragraph [ref=e369]: Smart & Intelligent Campus Laundry Management
+        - paragraph [ref=e370]: A dedicated portal for hostel students, laundry staff, and college administration to schedule slots, monitor real-time washing status, and verify clothes with complete transparency.
+      - generic [ref=e371]:
+        - heading "Select Your Portal to Continue" [level=2] [ref=e373]
+        - generic [ref=e374]:
+          - generic [ref=e376] [cursor=pointer]:
+            - generic [ref=e377]:
+              - generic [ref=e382]:
+                - heading "Student" [level=3] [ref=e383]
+                - generic [ref=e384]: Hostel Access
+              - paragraph [ref=e385]: Select your hostel, sign in with your student ID, book laundry slots, and track processing till pickup.
+            - generic [ref=e386]: Enter Student Portal
+          - generic [ref=e391] [cursor=pointer]:
+            - generic [ref=e392]:
+              - generic [ref=e396]:
+                - heading "Laundry Staff" [level=3] [ref=e397]
+                - generic [ref=e398]: Operations
+              - paragraph [ref=e399]: Manage hostel laundry intake, assign rack and shelf locations, update washing status, and handle student returns.
+            - generic [ref=e400]: Enter Staff Portal
+          - generic [ref=e405] [cursor=pointer]:
+            - generic [ref=e406]:
+              - generic [ref=e411]:
+                - heading "Admin" [level=3] [ref=e412]
+                - generic [ref=e413]: College Wide
+              - paragraph [ref=e414]: Centralized monitoring across all three hostels, review booking capacity, resolve student complaints, and audit records.
+            - generic [ref=e415]: Enter Admin Portal
+      - generic [ref=e420]:
+        - generic [ref=e426]:
+          - heading "3 Campus Hostels" [level=4] [ref=e427]
+          - paragraph [ref=e428]: Habitat, Thandalam, and Girls hostels with dedicated queues.
+        - generic [ref=e432]:
+          - heading "20-Clothes Limit" [level=4] [ref=e433]
+          - paragraph [ref=e434]: T-shirt/Shirt and Pants/Track with automatic limit validation.
+        - generic [ref=e439]:
+          - heading "4 Runs Monthly" [level=4] [ref=e440]
+          - paragraph [ref=e441]: Fair campus quota tracking with monthly usage monitoring.
+        - generic [ref=e446]:
+          - heading "Verify & Complaint" [level=4] [ref=e447]
+          - paragraph [ref=e448]: Two-way verification at collection with admin resolution flow.
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]: WASHWISE
+        - generic [ref=e121]: "-"
+        - generic [ref=e122]: Rajalakshmi Engineering College
+      - generic [ref=e123]:
+        - generic [ref=e124]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=e125]: "-"
+        - generic [ref=e126]: Campus Laundry Services

@@ -1,0 +1,54 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: WASHWISE
+            - generic [ref=e14]: REC
+          - paragraph [ref=e15]: Campus Laundry Management
+      - generic [ref=e16]:
+        - button "Toggle Sound Effects" [ref=e17] [cursor=pointer]:
+          - generic [ref=e22]: Sound ON
+        - generic [ref=e23]:
+          - generic [ref=e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=e27]:
+    - generic [ref=e127]:
+      - button "Back to Portal Selection" [ref=e128] [cursor=pointer]
+      - generic [ref=e133]:
+        - generic [ref=e140]:
+          - heading "Select Your Hostel" [level=1] [ref=e141]
+          - paragraph [ref=e142]: Rajalakshmi Engineering College
+        - paragraph [ref=e143]: "Laundry services and slots are allocated exclusively per hostel. Choose your assigned hostel to log in:"
+        - generic [ref=e144]:
+          - button "GIR Girls Hostel Girls Hostel Unit · Dedicated Laundry" [ref=e145] [cursor=pointer]:
+            - generic [ref=e146]:
+              - generic [ref=e147]: GIR
+              - generic [ref=e148]:
+                - generic [ref=e149]: Girls Hostel
+                - generic [ref=e150]: Girls Hostel Unit · Dedicated Laundry
+          - button "HAB Habitat Hostel Boys Hostel Unit · Dedicated Laundry" [ref=e153] [cursor=pointer]:
+            - generic [ref=e154]:
+              - generic [ref=e155]: HAB
+              - generic [ref=e156]:
+                - generic [ref=e157]: Habitat Hostel
+                - generic [ref=e158]: Boys Hostel Unit · Dedicated Laundry
+          - button "THA Thandalam Hostel Boys Hostel Unit · Dedicated Laundry" [ref=e161] [cursor=pointer]:
+            - generic [ref=e162]:
+              - generic [ref=e163]: THA
+              - generic [ref=e164]:
+                - generic [ref=e165]: Thandalam Hostel
+                - generic [ref=e166]: Boys Hostel Unit · Dedicated Laundry
+  - contentinfo [ref=e117]:
+    - generic [ref=e118]:
+      - generic [ref=e119]:
+        - generic [ref=e120]: WASHWISE
+        - generic [ref=e121]: "-"
+        - generic [ref=e122]: Rajalakshmi Engineering College
+      - generic [ref=e123]:
+        - generic [ref=e124]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=e125]: "-"
+        - generic [ref=e126]: Campus Laundry Services

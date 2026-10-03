@@ -1,0 +1,54 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f1e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]:
+            - generic [ref=f1e13]: WASHWISE
+            - generic [ref=f1e14]: REC
+          - paragraph [ref=f1e15]: Campus Laundry Management
+      - generic [ref=f1e16]:
+        - button "Toggle Sound Effects" [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e22]: Sound ON
+        - generic [ref=f1e23]:
+          - generic [ref=f1e117]:
+            - generic [ref=f1e118]: Student Four
+            - generic [ref=f1e119]: STUDENT (Thandalam)
+          - generic [ref=f1e120]: STUDENT
+          - button "Logout" [ref=f1e127] [cursor=pointer]
+  - main [ref=f1e27]:
+    - generic [ref=f1e252]:
+      - generic [ref=f1e1090]:
+        - heading "Booking Confirmed" [level=1] [ref=f1e1095]
+        - paragraph [ref=f1e1096]: Your laundry slot has been successfully booked.
+      - generic [ref=f1e1099]:
+        - generic [ref=f1e1100]:
+          - generic [ref=f1e1101]: Status
+          - generic [ref=f1e1102]: BOOKED
+        - generic [ref=f1e1104]:
+          - generic [ref=f1e1105]: Date
+          - generic [ref=f1e1106]: Sunday, 4 October 2026
+        - generic [ref=f1e1107]:
+          - generic [ref=f1e1108]: Time
+          - generic [ref=f1e1109]: 10:00 AM – 11:00 AM
+        - generic [ref=f1e1110]:
+          - generic [ref=f1e1111]: T-shirt / Shirt
+          - generic [ref=f1e1112]: 5 items
+        - generic [ref=f1e1113]:
+          - generic [ref=f1e1114]: Pants / Track
+          - generic [ref=f1e1115]: 3 items
+        - generic [ref=f1e1116]:
+          - generic [ref=f1e1117]: Total Clothes
+          - generic [ref=f1e1118]: 8 / 20
+      - button "View Dashboard" [ref=f1e1119] [cursor=pointer]
+  - contentinfo [ref=f1e45]:
+    - generic [ref=f1e46]:
+      - generic [ref=f1e47]:
+        - generic [ref=f1e48]: WASHWISE
+        - generic [ref=f1e49]: "-"
+        - generic [ref=f1e50]: Rajalakshmi Engineering College
+      - generic [ref=f1e51]:
+        - generic [ref=f1e52]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f1e53]: "-"
+        - generic [ref=f1e54]: Campus Laundry Services

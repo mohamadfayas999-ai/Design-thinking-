@@ -70,16 +70,16 @@ export async function login(req: Request, res: Response, next: NextFunction) {
     if (user.role !== role) {
       return res.status(401).json({
         success: false,
-        message: `Account is registered as ${user.role}, not ${role}`,
+        message: 'Invalid credentials. User does not exist.',
       });
     }
 
     // Verify hostel matches if student or staff
     if (role === Role.STUDENT || role === Role.STAFF) {
-      if (user.hostelId !== hostelId) {
+      if (!user.hostelId || user.hostelId !== hostelId) {
         return res.status(401).json({
           success: false,
-          message: 'The selected hostel does not match your registered hostel',
+          message: 'Invalid credentials. User does not exist.',
         });
       }
     }

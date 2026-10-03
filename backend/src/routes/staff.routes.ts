@@ -10,6 +10,7 @@ import {
   getOrderDetail,
   completeOrder,
 } from '../controllers/staff.controller.js';
+import { confirmStaffAiScan } from '../controllers/aiScan.controller.js';
 
 const router = Router();
 
@@ -36,5 +37,8 @@ router.get('/orders/:id', getOrderDetail);
 
 // Phase 4: Mark an IN_PROGRESS order as COMPLETED
 router.post('/orders/:id/complete', completeOrder);
+
+// Staff AI Observation Confirmation/Editing
+router.put('/bookings/:id/ai-scan-confirm', confirmStaffAiScan);
 
 export default router;

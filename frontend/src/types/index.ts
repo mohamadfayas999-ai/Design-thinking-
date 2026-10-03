@@ -72,6 +72,8 @@ export interface ActiveBooking {
     endTime: string;
   };
   itemCount: ItemCount | null;
+  complaint?: ComplaintInfo | null;
+  aiScan?: AiScanData | null;
 }
 
 export interface MonthlyUsage {
@@ -147,6 +149,7 @@ export interface StaffBooking {
   student: StaffBookingStudent;
   slot: StaffBookingSlot;
   laundryOrder: StaffOrderSummary | null;
+  aiScan?: AiScanData | null;
 }
 
 export interface RackShelfLocation {
@@ -330,6 +333,7 @@ export interface AdminOrder {
     createdAt: string;
     resolvedAt: string | null;
   } | null;
+  aiScan?: AiScanData | null;
 }
 
 export interface AdminComplaint {
@@ -431,6 +435,62 @@ export interface AdminAuditLog {
   actor: { email: string; role: string };
   reason: string | null;
   createdAt: string;
+}
+
+// ── Optional AI Laundry Scanner Types ───────────────
+
+export interface AiItemObservation {
+  type: 'T-Shirt/Shirt' | 'Pants/Track' | 'UNKNOWN';
+  color: string;
+  possibleStain: string;
+  stainSeverity: 'None' | 'Low' | 'Medium' | 'High' | 'Unknown';
+  confidence: 'High' | 'Medium' | 'Low';
+}
+
+export interface AiLaundryRecommendation {
+  washMode: string;
+  preTreatment: string;
+  detergentLevel: 'Low' | 'Medium' | 'High';
+  detergentNote: string;
+}
+
+export interface AiLaundryEstimate {
+  visibleClothingCount: number;
+  clothingType: string;
+  mainColor: string;
+  possibleStain: string;
+  stainSeverity: 'None' | 'Low' | 'Medium' | 'High' | 'Unknown';
+  confidence: 'High' | 'Medium' | 'Low';
+  items?: AiItemObservation[];
+  recommendation: AiLaundryRecommendation;
+}
+
+export interface AiScanData {
+  id: string;
+  visibleClothingCount: number;
+  clothingType: string;
+  mainColor: string;
+  possibleStain: string;
+  stainSeverity: 'None' | 'Low' | 'Medium' | 'High' | 'Unknown';
+  confidence: 'High' | 'Medium' | 'Low';
+  items?: AiItemObservation[];
+  washMode: string;
+  preTreatment: string;
+  detergentLevel: string;
+  staffConfirmed: boolean;
+  confirmedType?: string | null;
+  confirmedColor?: string | null;
+  confirmedStain?: string | null;
+  confirmedSeverity?: string | null;
+  confirmedRecommendation?: string | null;
+  confirmedAt?: string | null;
+}
+
+export interface AiScanResponse {
+  success: boolean;
+  scanId: string;
+  estimate: AiLaundryEstimate;
+  disclaimer: string;
 }
 
 

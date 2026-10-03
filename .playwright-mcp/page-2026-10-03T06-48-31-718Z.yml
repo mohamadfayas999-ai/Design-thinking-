@@ -1,0 +1,96 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f1e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]:
+            - generic [ref=f1e13]: WASHWISE
+            - generic [ref=f1e14]: REC
+          - paragraph [ref=f1e15]: Campus Laundry Management
+      - generic [ref=f1e16]:
+        - button "Toggle Sound Effects" [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e22]: Sound ON
+        - generic [ref=f1e23]:
+          - generic [ref=f1e117]:
+            - generic [ref=f1e118]: Student Four
+            - generic [ref=f1e119]: STUDENT (Thandalam)
+          - generic [ref=f1e120]: STUDENT
+          - button "Logout" [ref=f1e127] [cursor=pointer]
+  - main [ref=f1e27]:
+    - generic [ref=f1e132]:
+      - generic [ref=f1e138]:
+        - generic [ref=f1e139]:
+          - generic [ref=f1e140]:
+            - generic [ref=f1e141]: Student
+            - generic [ref=f1e143]: Thandalam Hostel
+          - heading "Good afternoon, Student" [level=1] [ref=f1e144]
+          - paragraph [ref=f1e145]: Manage your campus laundry bookings.
+          - generic [ref=f1e146]:
+            - generic [ref=f1e147]:
+              - generic [ref=f1e148]: Student ID
+              - text: 2024ECE004
+            - generic [ref=f1e149]:
+              - generic [ref=f1e150]: Dept
+              - generic [ref=f1e151]: ECE · 2024
+        - button "Sign Out" [ref=f1e152] [cursor=pointer]
+      - generic [ref=f1e158]:
+        - generic [ref=f1e160]:
+          - generic [ref=f1e169]:
+            - heading "Permanent ID QR" [level=3] [ref=f1e170]
+            - paragraph [ref=f1e171]: Display-only digital identity
+          - generic [ref=f1e172]:
+            - img "Permanent Student QR Code" [ref=f1e174]
+            - paragraph [ref=f1e175]: 2024ECE004 · Student Four
+            - paragraph [ref=f1e176]: Permanent · Read-only
+          - paragraph [ref=f1e180]: This QR permanently identifies you. It is display-only and cannot be scanned.
+        - generic [ref=f1e181]:
+          - generic [ref=f1e182]:
+            - generic [ref=f1e183]:
+              - heading "Monthly Usage" [level=3] [ref=f1e184]
+              - button "Refresh dashboard" [ref=f1e185] [cursor=pointer]
+            - generic [ref=f1e191]:
+              - generic [ref=f1e196]:
+                - generic [ref=f1e197]: "0"
+                - generic [ref=f1e198]: / 4
+              - generic [ref=f1e199]:
+                - paragraph [ref=f1e200]: 0 of 4 uses this October
+                - paragraph [ref=f1e201]: 4 bookings remaining
+                - paragraph [ref=f1e202]: Resets on the 1st of every month
+          - generic [ref=f1e203]:
+            - heading "No Active Booking" [level=3] [ref=f1e207]
+            - paragraph [ref=f1e208]: You don't have a laundry booking yet.
+            - button "Book Laundry" [ref=f1e209] [cursor=pointer]
+          - button [ref=f1e213] [cursor=pointer]:
+            - generic [ref=f1e220]:
+              - paragraph [ref=f1e221]: Laundry History
+              - paragraph [ref=f1e222]: View your past laundry submissions
+          - generic [ref=f1e225]:
+            - heading "Laundry Rules" [level=3] [ref=f1e226]
+            - generic [ref=f1e229]:
+              - generic [ref=f1e230]:
+                - paragraph [ref=f1e231]: 4 uses / month
+                - paragraph [ref=f1e232]: Calendar month limit
+              - generic [ref=f1e233]:
+                - paragraph [ref=f1e234]: Max 20 clothes
+                - paragraph [ref=f1e235]: Per submission
+              - generic [ref=f1e236]:
+                - paragraph [ref=f1e237]: T-shirt / Shirt
+                - paragraph [ref=f1e238]: Category 1
+              - generic [ref=f1e239]:
+                - paragraph [ref=f1e240]: Pants / Track
+                - paragraph [ref=f1e241]: Category 2
+          - button [ref=f1e242] [cursor=pointer]:
+            - generic [ref=f1e247]:
+              - paragraph [ref=f1e248]: View Available Slots
+              - paragraph [ref=f1e249]: 4 uses remaining this month
+  - contentinfo [ref=f1e45]:
+    - generic [ref=f1e46]:
+      - generic [ref=f1e47]:
+        - generic [ref=f1e48]: WASHWISE
+        - generic [ref=f1e49]: "-"
+        - generic [ref=f1e50]: Rajalakshmi Engineering College
+      - generic [ref=f1e51]:
+        - generic [ref=f1e52]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f1e53]: "-"
+        - generic [ref=f1e54]: Campus Laundry Services

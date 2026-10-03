@@ -9,6 +9,10 @@ import {
   getStudentComplaints,
   getStudentOrder,
 } from '../controllers/student.controller.js';
+import {
+  performAiLaundryScan,
+  getStudentAiScan,
+} from '../controllers/aiScan.controller.js';
 
 const router = Router();
 
@@ -32,5 +36,9 @@ router.get('/history', getStudentHistory);
 
 // Complaint status list
 router.get('/complaints', getStudentComplaints);
+
+// Optional AI Laundry Scanner
+router.post('/ai-laundry-scan', performAiLaundryScan);
+router.get('/ai-laundry-scan/:id', getStudentAiScan);
 
 export default router;

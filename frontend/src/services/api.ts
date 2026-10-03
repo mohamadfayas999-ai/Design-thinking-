@@ -116,6 +116,7 @@ export const api = {
     slotId: string;
     tShirtShirtCount: number;
     pantsTrackCount: number;
+    aiScanId?: string;
   }) =>
     request<{
       success: boolean;
@@ -159,7 +160,18 @@ export const api = {
   // Intake (atomic)
   performIntake: (
     bookingId: string,
-    data: { tShirtShirtCount: number; pantsTrackCount: number; rackShelfId: string }
+    data: {
+      tShirtShirtCount: number;
+      pantsTrackCount: number;
+      rackShelfId: string;
+      aiScanConfirmation?: {
+        confirmedType?: string;
+        confirmedColor?: string;
+        confirmedStain?: string;
+        confirmedSeverity?: string;
+        confirmedRecommendation?: string;
+      };
+    }
   ) =>
     request<{
       success: boolean;
@@ -321,4 +333,34 @@ export const api = {
     const qs = params.toString() ? `?${params.toString()}` : '';
     return request<{ success: boolean; count: number; logs: AdminAuditLog[] }>(`/admin/audit-logs${qs}`);
   },
+
+  // ── Optional AI Laundry Scanner ─────────────────────
+  scanLaundryWithAi: (data: { imageBase64: string; mimeType?: string; bookingId?: string }) =>
+    request<import('../types').AiScanResponse>('/student/ai-laundry-scan', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getStudentAiScan: (scanId: string) =>
+    request<{ success: boolean; scan: import('../types').AiScanData }>(
+      `/student/ai-laundry-scan/${scanId}`
+    ),
+
+  confirmStaffAiScan: (
+    bookingId: string,
+    confirmation: {
+      confirmedType?: string;
+      confirmedColor?: string;
+      confirmedStain?: string;
+      confirmedSeverity?: string;
+      confirmedRecommendation?: string;
+    }
+  ) =>
+    request<{ success: boolean; message: string; aiScan: any }>(
+      `/staff/bookings/${bookingId}/ai-scan-confirm`,
+      {
+        method: 'PUT',
+        body: JSON.stringify(confirmation),
+      }
+    ),
 };

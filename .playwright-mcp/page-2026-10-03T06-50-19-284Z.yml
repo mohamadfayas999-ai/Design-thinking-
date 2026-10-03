@@ -1,0 +1,97 @@
+- generic [ref=f1e3]:
+  - banner [ref=f1e4]:
+    - generic [ref=f1e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f1e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f1e11]:
+          - generic [ref=f1e12]:
+            - generic [ref=f1e13]: WASHWISE
+            - generic [ref=f1e14]: REC
+          - paragraph [ref=f1e15]: Campus Laundry Management
+      - generic [ref=f1e16]:
+        - button "Toggle Sound Effects" [ref=f1e17] [cursor=pointer]:
+          - generic [ref=f1e22]: Sound ON
+        - generic [ref=f1e23]:
+          - generic [ref=f1e117]:
+            - generic [ref=f1e118]: Student Four
+            - generic [ref=f1e119]: STUDENT (Thandalam)
+          - generic [ref=f1e120]: STUDENT
+          - button "Logout" [ref=f1e127] [cursor=pointer]
+  - main [ref=f1e27]:
+    - generic [ref=f1e252]:
+      - generic [ref=f1e253]:
+        - button "Back" [ref=f1e866] [cursor=pointer]
+        - heading "Book Laundry" [level=1] [ref=f1e257]
+        - paragraph [ref=f1e258]: Complete all 3 steps to confirm your booking.
+      - generic [ref=f1e259]:
+        - generic [ref=f1e260]: Select Slot
+        - generic [ref=f1e264]:
+          - generic [ref=f1e265]: "2"
+          - generic [ref=f1e266]: Clothes Count
+        - generic [ref=f1e268]:
+          - generic [ref=f1e269]: "3"
+          - generic [ref=f1e270]: Review
+      - generic [ref=f1e271]: 0 of 4 monthly uses — 4 remaining for October.
+      - generic [ref=f1e870]:
+        - generic [ref=f1e875]:
+          - text: Sun, 4 Oct
+          - generic [ref=f1e876]: 10:00 AM – 11:00 AM
+        - generic [ref=f1e878]:
+          - generic [ref=f1e884]:
+            - generic [ref=f1e885]:
+              - generic [ref=f1e886]: AI Laundry Scanner
+              - generic [ref=f1e887]: Optional
+            - paragraph [ref=f1e888]: Optional — analyze your clothes before booking.
+          - button "Scan Clothes" [active] [ref=f1e889] [cursor=pointer]
+        - generic [ref=f1e893]:
+          - heading "Enter Clothing Counts" [level=3] [ref=f1e894]
+          - paragraph [ref=f1e897]: Maximum 20 clothes total. Two categories only.
+          - generic [ref=f1e898]:
+            - generic [ref=f1e899]:
+              - generic [ref=f1e900]: T-shirt / Shirt
+              - generic [ref=f1e901]:
+                - button "Decrease t-shirt count" [ref=f1e902] [cursor=pointer]: −
+                - spinbutton "T-shirt and shirt count" [ref=f1e903]: "0"
+                - button "Increase t-shirt count" [ref=f1e904] [cursor=pointer]: +
+                - generic [ref=f1e905]: items
+            - generic [ref=f1e906]:
+              - generic [ref=f1e907]: Pants / Track
+              - generic [ref=f1e908]:
+                - button "Decrease pants count" [ref=f1e909] [cursor=pointer]: −
+                - spinbutton "Pants and track count" [ref=f1e910]: "0"
+                - button "Increase pants count" [ref=f1e911] [cursor=pointer]: +
+                - generic [ref=f1e912]: items
+          - generic [ref=f1e913]:
+            - generic [ref=f1e914]: Total Clothes
+            - generic [ref=f1e915]: 0 / 20
+        - button "Review Booking" [disabled]
+      - generic [ref=f1e918]:
+        - generic [ref=f1e919]:
+          - generic [ref=f1e924]:
+            - generic [ref=f1e925]:
+              - heading "AI Laundry Scanner" [level=3] [ref=f1e926]
+              - generic [ref=f1e927]: Optional
+            - paragraph [ref=f1e928]: Analyze clothes for visible stains and laundry recommendations
+          - button [ref=f1e929] [cursor=pointer]
+        - generic [ref=f1e934]:
+          - generic [ref=f1e938]:
+            - generic [ref=f1e939]: Assisted Estimation Tool
+            - text: Take a photo or upload an image of your laundry load. The AI will estimate visible clothing counts, colors, possible stains, and suggest laundry care.
+            - generic [ref=f1e940]: Your manual booking count remains authoritative and can be edited freely.
+          - generic [ref=f1e941]:
+            - button "Take Photo Use device camera" [ref=f1e942] [cursor=pointer]:
+              - generic [ref=f1e947]: Take Photo
+              - generic [ref=f1e948]: Use device camera
+            - button "Upload Photo JPG, PNG, or WEBP (Max 5MB)" [ref=f1e949] [cursor=pointer]:
+              - generic [ref=f1e954]: Upload Photo
+              - generic [ref=f1e955]: JPG, PNG, or WEBP (Max 5MB)
+  - contentinfo [ref=f1e45]:
+    - generic [ref=f1e46]:
+      - generic [ref=f1e47]:
+        - generic [ref=f1e48]: WASHWISE
+        - generic [ref=f1e49]: "-"
+        - generic [ref=f1e50]: Rajalakshmi Engineering College
+      - generic [ref=f1e51]:
+        - generic [ref=f1e52]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f1e53]: "-"
+        - generic [ref=f1e54]: Campus Laundry Services

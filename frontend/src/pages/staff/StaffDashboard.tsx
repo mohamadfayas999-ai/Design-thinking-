@@ -5,7 +5,8 @@ import {
   LogOut, Search, RefreshCw, Package, Clock, CheckCircle2,
   AlertCircle, ChevronDown, ChevronUp, Shirt, ArrowRight,
   Loader2, Layers, User, Calendar,
-  ClipboardList, Inbox, X, CheckCheck, TriangleAlert, Volume2, VolumeX
+  ClipboardList, Inbox, X, CheckCheck, TriangleAlert, Volume2, VolumeX,
+  Sparkles
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -172,6 +173,18 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
   const [selectedRackShelf, setSelectedRackShelf] = useState('');
   const [error, setError] = useState<string | null>(null);
 
+  // AI Scan state
+  const aiScan = booking.aiScan;
+  const [isEditingAi, setIsEditingAi] = useState(false);
+  const [confirmedType, setConfirmedType] = useState(aiScan?.confirmedType || aiScan?.clothingType || '');
+  const [confirmedColor, setConfirmedColor] = useState(aiScan?.confirmedColor || aiScan?.mainColor || '');
+  const [confirmedStain, setConfirmedStain] = useState(aiScan?.confirmedStain || aiScan?.possibleStain || '');
+  const [confirmedSeverity, setConfirmedSeverity] = useState(aiScan?.confirmedSeverity || aiScan?.stainSeverity || '');
+  const [confirmedRecommendation, setConfirmedRecommendation] = useState(
+    aiScan?.confirmedRecommendation || (aiScan ? `${aiScan.washMode} (${aiScan.preTreatment})` : '')
+  );
+  const [isAiConfirmed, setIsAiConfirmed] = useState(aiScan?.staffConfirmed ?? false);
+
   // Student declared counts (immutable source of truth)
   const shirts = booking.laundryOrder?.itemCount?.tShirtShirtCount ?? 0;
   const pants = booking.laundryOrder?.itemCount?.pantsTrackCount ?? 0;
@@ -208,6 +221,15 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
         tShirtShirtCount: shirts,
         pantsTrackCount: pants,
         rackShelfId: selectedRackShelf,
+        aiScanConfirmation: aiScan
+          ? {
+              confirmedType,
+              confirmedColor,
+              confirmedStain,
+              confirmedSeverity,
+              confirmedRecommendation,
+            }
+          : undefined,
       });
       onSuccess(res.order);
     } catch (e: any) {
@@ -313,6 +335,236 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                   <span className="text-base font-bold text-water-700">{total} Items</span>
                 </div>
               </div>
+
+              {/* AI Laundry Scan (if student performed an AI scan) */}
+              {aiScan && (
+                <div className="rounded-xl border border-cyan-200 bg-gradient-to-br from-cyan-50/80 via-sky-50/50 to-blue-50/60 p-4 space-y-3">
+                  <div className="flex items-center justify-between border-b border-cyan-100 pb-2">
+                    <div className="flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-cyan-700" />
+                      <span className="text-xs font-bold text-slate-800">AI Laundry Scan</span>
+                      <span className="text-[10px] font-extrabold uppercase bg-cyan-200 text-cyan-900 px-2 py-0.5 rounded-full">
+                        AI Estimate
+                      </span>
+                    </div>
+                    {isAiConfirmed ? (
+                      <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                        <CheckCheck className="w-3 h-3" /> Staff Confirmed
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-medium text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+                        Verification Required
+                      </span>
+                    )}
+                  </div>
+
+                  {/* AI Estimate vs Staff Confirmed Comparison */}
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-cyan-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">Estimated Visible Count</span>
+                      <span className="font-bold text-slate-800">{aiScan.visibleClothingCount} items</span>
+                      <span className="text-[9px] text-slate-400 block mt-0.5">Booked: {total} items (Authoritative)</span>
+                    </div>
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-cyan-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">Clothing Type</span>
+                      <span className="font-bold text-slate-800">
+                        {isAiConfirmed && confirmedType !== aiScan.clothingType ? (
+                          <>
+                            <span className="line-through text-slate-400 mr-1">{aiScan.clothingType}</span>
+                            <span className="text-emerald-700">{confirmedType}</span>
+                          </>
+                        ) : (
+                          aiScan.clothingType
+                        )}
+                      </span>
+                    </div>
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-cyan-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">Main Color</span>
+                      <span className="font-bold text-slate-800">
+                        {isAiConfirmed && confirmedColor !== aiScan.mainColor ? (
+                          <>
+                            <span className="line-through text-slate-400 mr-1">{aiScan.mainColor}</span>
+                            <span className="text-emerald-700">{confirmedColor}</span>
+                          </>
+                        ) : (
+                          aiScan.mainColor
+                        )}
+                      </span>
+                    </div>
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-cyan-100">
+                      <span className="text-[10px] text-slate-400 block font-medium">Possible Stain & Severity</span>
+                      <span className="font-bold text-slate-800">
+                        {isAiConfirmed && (confirmedStain !== aiScan.possibleStain || confirmedSeverity !== aiScan.stainSeverity) ? (
+                          <>
+                            <span className="line-through text-slate-400 mr-1">
+                              {aiScan.possibleStain} ({aiScan.stainSeverity})
+                            </span>
+                            <span className="text-emerald-700">
+                              {confirmedStain} ({confirmedSeverity})
+                            </span>
+                          </>
+                        ) : (
+                          `${aiScan.possibleStain} (${aiScan.stainSeverity})`
+                        )}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="bg-white/90 p-2.5 rounded-lg border border-cyan-100 text-xs text-slate-700 space-y-0.5">
+                    <div className="text-[10px] text-slate-400 font-medium">Laundry Recommendation:</div>
+                    <div className="text-slate-600">
+                      &bull; Wash mode: <span className="font-semibold text-slate-800">{aiScan.washMode}</span>
+                    </div>
+                    <div className="text-slate-600">
+                      &bull; Pre-treatment: <span className="font-semibold text-slate-800">{aiScan.preTreatment}</span>
+                    </div>
+                    <div className="text-slate-600">
+                      &bull; Detergent level: <span className="font-semibold text-slate-800">{aiScan.detergentLevel} (Estimated — staff confirmation required)</span>
+                    </div>
+                  </div>
+
+                  {/* Staff Confirmation / Edit Controls */}
+                  <div className="pt-1">
+                    {!isEditingAi ? (
+                      <div className="flex items-center justify-between gap-2">
+                        <div className="text-[11px] text-slate-600">
+                          {isAiConfirmed ? (
+                            <span className="text-emerald-800 font-medium">
+                              Staff verified descriptive observations.
+                            </span>
+                          ) : (
+                            <span className="text-slate-500">
+                              Verify or adjust the AI's visual observations.
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex gap-1.5 flex-shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingAi(true)}
+                            className="px-2.5 py-1 text-[11px] font-semibold text-slate-700 bg-white border border-slate-300 rounded-lg hover:bg-slate-50"
+                          >
+                            Edit / Correct
+                          </button>
+                          {!isAiConfirmed && (
+                            <button
+                              type="button"
+                              onClick={() => setIsAiConfirmed(true)}
+                              className="px-2.5 py-1 text-[11px] font-semibold text-white bg-cyan-700 hover:bg-cyan-800 rounded-lg"
+                            >
+                              Confirm Observations
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-3 bg-white rounded-lg border border-cyan-200 space-y-2.5 text-xs">
+                        <div className="font-bold text-slate-800 flex items-center justify-between">
+                          <span>Edit & Confirm AI Observations</span>
+                          <span className="text-[10px] text-amber-700 font-medium">
+                            Booked quantity cannot be changed
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">
+                              Clothing Type
+                            </label>
+                            <select
+                              value={confirmedType}
+                              onChange={(e) => setConfirmedType(e.target.value)}
+                              className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white"
+                            >
+                              <option value="T-Shirt/Shirt">T-Shirt/Shirt</option>
+                              <option value="Pants/Track">Pants/Track</option>
+                              <option value="Mixed">Mixed</option>
+                              <option value="UNKNOWN">UNKNOWN</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">
+                              Main Color
+                            </label>
+                            <input
+                              type="text"
+                              value={confirmedColor}
+                              onChange={(e) => setConfirmedColor(e.target.value)}
+                              className="w-full text-xs p-1.5 border border-slate-200 rounded"
+                              placeholder="e.g. Blue"
+                            />
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2">
+                          <div>
+                            <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">
+                              Stain Observation
+                            </label>
+                            <select
+                              value={confirmedStain}
+                              onChange={(e) => setConfirmedStain(e.target.value)}
+                              className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white"
+                            >
+                              <option value="None visible">None visible</option>
+                              <option value="Possible dirt">Possible dirt</option>
+                              <option value="Possible food stain">Possible food stain</option>
+                              <option value="Possible oil/grease">Possible oil/grease</option>
+                              <option value="Possible ink">Possible ink</option>
+                              <option value="Other visible stain">Other visible stain</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">
+                              Stain Severity
+                            </label>
+                            <select
+                              value={confirmedSeverity}
+                              onChange={(e) => setConfirmedSeverity(e.target.value)}
+                              className="w-full text-xs p-1.5 border border-slate-200 rounded bg-white"
+                            >
+                              <option value="None">None</option>
+                              <option value="Low">Low</option>
+                              <option value="Medium">Medium</option>
+                              <option value="High">High</option>
+                              <option value="Unknown">Unknown</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="text-[10px] font-semibold text-slate-500 block mb-0.5">
+                            Staff Recommendation
+                          </label>
+                          <input
+                            type="text"
+                            value={confirmedRecommendation}
+                            onChange={(e) => setConfirmedRecommendation(e.target.value)}
+                            className="w-full text-xs p-1.5 border border-slate-200 rounded"
+                            placeholder="e.g. Standard Wash (Inspect / optional pre-treatment)"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-1">
+                          <button
+                            type="button"
+                            onClick={() => setIsEditingAi(false)}
+                            className="px-2.5 py-1 text-[11px] border border-slate-200 text-slate-600 rounded hover:bg-slate-50"
+                          >
+                            Cancel
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setIsAiConfirmed(true);
+                              setIsEditingAi(false);
+                            }}
+                            className="px-2.5 py-1 text-[11px] font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700"
+                          >
+                            Save Confirmation
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
 
               {/* Discrepancy toggle / report */}
               <div className="border border-slate-200 rounded-xl p-3 bg-slate-50">

@@ -12,6 +12,24 @@ import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { PageTransition } from '../../components/common/PageTransition';
 import { stepVariants } from '../../utils/animations';
 
+const DEMO_STUDENTS: Record<string, { email: string; name: string; dept: string }> = {
+  HABITAT: {
+    email: 'student.one.2024.csd@rajalakshmi.edu.in',
+    name: 'Student One',
+    dept: 'CSD · 2024',
+  },
+  THANDALAM: {
+    email: 'student.four.2024.ece@rajalakshmi.edu.in',
+    name: 'Student Four',
+    dept: 'ECE · 2024',
+  },
+  GIRLS: {
+    email: 'student.seven.2024.csd@rajalakshmi.edu.in',
+    name: 'Student Seven',
+    dept: 'CSD · 2024',
+  },
+};
+
 export const StudentLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -73,17 +91,6 @@ export const StudentLoginPage: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
-
-  const autofillDemoStudent = (hostelCode: string, studentEmail: string) => {
-    const target = hostels.find((h) => h.code === hostelCode);
-    if (target) {
-      setSelectedHostelId(target.id);
-    }
-    setEmail(studentEmail);
-    setPassword('rec123');
-    setError(null);
-    setStep('login');
   };
 
   return (
@@ -168,39 +175,6 @@ export const StudentLoginPage: React.FC = () => {
                   );
                 })}
               </div>
-
-              {/* Quick Fill for Demo */}
-              <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                  Demo Student Quick Fill:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStudent('HABITAT', 'student.one.2024.csd@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Habitat</span>
-                    <span>Student One</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStudent('THANDALAM', 'student.four.2024.ece@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Thandalam</span>
-                    <span>Student Four</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStudent('GIRLS', 'student.seven.2024.csd@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Girls</span>
-                    <span>Student Seven</span>
-                  </button>
-                </div>
-              </div>
             </Card>
           </motion.div>
         )}
@@ -273,38 +247,35 @@ export const StudentLoginPage: React.FC = () => {
                 </div>
               </form>
 
-              {/* Demo Credentials Quick-Fill helper */}
-              <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
-                <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                  Demo Student Quick Fill:
-                </p>
-                <div className="grid grid-cols-3 gap-2">
+              {/* Demo Credentials Quick-Fill helper — Hostel-scoped */}
+              {selectedHostel && DEMO_STUDENTS[selectedHostel.code] && (
+                <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
+                    {selectedHostel.name} Student Demo Credentials:
+                  </p>
                   <button
                     type="button"
-                    onClick={() => autofillDemoStudent('HABITAT', 'student.one.2024.csd@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
+                    onClick={() => {
+                      setEmail(DEMO_STUDENTS[selectedHostel.code].email);
+                      setPassword('rec123');
+                      setError(null);
+                    }}
+                    className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-xs text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400 flex items-center justify-between"
                   >
-                    <span className="font-bold text-slate-800 block">Habitat</span>
-                    <span>Student One</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStudent('THANDALAM', 'student.four.2024.ece@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Thandalam</span>
-                    <span>Student Four</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => autofillDemoStudent('GIRLS', 'student.seven.2024.csd@rajalakshmi.edu.in')}
-                    className="text-left p-2 rounded-lg border border-slate-200 hover:border-water-300 hover:bg-water-50/50 text-[11px] text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-water-400"
-                  >
-                    <span className="font-bold text-slate-800 block">Girls</span>
-                    <span>Student Seven</span>
+                    <div>
+                      <span className="font-bold text-slate-800 block text-xs">
+                        {DEMO_STUDENTS[selectedHostel.code].name} ({selectedHostel.name})
+                      </span>
+                      <span className="text-[11px] text-slate-500 font-mono">
+                        {DEMO_STUDENTS[selectedHostel.code].email}
+                      </span>
+                    </div>
+                    <span className="text-[11px] font-semibold text-water-700 bg-water-50 px-2 py-1 rounded-md border border-water-100">
+                      Auto-fill
+                    </span>
                   </button>
                 </div>
-              </div>
+              )}
             </Card>
           </motion.div>
         )}

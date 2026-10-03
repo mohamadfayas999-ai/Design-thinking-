@@ -2,6 +2,7 @@ import { Response, NextFunction } from 'express';
 import { prisma } from '../prisma.js';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { Role } from '../types/models.js';
+import { isSlotInFuture } from '../utils/date.js';
 
 const MAX_MONTHLY_USES = 4;
 const MAX_CLOTHES_TOTAL = 20;
@@ -85,20 +86,22 @@ export async function getAvailableSlots(
       orderBy: [{ date: 'asc' }, { startTime: 'asc' }],
     });
 
-    const result = slots.map((slot) => {
-      const bookedCount = slot._count.slotBookings;
-      const availableSpots = slot.capacity - bookedCount;
-      return {
-        id: slot.id,
-        date: slot.date,
-        startTime: slot.startTime,
-        endTime: slot.endTime,
-        capacity: slot.capacity,
-        bookedCount,
-        availableSpots,
-        isFull: availableSpots <= 0,
-      };
-    });
+    const result = slots
+      .filter((slot) => isSlotInFuture(slot.date, slot.startTime))
+      .map((slot) => {
+        const bookedCount = slot._count.slotBookings;
+        const availableSpots = slot.capacity - bookedCount;
+        return {
+          id: slot.id,
+          date: slot.date,
+          startTime: slot.startTime,
+          endTime: slot.endTime,
+          capacity: slot.capacity,
+          bookedCount,
+          availableSpots,
+          isFull: availableSpots <= 0,
+        };
+      });
 
     return res.status(200).json({ success: true, slots: result });
   } catch (error) {
@@ -135,9 +138,12 @@ export async function getMyActiveBooking(
       },
       include: {
         slot: true,
+        aiScan: true,
         laundryOrder: {
           include: {
             itemCount: true,
+            complaint: true,
+            aiScan: true,
           },
         },
       },
@@ -148,9 +154,10 @@ export async function getMyActiveBooking(
       return res.status(200).json({ success: true, booking: null });
     }
 
-    // Determine if student can still cancel (can't cancel if laundry is IN_PROGRESS)
+    // Determine if student can still cancel (can only cancel if BOOKED and not in processing/completed/complained)
     const orderStatus = booking.laundryOrder?.status ?? null;
-    const canCancel = booking.status === 'BOOKED' && orderStatus !== 'IN_PROGRESS';
+    const canCancel =
+      booking.status === 'BOOKED' && (!orderStatus || orderStatus === 'BOOKED');
 
     // Return booking info — rack/shelf/staff NEVER exposed to students
     return res.status(200).json({
@@ -173,6 +180,36 @@ export async function getMyActiveBooking(
               tShirtShirtCount: booking.laundryOrder.itemCount.tShirtShirtCount,
               pantsTrackCount: booking.laundryOrder.itemCount.pantsTrackCount,
               totalCount: booking.laundryOrder.itemCount.totalCount,
+            }
+          : null,
+        complaint: booking.laundryOrder?.complaint
+          ? {
+              id: booking.laundryOrder.complaint.id,
+              type: booking.laundryOrder.complaint.type,
+              status: booking.laundryOrder.complaint.status,
+              additionalDetails: booking.laundryOrder.complaint.additionalDetails,
+              createdAt: booking.laundryOrder.complaint.createdAt,
+              resolvedAt: booking.laundryOrder.complaint.resolvedAt,
+            }
+          : null,
+        aiScan: (booking.aiScan || booking.laundryOrder?.aiScan)
+          ? {
+              id: (booking.aiScan || booking.laundryOrder?.aiScan)!.id,
+              visibleClothingCount: (booking.aiScan || booking.laundryOrder?.aiScan)!.visibleClothingCount,
+              clothingType: (booking.aiScan || booking.laundryOrder?.aiScan)!.clothingType,
+              mainColor: (booking.aiScan || booking.laundryOrder?.aiScan)!.mainColor,
+              possibleStain: (booking.aiScan || booking.laundryOrder?.aiScan)!.possibleStain,
+              stainSeverity: (booking.aiScan || booking.laundryOrder?.aiScan)!.stainSeverity,
+              confidence: (booking.aiScan || booking.laundryOrder?.aiScan)!.confidence,
+              washMode: (booking.aiScan || booking.laundryOrder?.aiScan)!.washMode,
+              preTreatment: (booking.aiScan || booking.laundryOrder?.aiScan)!.preTreatment,
+              detergentLevel: (booking.aiScan || booking.laundryOrder?.aiScan)!.detergentLevel,
+              staffConfirmed: (booking.aiScan || booking.laundryOrder?.aiScan)!.staffConfirmed,
+              confirmedType: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedType,
+              confirmedColor: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedColor,
+              confirmedStain: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedStain,
+              confirmedSeverity: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedSeverity,
+              confirmedRecommendation: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedRecommendation,
             }
           : null,
       },
@@ -233,7 +270,7 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
       return res.status(403).json({ success: false, message: 'Student access only' });
     }
 
-    const { slotId, tShirtShirtCount, pantsTrackCount } = req.body;
+    const { slotId, tShirtShirtCount, pantsTrackCount, aiScanId } = req.body;
 
     // ── 1. Input presence check ──
     if (!slotId) {
@@ -289,6 +326,14 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
 
     if (!slot.isActive) {
       return res.status(400).json({ success: false, message: 'This laundry slot is not available.' });
+    }
+
+    // ── 4b. Slot start time must be in future (slot start time > now) ──
+    if (!isSlotInFuture(slot.date, slot.startTime)) {
+      return res.status(400).json({
+        success: false,
+        message: 'This laundry slot start time has already passed.',
+      });
     }
 
     // ── 5. Hostel isolation: slot must belong to student's hostel ──
@@ -389,6 +434,26 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
           status: 'BOOKED',
         },
       });
+
+      // If student provided an aiScanId, link it to the booking and order
+      if (aiScanId && typeof aiScanId === 'string') {
+        const existingScan = await tx.aiScan.findUnique({
+          where: { id: aiScanId },
+        });
+        if (
+          existingScan &&
+          existingScan.studentId === studentProfile.id &&
+          existingScan.hostelId === studentProfile.hostelId
+        ) {
+          await tx.aiScan.update({
+            where: { id: aiScanId },
+            data: {
+              bookingId: booking.id,
+              laundryOrderId: laundryOrder.id,
+            },
+          });
+        }
+      }
 
       return { booking, itemCount, laundryOrder };
     });

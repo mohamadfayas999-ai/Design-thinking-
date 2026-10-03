@@ -1,0 +1,215 @@
+- generic [ref=f2e115]:
+  - banner [ref=f2e116]:
+    - generic [ref=f2e117]:
+      - generic [ref=f2e122]:
+        - text: WASHWISE
+        - generic [ref=f2e123]: Thandalam Laundry
+      - generic [ref=f2e124]:
+        - button "Sound ON" [ref=f2e125] [cursor=pointer]
+        - generic [ref=f2e131]:
+          - generic [ref=f2e132]: Thandalam Laundry Staff
+          - generic [ref=f2e133]: Laundry Staff
+        - button "Logout" [ref=f2e134] [cursor=pointer]
+  - main [ref=f2e139]:
+    - generic [ref=f2e140]:
+      - generic [ref=f2e145]:
+        - generic [ref=f2e146]: "0"
+        - generic [ref=f2e147]: Today's Bookings
+      - generic [ref=f2e153]:
+        - generic [ref=f2e154]: "1"
+        - generic [ref=f2e155]: Waiting for Intake
+        - generic [ref=f2e156]: Need action
+      - generic [ref=f2e163]:
+        - generic [ref=f2e164]: "0"
+        - generic [ref=f2e165]: In Progress
+      - generic [ref=f2e172]:
+        - generic [ref=f2e173]: "12"
+        - generic [ref=f2e174]: Storage Available
+        - generic [ref=f2e175]: of 12 total
+    - button "Today's Slot Summary (your hostel only)" [ref=f2e177] [cursor=pointer]:
+      - generic [ref=f2e178]:
+        - text: Today's Slot Summary
+        - generic [ref=f2e182]: (your hostel only)
+    - generic [ref=f2e185]:
+      - generic [ref=f2e186]:
+        - textbox "Search student name or student ID..." [ref=f2e188]
+        - generic [ref=f2e189]:
+          - generic [ref=f2e190]:
+            - button "Today" [ref=f2e191] [cursor=pointer]
+            - button "All Dates" [ref=f2e192] [cursor=pointer]
+          - generic [ref=f2e193]:
+            - button "All" [ref=f2e194] [cursor=pointer]
+            - button "Waiting" [ref=f2e195] [cursor=pointer]
+            - button "In Progress" [ref=f2e196] [cursor=pointer]
+          - button "Refresh" [ref=f2e197] [cursor=pointer]
+      - generic [ref=f2e203]:
+        - generic [ref=f2e204]:
+          - generic [ref=f2e285]:
+            - text: Waiting for Intake
+            - generic [ref=f2e286]: (1)
+          - generic [ref=f2e288]:
+            - generic [ref=f2e293]:
+              - generic [ref=f2e294]: Student Four
+              - generic [ref=f2e295]: 2024ECE004 · ECE
+            - generic [ref=f2e296]:
+              - generic [ref=f2e297]: 10:00 AM – 11:00 AM
+              - generic [ref=f2e298]: 4 Oct
+            - generic [ref=f2e299]:
+              - generic [ref=f2e300]: "8"
+              - generic [ref=f2e301]: items
+            - generic [ref=f2e302]: Waiting
+            - button "Start Intake" [ref=f2e306] [cursor=pointer]
+        - generic [ref=f2e307]:
+          - generic [ref=f2e308]: In Progress
+          - paragraph [ref=f2e316]: No laundry currently in progress.
+    - generic [ref=f2e223]:
+      - generic [ref=f2e224]:
+        - generic [ref=f2e225]: Storage Overview
+        - button [ref=f2e230] [cursor=pointer]
+      - generic [ref=f2e237]:
+        - generic [ref=f2e238]:
+          - generic [ref=f2e239]: Rack 1
+          - generic [ref=f2e240]:
+            - generic "Available" [ref=f2e241]:
+              - generic [ref=f2e242]: S1
+              - generic [ref=f2e243]: AVAIL
+            - generic "Available" [ref=f2e244]:
+              - generic [ref=f2e245]: S2
+              - generic [ref=f2e246]: AVAIL
+            - generic "Available" [ref=f2e247]:
+              - generic [ref=f2e248]: S3
+              - generic [ref=f2e249]: AVAIL
+            - generic "Available" [ref=f2e250]:
+              - generic [ref=f2e251]: S4
+              - generic [ref=f2e252]: AVAIL
+        - generic [ref=f2e253]:
+          - generic [ref=f2e254]: Rack 2
+          - generic [ref=f2e255]:
+            - generic "Available" [ref=f2e256]:
+              - generic [ref=f2e257]: S1
+              - generic [ref=f2e258]: AVAIL
+            - generic "Available" [ref=f2e259]:
+              - generic [ref=f2e260]: S2
+              - generic [ref=f2e261]: AVAIL
+            - generic "Available" [ref=f2e262]:
+              - generic [ref=f2e263]: S3
+              - generic [ref=f2e264]: AVAIL
+            - generic "Available" [ref=f2e265]:
+              - generic [ref=f2e266]: S4
+              - generic [ref=f2e267]: AVAIL
+        - generic [ref=f2e268]:
+          - generic [ref=f2e269]: Rack 3
+          - generic [ref=f2e270]:
+            - generic "Available" [ref=f2e271]:
+              - generic [ref=f2e272]: S1
+              - generic [ref=f2e273]: AVAIL
+            - generic "Available" [ref=f2e274]:
+              - generic [ref=f2e275]: S2
+              - generic [ref=f2e276]: AVAIL
+            - generic "Available" [ref=f2e277]:
+              - generic [ref=f2e278]: S3
+              - generic [ref=f2e279]: AVAIL
+            - generic "Available" [ref=f2e280]:
+              - generic [ref=f2e281]: S4
+              - generic [ref=f2e282]: AVAIL
+  - generic [ref=f2e319]:
+    - generic [ref=f2e320]:
+      - generic [ref=f2e321]:
+        - generic [ref=f2e322]: Laundry Intake • Count Verification
+        - generic [ref=f2e323]: Student Four
+        - generic [ref=f2e324]: 2024ECE004 · 10:00 AM – 11:00 AM
+      - button [ref=f2e325] [cursor=pointer]
+    - generic [ref=f2e329]:
+      - generic [ref=f2e330]: 1. Verify Booked Count
+      - generic [ref=f2e331]: 2. Allocate Rack
+      - generic [ref=f2e332]: 3. Confirmation
+    - generic [ref=f2e334]:
+      - generic [ref=f2e335]:
+        - generic [ref=f2e336]:
+          - generic [ref=f2e337]: Student Declared Booking
+          - generic [ref=f2e338]: Immutable
+        - generic [ref=f2e339]: "Staff cannot modify student booking quantities. Verify that the clothes received physically match the counts below:"
+        - generic [ref=f2e340]:
+          - generic [ref=f2e341]:
+            - generic [ref=f2e342]: T-shirt / Shirt
+            - generic [ref=f2e343]: "5"
+          - generic [ref=f2e344]:
+            - generic [ref=f2e345]: Pants / Track
+            - generic [ref=f2e346]: "3"
+        - generic [ref=f2e347]:
+          - generic [ref=f2e348]: "Total Booked Quantity:"
+          - generic [ref=f2e349]: 8 Items
+      - generic [ref=f2e350]:
+        - generic [ref=f2e351]:
+          - generic [ref=f2e352]:
+            - generic [ref=f2e355]: AI Laundry Scan
+            - generic [ref=f2e356]: AI Estimate
+          - generic [ref=f2e357]: Verification Required
+        - generic [ref=f2e358]:
+          - generic [ref=f2e359]:
+            - generic [ref=f2e360]: Estimated Visible Count
+            - generic [ref=f2e361]: 7 items
+            - generic [ref=f2e362]: "Booked: 8 items (Authoritative)"
+          - generic [ref=f2e363]:
+            - generic [ref=f2e364]: Clothing Type
+            - text: T-Shirt/Shirt
+          - generic [ref=f2e365]:
+            - generic [ref=f2e366]: Main Color
+            - text: Red
+          - generic [ref=f2e367]:
+            - generic [ref=f2e368]: Possible Stain & Severity
+            - text: None visible (None)
+        - generic [ref=f2e369]:
+          - generic [ref=f2e370]: "Laundry Recommendation:"
+          - generic [ref=f2e371]: "• Wash mode: Standard Wash"
+          - generic [ref=f2e372]: "• Pre-treatment: Not normally required"
+          - generic [ref=f2e373]:
+            - text: "• Detergent level:"
+            - generic [ref=f2e374]: Medium (Estimated — staff confirmation required)
+        - generic [ref=f2e376]:
+          - generic [ref=f2e377]:
+            - generic [ref=f2e393]: Edit & Confirm AI Observations
+            - generic [ref=f2e394]: Booked quantity cannot be changed
+          - generic [ref=f2e378]:
+            - generic [ref=f2e395]:
+              - generic [ref=f2e396]: Clothing Type
+              - combobox [ref=f2e397]:
+                - option "T-Shirt/Shirt" [selected]
+                - option "Pants/Track"
+                - option "Mixed"
+                - option "UNKNOWN"
+            - generic [ref=f2e398]:
+              - generic [ref=f2e399]: Main Color
+              - textbox "e.g. Blue" [ref=f2e400]: Red
+          - generic [ref=f2e401]:
+            - generic [ref=f2e402]:
+              - generic [ref=f2e403]: Stain Observation
+              - combobox [ref=f2e404]:
+                - option "None visible" [selected]
+                - option "Possible dirt"
+                - option "Possible food stain"
+                - option "Possible oil/grease"
+                - option "Possible ink"
+                - option "Other visible stain"
+            - generic [ref=f2e405]:
+              - generic [ref=f2e406]: Stain Severity
+              - combobox [ref=f2e407]:
+                - option "None" [selected]
+                - option "Low"
+                - option "Medium"
+                - option "High"
+                - option "Unknown"
+          - generic [ref=f2e408]:
+            - generic [ref=f2e409]: Staff Recommendation
+            - textbox "e.g. Standard Wash (Inspect / optional pre-treatment)" [ref=f2e410]: Standard Wash (Not normally required)
+          - generic [ref=f2e411]:
+            - button "Cancel" [ref=f2e412] [cursor=pointer]
+            - button "Save Confirmation" [ref=f2e413] [cursor=pointer]
+      - generic [ref=f2e382]:
+        - generic [ref=f2e383]:
+          - generic [ref=f2e384]: Count Discrepancy?
+          - generic [ref=f2e385]: Does physical count differ from 8 items?
+        - button "Count does not match" [ref=f2e386] [cursor=pointer]
+      - generic [ref=f2e387]:
+        - button "Cancel" [ref=f2e388] [cursor=pointer]
+        - button "Verify & Allocate Rack" [ref=f2e389] [cursor=pointer]
