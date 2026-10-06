@@ -19,6 +19,14 @@ export function createApp() {
   // API router
   app.use('/api', routes);
 
+  // 404 handler: always return JSON for undefined routes (never HTML)
+  app.use((req, res) => {
+    res.status(404).json({
+      success: false,
+      message: `Endpoint not found: ${req.method} ${req.originalUrl}`,
+    });
+  });
+
   // Centralized Error handler
   app.use(errorHandler);
 

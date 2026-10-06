@@ -6,6 +6,7 @@ import slotsRoutes from './slots.routes.js';
 import staffRoutes from './staff.routes.js';
 import studentRoutes from './student.routes.js';
 import adminRoutes from './admin.routes.js';
+import aiRoutes from './ai.routes.js';
 
 const router = Router();
 
@@ -16,5 +17,6 @@ router.use('/slots', slotsRoutes);
 router.use('/staff', staffRoutes);
 router.use('/student', studentRoutes);
 router.use('/admin', adminRoutes);
+router.use('/ai', aiRoutes);
 
 export default router;
