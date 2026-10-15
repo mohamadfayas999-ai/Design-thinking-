@@ -1,0 +1,94 @@
+- generic [ref=f7e3]:
+  - banner [ref=f7e4]:
+    - generic [ref=f7e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f7e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f7e11]:
+          - generic [ref=f7e12]:
+            - generic [ref=f7e13]: WASHWISE
+            - generic [ref=f7e14]: REC
+          - paragraph [ref=f7e15]: Campus Laundry Management
+      - generic [ref=f7e16]:
+        - button "Toggle Sound Effects" [ref=f7e17] [cursor=pointer]:
+          - generic [ref=f7e22]: Sound ON
+        - generic [ref=f7e23]:
+          - generic [ref=f7e269]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=f7e271] [cursor=pointer]:
+            - /url: /
+  - main [ref=f7e27]:
+    - generic [ref=f7e272]:
+      - generic [ref=f7e274]:
+        - generic [ref=f7e275]: Rajalakshmi Engineering College Hostels
+        - heading "WASHWISE" [level=1] [ref=f7e280]
+        - paragraph [ref=f7e281]: Smart & Intelligent Campus Laundry Management
+        - paragraph [ref=f7e282]: A dedicated portal for hostel students, laundry staff, and college administration to schedule slots, monitor real-time washing status, and verify clothes with complete transparency.
+      - generic [ref=f7e283]:
+        - heading "Select Your Accommodation Portal" [level=2] [ref=f7e285]
+        - generic [ref=f7e286]:
+          - generic [ref=f7e288] [cursor=pointer]:
+            - generic [ref=f7e289]:
+              - generic [ref=f7e294]:
+                - heading "Rajalakshmi Engineering College" [level=3] [ref=f7e295]
+                - generic [ref=f7e296]: REC Campus
+              - paragraph [ref=f7e297]:
+                - text: Official on-campus laundry service exclusively for REC students. Select from
+                - strong [ref=f7e298]: Girls
+                - text: ","
+                - strong [ref=f7e299]: Thandalam
+                - text: ", or"
+                - strong [ref=f7e300]: Habitat
+                - text: hostels to schedule and track laundry runs.
+              - generic [ref=f7e301]:
+                - generic [ref=f7e302]: Girls Hostel
+                - generic [ref=f7e303]: Thandalam Hostel
+                - generic [ref=f7e304]: Habitat Hostel
+            - generic [ref=f7e305]: Enter REC Portal
+          - generic [ref=f7e310] [cursor=pointer]:
+            - generic [ref=f7e311]:
+              - generic [ref=f7e317]:
+                - heading "PG Hostel" [level=3] [ref=f7e318]
+                - generic [ref=f7e319]: PG & Shared Living
+              - paragraph [ref=f7e320]:
+                - text: Dedicated shared accommodation laundry portal. Access demo resident accounts for
+                - strong [ref=f7e321]: User 1
+                - text: ","
+                - strong [ref=f7e322]: User 2
+                - text: ","
+                - strong [ref=f7e323]: User 3
+                - text: ", and"
+                - strong [ref=f7e324]: User 4
+                - text: across PG facilities.
+              - generic [ref=f7e325]:
+                - generic [ref=f7e326]: User 1
+                - generic [ref=f7e327]: User 2
+                - generic [ref=f7e328]: User 3
+                - generic [ref=f7e329]: User 4
+            - generic [ref=f7e330]: Enter PG Hostel Portal
+        - paragraph [ref=f7e335]:
+          - text: "Staff & Administrative Operations:"
+          - button "Laundry Staff Login" [ref=f7e336] [cursor=pointer]
+          - text: "|"
+          - button "College Administrator Login" [ref=f7e337] [cursor=pointer]
+      - generic [ref=f7e339]:
+        - generic [ref=f7e345]:
+          - heading "3 Campus Hostels" [level=4] [ref=f7e346]
+          - paragraph [ref=f7e347]: Habitat, Thandalam, and Girls hostels with dedicated queues.
+        - generic [ref=f7e351]:
+          - heading "20-Clothes Limit" [level=4] [ref=f7e352]
+          - paragraph [ref=f7e353]: T-shirt/Shirt and Pants/Track with automatic limit validation.
+        - generic [ref=f7e358]:
+          - heading "4 Runs Monthly" [level=4] [ref=f7e359]
+          - paragraph [ref=f7e360]: Fair campus quota tracking with monthly usage monitoring.
+        - generic [ref=f7e365]:
+          - heading "Verify & Complaint" [level=4] [ref=f7e366]
+          - paragraph [ref=f7e367]: Two-way verification at collection with admin resolution flow.
+  - contentinfo [ref=f7e122]:
+    - generic [ref=f7e123]:
+      - generic [ref=f7e124]:
+        - generic [ref=f7e125]: WASHWISE
+        - generic [ref=f7e126]: "-"
+        - generic [ref=f7e127]: Rajalakshmi Engineering College
+      - generic [ref=f7e128]:
+        - generic [ref=f7e129]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f7e130]: "-"
+        - generic [ref=f7e131]: Campus Laundry Services

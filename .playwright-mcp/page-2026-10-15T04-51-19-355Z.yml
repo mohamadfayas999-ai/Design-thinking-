@@ -1,0 +1,102 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: WASHWISE
+            - generic [ref=e14]: REC
+          - paragraph [ref=e15]: Campus Laundry Management
+      - generic [ref=e16]:
+        - button "Toggle Sound Effects" [ref=e17] [cursor=pointer]:
+          - generic [ref=e22]: Sound ON
+        - generic [ref=e23]:
+          - generic [ref=e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=e27]:
+    - generic [ref=e134]:
+      - generic [ref=e135]:
+        - button "Back to Main Menu" [ref=e136] [cursor=pointer]
+        - generic [ref=e140]:
+          - button "REC Hostels" [ref=e141] [cursor=pointer]
+          - button "PG Hostel" [ref=e142] [cursor=pointer]
+      - generic [ref=e144]:
+        - generic [ref=e151]:
+          - heading "PG Hostel Resident Portal" [level=1] [ref=e152]
+          - paragraph [ref=e153]: Shared Living Laundry Management & Demo Residents
+        - generic [ref=e154]:
+          - generic [ref=e155]: "Select Demo User:"
+          - generic [ref=e156]:
+            - button "U1 User 1 Oak House Active" [ref=e157] [cursor=pointer]:
+              - generic [ref=e158]: U1
+              - generic [ref=e159]: User 1
+              - generic [ref=e160]: Oak House
+              - generic [ref=e161]: Active
+            - button "U2 User 2 Maple Villa" [ref=e166] [cursor=pointer]:
+              - generic [ref=e167]: U2
+              - generic [ref=e168]: User 2
+              - generic [ref=e169]: Maple Villa
+            - button "U3 User 3 Pine Residence" [ref=e170] [cursor=pointer]:
+              - generic [ref=e171]: U3
+              - generic [ref=e172]: User 3
+              - generic [ref=e173]: Pine Residence
+            - button "U4 User 4 Cedar Suites" [ref=e174] [cursor=pointer]:
+              - generic [ref=e175]: U4
+              - generic [ref=e176]: User 4
+              - generic [ref=e177]: Cedar Suites
+        - generic [ref=e178]:
+          - generic [ref=e179]: "PG Demo Credentials:"
+          - generic [ref=e183]:
+            - generic [ref=e184] [cursor=pointer]:
+              - generic [ref=e185]:
+                - generic [ref=e186]: User 1
+                - generic [ref=e187]: Oak House
+              - generic [ref=e188]: "Email: user1@gmail.com"
+              - generic [ref=e189]: "Password: user1"
+            - generic [ref=e190] [cursor=pointer]:
+              - generic [ref=e191]:
+                - generic [ref=e192]: User 2
+                - generic [ref=e193]: Maple Villa
+              - generic [ref=e194]: "Email: user2@gmail.com"
+              - generic [ref=e195]: "Password: user2"
+            - generic [ref=e196] [cursor=pointer]:
+              - generic [ref=e197]:
+                - generic [ref=e198]: User 3
+                - generic [ref=e199]: Pine Residence
+              - generic [ref=e200]: "Email: user3@gmail.com"
+              - generic [ref=e201]: "Password: user3"
+            - generic [ref=e202] [cursor=pointer]:
+              - generic [ref=e203]:
+                - generic [ref=e204]: User 4
+                - generic [ref=e205]: Cedar Suites
+              - generic [ref=e206]: "Email: user4@gmail.com"
+              - generic [ref=e207]: "Password: user4"
+        - generic [ref=e208]:
+          - generic [ref=e209]:
+            - generic [ref=e210]: "PG Facility Association:"
+            - generic [ref=e211]: Oak House (Unit A · Room 101)
+          - generic [ref=e215]:
+            - generic [ref=e216]: Resident Email Address*
+            - textbox "Resident Email Address*" [ref=e218]:
+              - /placeholder: user1@gmail.com
+              - text: user1@gmail.com
+            - paragraph [ref=e219]: "Selected account: User 1 (Oak House)"
+          - generic [ref=e220]:
+            - generic [ref=e221]: Password*
+            - textbox "Password*" [ref=e223]:
+              - /placeholder: Password
+              - text: user1
+            - paragraph [ref=e224]: Backend verifies password against encrypted database record.
+          - button "Sign In as User 1 (Oak House)" [ref=e226] [cursor=pointer]
+  - contentinfo [ref=e124]:
+    - generic [ref=e125]:
+      - generic [ref=e126]:
+        - generic [ref=e127]: WASHWISE
+        - generic [ref=e128]: "-"
+        - generic [ref=e129]: Rajalakshmi Engineering College
+      - generic [ref=e130]:
+        - generic [ref=e131]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=e132]: "-"
+        - generic [ref=e133]: Campus Laundry Services

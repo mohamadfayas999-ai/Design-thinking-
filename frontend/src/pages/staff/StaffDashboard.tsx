@@ -6,7 +6,7 @@ import {
   AlertCircle, ChevronDown, ChevronUp, Shirt, ArrowRight,
   Loader2, Layers, User, Calendar,
   ClipboardList, Inbox, X, CheckCheck, TriangleAlert, Volume2, VolumeX,
-  Sparkles
+  Sparkles, QrCode
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -16,7 +16,8 @@ import {
   StaffBooking,
   RackShelfLocation,
   LaundryOrderDetail,
-  TodaySlot
+  TodaySlot,
+  StaffQrLookupResponse
 } from '../../types';
 import {
   smoothEase,
@@ -185,10 +186,14 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
   );
   const [isAiConfirmed, setIsAiConfirmed] = useState(aiScan?.staffConfirmed ?? false);
 
-  // Student declared counts (immutable source of truth)
-  const shirts = booking.laundryOrder?.itemCount?.tShirtShirtCount ?? 0;
-  const pants = booking.laundryOrder?.itemCount?.pantsTrackCount ?? 0;
+  // Student declared counts (authoritative source of truth)
+  const itemCount = booking.laundryOrder?.itemCount;
+  const shirts = itemCount?.tShirtShirtCount ?? 0;
+  const pants = itemCount?.pantsTrackCount ?? 0;
   const total = shirts + pants;
+  const weightGrams = booking.weightGrams ?? itemCount?.totalWeightGrams ?? 0;
+  const has5Cat = itemCount?.shirtCount !== undefined || itemCount?.tshirtCount !== undefined;
+  const isMultiBatch = (booking.totalBatches ?? 1) > 1;
   const selectedLoc = storage.find((s) => s.id === selectedRackShelf);
 
   function handleVerifyProceed() {
@@ -319,20 +324,59 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
                   Staff cannot modify student booking quantities. Verify that the clothes received physically match the counts below:
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 mb-3">
-                  <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
-                    <div className="text-xs text-slate-500">T-shirt / Shirt</div>
-                    <div className="text-xl font-bold text-slate-900 mt-0.5">{shirts}</div>
+                {isMultiBatch && (
+                  <div className="mb-3 inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-blue-100 text-blue-900 text-xs font-semibold">
+                    Batch {booking.batchNumber || 1} of {booking.totalBatches}
+                    {weightGrams > 0 && <span>&bull; {weightGrams}g booked</span>}
                   </div>
-                  <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
-                    <div className="text-xs text-slate-500">Pants / Track</div>
-                    <div className="text-xl font-bold text-slate-900 mt-0.5">{pants}</div>
+                )}
+
+                {has5Cat ? (
+                  <div className="grid grid-cols-5 gap-1.5 mb-3">
+                    <div className="bg-white rounded-lg p-2 text-center border border-blue-100 shadow-xs">
+                      <div className="text-[10px] text-slate-500 font-medium">T-Shirts</div>
+                      <div className="text-base font-bold text-slate-900 mt-0.5">{itemCount?.tshirtCount ?? 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-2 text-center border border-blue-100 shadow-xs">
+                      <div className="text-[10px] text-slate-500 font-medium">Shirts</div>
+                      <div className="text-base font-bold text-slate-900 mt-0.5">{itemCount?.shirtCount ?? 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-2 text-center border border-blue-100 shadow-xs">
+                      <div className="text-[10px] text-slate-500 font-medium">Pants</div>
+                      <div className="text-base font-bold text-slate-900 mt-0.5">{itemCount?.pantsCount ?? 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-2 text-center border border-blue-100 shadow-xs">
+                      <div className="text-[10px] text-slate-500 font-medium">Jeans</div>
+                      <div className="text-base font-bold text-slate-900 mt-0.5">{itemCount?.jeansCount ?? 0}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-2 text-center border border-blue-100 shadow-xs">
+                      <div className="text-[10px] text-slate-500 font-medium">Shorts</div>
+                      <div className="text-base font-bold text-slate-900 mt-0.5">{itemCount?.shortsCount ?? 0}</div>
+                    </div>
                   </div>
-                </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-3 mb-3">
+                    <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
+                      <div className="text-xs text-slate-500">T-shirt / Shirt</div>
+                      <div className="text-xl font-bold text-slate-900 mt-0.5">{shirts}</div>
+                    </div>
+                    <div className="bg-white rounded-lg p-3 border border-blue-100 shadow-xs">
+                      <div className="text-xs text-slate-500">Pants / Track</div>
+                      <div className="text-xl font-bold text-slate-900 mt-0.5">{pants}</div>
+                    </div>
+                  </div>
+                )}
 
                 <div className="bg-white rounded-lg px-4 py-2.5 border border-blue-100 flex items-center justify-between">
-                  <span className="text-sm font-semibold text-slate-700">Total Booked Quantity:</span>
-                  <span className="text-base font-bold text-water-700">{total} Items</span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-slate-700">Total Booked Quantity:</span>
+                    <span className="text-base font-bold text-water-700">{total} Items</span>
+                  </div>
+                  {weightGrams > 0 && (
+                    <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-water-50 text-water-700 border border-water-200">
+                      {weightGrams}g booked
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -694,21 +738,57 @@ function IntakeModal({ booking, storage, onClose, onSuccess }: IntakeModalProps)
               </div>
 
               <div className="bg-slate-50 rounded-xl p-4 border border-slate-200 space-y-2.5">
-                <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
-                  Student booked:
+                <div className="flex items-center justify-between">
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                    Student booked:
+                  </div>
+                  {isMultiBatch && (
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-water-100 text-water-800 border border-water-200">
+                      Batch {booking.batchNumber || 1} of {booking.totalBatches}
+                    </span>
+                  )}
                 </div>
                 <div className="space-y-1.5 text-sm text-slate-700 pl-1">
-                  <div className="flex justify-between">
-                    <span>&bull; T-shirts / Shirts:</span>
-                    <span className="font-bold text-slate-900">{shirts}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span>&bull; Pants / Track:</span>
-                    <span className="font-bold text-slate-900">{pants}</span>
-                  </div>
+                  {has5Cat ? (
+                    <>
+                      <div className="flex justify-between text-xs">
+                        <span>&bull; T-Shirts:</span>
+                        <span className="font-bold text-slate-900">{itemCount?.tshirtCount ?? 0}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>&bull; Shirts:</span>
+                        <span className="font-bold text-slate-900">{itemCount?.shirtCount ?? 0}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>&bull; Pants:</span>
+                        <span className="font-bold text-slate-900">{itemCount?.pantsCount ?? 0}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>&bull; Jeans:</span>
+                        <span className="font-bold text-slate-900">{itemCount?.jeansCount ?? 0}</span>
+                      </div>
+                      <div className="flex justify-between text-xs">
+                        <span>&bull; Shorts:</span>
+                        <span className="font-bold text-slate-900">{itemCount?.shortsCount ?? 0}</span>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex justify-between">
+                        <span>&bull; T-shirts / Shirts:</span>
+                        <span className="font-bold text-slate-900">{shirts}</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span>&bull; Pants / Track:</span>
+                        <span className="font-bold text-slate-900">{pants}</span>
+                      </div>
+                    </>
+                  )}
                   <div className="flex justify-between pt-1 border-t border-slate-200">
                     <span className="font-semibold text-slate-800">Total:</span>
-                    <span className="font-bold text-water-700">{total} items</span>
+                    <span className="font-bold text-water-700">
+                      {total} items {weightGrams > 0 ? `(${weightGrams}g)` : ''}
+                    </span>
                   </div>
                 </div>
 
@@ -829,6 +909,167 @@ function IntakeSuccessModal({ order, onClose }: { order: LaundryOrderDetail; onC
   );
 }
 
+// ── Staff QR Lookup Modal ─────────────────────────────────────
+
+function StaffQrLookupModal({
+  onClose,
+  onSelectBooking,
+}: {
+  onClose: () => void;
+  onSelectBooking: (b: StaffBooking) => void;
+}) {
+  const [tokenInput, setTokenInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [lookupResult, setLookupResult] = useState<StaffQrLookupResponse | null>(null);
+
+  async function handleLookup(e: React.FormEvent) {
+    e.preventDefault();
+    const token = tokenInput.trim();
+    if (!token) return;
+
+    setIsLoading(true);
+    setError(null);
+    setLookupResult(null);
+
+    try {
+      const res = await api.qrLookup(token);
+      setLookupResult(res);
+      // Immediately clear token from input state so it is never retained
+      setTokenInput('');
+    } catch (err: any) {
+      // Safe, uniform error message without revealing resident existence
+      setError(err.message || 'No eligible bookings found for this QR token in your facility.');
+      setTokenInput('');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <motion.div
+        variants={modalBackdropVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        onClick={onClose}
+        className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm"
+      />
+      <motion.div
+        variants={modalDialogVariants}
+        initial="hidden"
+        animate="visible"
+        exit="exit"
+        className="relative z-10 bg-white rounded-2xl shadow-2xl w-full max-w-lg overflow-hidden border border-slate-200"
+      >
+        <div className="bg-gradient-to-r from-slate-800 to-slate-700 px-6 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-white">
+            <QrCode className="w-5 h-5 text-water-400" />
+            <h3 className="font-bold text-base">Staff Intake QR Lookup</h3>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-white transition-colors p-1">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+
+        <div className="p-6 space-y-4">
+          <p className="text-xs text-slate-500">
+            Enter the resident's QR token to retrieve their eligible intake bookings for your facility.
+          </p>
+
+          <form onSubmit={handleLookup} className="flex gap-2">
+            <input
+              type="text"
+              placeholder="Paste or enter resident QR token..."
+              value={tokenInput}
+              onChange={(e) => setTokenInput(e.target.value)}
+              disabled={isLoading}
+              className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-water-400 bg-slate-50"
+              autoFocus
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !tokenInput.trim()}
+              className="px-4 py-2 bg-water-700 text-white text-xs font-semibold rounded-lg hover:bg-water-800 disabled:opacity-50 transition-colors flex items-center gap-1.5"
+            >
+              {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Search className="w-4 h-4" />}
+              Look Up
+            </button>
+          </form>
+
+          {error && (
+            <div className="p-3 rounded-xl bg-amber-50 border border-amber-200 text-xs text-amber-800 flex items-start gap-2">
+              <AlertCircle className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {lookupResult && lookupResult.resident && lookupResult.bookings && (
+            <div className="space-y-3 pt-2 border-t border-slate-100">
+              <div className="p-3 rounded-xl bg-blue-50/70 border border-blue-200 flex items-center justify-between">
+                <div>
+                  <div className="font-bold text-sm text-slate-900">{lookupResult.resident.name}</div>
+                  <div className="text-xs text-slate-500">
+                    ID: {lookupResult.resident.studentId} &bull; {lookupResult.resident.department}
+                  </div>
+                </div>
+                <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-blue-100 text-blue-800">
+                  {lookupResult.eligibleBookingsCount ?? lookupResult.bookings.length} eligible
+                </span>
+              </div>
+
+              <div className="space-y-2 max-h-60 overflow-y-auto">
+                {lookupResult.bookings.map((b) => {
+                  const weightGrams = b.weightGrams ?? b.laundryOrder?.itemCount?.totalWeightGrams ?? 0;
+                  const isMulti = (b.totalBatches ?? 1) > 1;
+                  return (
+                    <div
+                      key={b.id}
+                      className="p-3 rounded-xl border border-slate-200 hover:border-slate-300 bg-white flex items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-xs font-bold text-slate-800">
+                            {b.slot.startTime} – {b.slot.endTime}
+                          </span>
+                          {isMulti && (
+                            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-water-100 text-water-800">
+                              Batch {b.batchNumber} of {b.totalBatches}
+                            </span>
+                          )}
+                          {weightGrams > 0 && (
+                            <span className="text-[10px] font-medium text-slate-500">
+                              {weightGrams}g
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">
+                          Date: {new Date(b.slot.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          onSelectBooking(b);
+                          onClose();
+                        }}
+                        className="px-3 py-1.5 rounded-lg bg-water-700 text-white text-xs font-semibold hover:bg-water-800 transition-colors shadow-sm"
+                      >
+                        Start Intake
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
 // ── Booking Row ───────────────────────────────────────────────
 
 function BookingRow({
@@ -848,7 +1089,11 @@ function BookingRow({
   const isUnderReview = orderStatus === 'UNDER_REVIEW';
   const isResolved = orderStatus === 'RESOLVED';
   const effectiveStatus = orderStatus || booking.status;
-  const total = booking.laundryOrder?.itemCount?.totalCount;
+  const itemCount = booking.laundryOrder?.itemCount;
+  const total = itemCount?.totalCount;
+  const weightGrams = booking.weightGrams ?? itemCount?.totalWeightGrams ?? 0;
+  const has5Cat = itemCount?.shirtCount !== undefined || itemCount?.tshirtCount !== undefined;
+  const isMultiBatch = (booking.totalBatches ?? 1) > 1;
 
   return (
     <motion.div
@@ -862,8 +1107,30 @@ function BookingRow({
         <User className="w-4 h-4 text-water-600" />
       </div>
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-slate-800 text-sm truncate">{booking.student.name}</div>
+        <div className="flex items-center gap-1.5 flex-wrap">
+          <span className="font-semibold text-slate-800 text-sm truncate">{booking.student.name}</span>
+          {isMultiBatch && (
+            <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-water-100 text-water-800 border border-water-200">
+              Batch {booking.batchNumber || 1} of {booking.totalBatches}
+            </span>
+          )}
+        </div>
         <div className="text-xs text-slate-500">{booking.student.studentId} &middot; {booking.student.department}</div>
+        {/* 5-category breakdown subtext */}
+        {has5Cat ? (
+          <div className="text-[11px] text-slate-400 mt-0.5 truncate">
+            T-Shirts: <span className="font-medium text-slate-600">{itemCount?.tshirtCount ?? 0}</span> &bull;{' '}
+            Shirts: <span className="font-medium text-slate-600">{itemCount?.shirtCount ?? 0}</span> &bull;{' '}
+            Pants: <span className="font-medium text-slate-600">{itemCount?.pantsCount ?? 0}</span> &bull;{' '}
+            Jeans: <span className="font-medium text-slate-600">{itemCount?.jeansCount ?? 0}</span> &bull;{' '}
+            Shorts: <span className="font-medium text-slate-600">{itemCount?.shortsCount ?? 0}</span>
+          </div>
+        ) : itemCount ? (
+          <div className="text-[11px] text-slate-400 mt-0.5 truncate">
+            Shirts: <span className="font-medium text-slate-600">{itemCount.tShirtShirtCount}</span> &bull;{' '}
+            Pants: <span className="font-medium text-slate-600">{itemCount.pantsTrackCount}</span>
+          </div>
+        ) : null}
       </div>
 
       {/* Slot */}
@@ -872,10 +1139,14 @@ function BookingRow({
         <div className="text-[10px] text-slate-400">{new Date(booking.slot.date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</div>
       </div>
 
-      {/* Clothes count */}
-      <div className="hidden md:block text-center w-12">
-        <div className="text-sm font-bold text-slate-800">{total ?? '—'}</div>
-        <div className="text-[10px] text-slate-400">items</div>
+      {/* Clothes count & weight */}
+      <div className="hidden md:block text-center min-w-[70px]">
+        <div className="text-sm font-bold text-slate-800">{total ?? '—'} <span className="text-[10px] text-slate-400 font-normal">items</span></div>
+        {weightGrams > 0 && (
+          <div className="text-[10px] font-medium text-water-700 bg-water-50 px-1.5 py-0.5 rounded border border-water-100 inline-block mt-0.5">
+            {weightGrams}g
+          </div>
+        )}
       </div>
 
       {/* Storage (if in progress or completed) */}
@@ -956,6 +1227,7 @@ export const StaffDashboard: React.FC = () => {
   const [successOrder, setSuccessOrder] = useState<LaundryOrderDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [showSlots, setShowSlots] = useState(false);
+  const [showQrModal, setShowQrModal] = useState(false);
 
   // Phase 4: complete order state
   const [isCompleting, setIsCompleting] = useState<string | null>(null); // orderId being completed
@@ -1256,6 +1528,16 @@ export const StaffDashboard: React.FC = () => {
 
               <button
                 type="button"
+                onClick={() => setShowQrModal(true)}
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-water-700 text-white text-xs font-semibold hover:bg-water-800 transition-colors shadow-sm"
+                title="Scan or look up resident QR token"
+              >
+                <QrCode className="w-3.5 h-3.5" />
+                <span>QR Lookup</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => { fetchBookings(); fetchDashboard(); fetchStorage(); }}
                 className="p-1.5 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors"
                 title="Refresh"
@@ -1410,6 +1692,16 @@ export const StaffDashboard: React.FC = () => {
             key="success-modal"
             order={successOrder}
             onClose={() => setSuccessOrder(null)}
+          />
+        )}
+        {showQrModal && (
+          <StaffQrLookupModal
+            key="qr-lookup-modal"
+            onClose={() => setShowQrModal(false)}
+            onSelectBooking={(b) => {
+              setShowQrModal(false);
+              setIntakeBooking(b);
+            }}
           />
         )}
       </AnimatePresence>

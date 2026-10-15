@@ -208,10 +208,17 @@ export async function getStaffBookings(
             aiScan: true,
             itemCount: {
               select: {
+                shirtCount: true,
+                tshirtCount: true,
+                pantsCount: true,
+                jeansCount: true,
+                shortsCount: true,
+                totalWeightGrams: true,
                 tShirtShirtCount: true,
                 pantsTrackCount: true,
                 totalCount: true,
                 isLocked: true,
+                lockedAt: true,
               },
             },
             rackShelf: {
@@ -240,6 +247,10 @@ export async function getStaffBookings(
         status: b.status,
         bookedAt: b.bookedAt,
         cancelledAt: b.cancelledAt,
+        batchGroupId: b.batchGroupId,
+        batchNumber: b.batchNumber,
+        totalBatches: b.totalBatches,
+        weightGrams: b.weightGrams,
         student: b.student,
         slot: b.slot,
         aiScan: b.aiScan || b.laundryOrder?.aiScan || null,
@@ -912,3 +923,146 @@ export async function getOrderDetail(
     next(error);
   }
 }
+
+// ────────────────────────────────────────────────
+// POST /api/staff/qr-lookup
+// Staff submits a resident's QR token in the body to safely locate pending intake bookings.
+// Security & Privacy Safeguards:
+// 1. Scoped strictly to the staff member's assigned facility & environment.
+// 2. Never returns the QR token in the response.
+// 3. Never logs the submitted QR token.
+// 4. Returns a generic safe 404 response for unknown or out-of-scope tokens without leaking existence.
+// 5. Returns only bookings eligible for intake (status = BOOKED, order status = BOOKED/null).
+// ────────────────────────────────────────────────
+export async function staffQrLookup(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user || req.user.role !== Role.STAFF) {
+      return res.status(403).json({ success: false, message: 'Staff access only' });
+    }
+
+    const staff = await getStaffProfile(req.user.userId);
+    if (!staff) {
+      return res.status(404).json({ success: false, message: 'Staff profile not found' });
+    }
+
+    const { qrToken } = req.body;
+    if (!qrToken || typeof qrToken !== 'string' || qrToken.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'A valid QR token is required.',
+      });
+    }
+
+    const token = qrToken.trim();
+
+    // Query student strictly by permanentQrToken
+    const student = await prisma.studentProfile.findUnique({
+      where: { permanentQrToken: token },
+      include: {
+        hostel: {
+          select: {
+            id: true,
+            environment: true,
+          },
+        },
+      },
+    });
+
+    // Uniform safe generic response: prevents cross-hostel resident probing
+    if (
+      !student ||
+      student.hostelId !== staff.hostelId ||
+      student.hostel.environment !== staff.hostel.environment
+    ) {
+      return res.status(404).json({
+        success: false,
+        message: 'No eligible bookings found for this QR token in your facility.',
+      });
+    }
+
+    // Query only bookings eligible for staff intake in staff's facility
+    const eligibleBookings = await prisma.slotBooking.findMany({
+      where: {
+        studentId: student.id,
+        slot: { hostelId: staff.hostelId },
+        status: 'BOOKED',
+        OR: [
+          { laundryOrder: null },
+          { laundryOrder: { status: 'BOOKED' } },
+        ],
+      },
+      include: {
+        slot: {
+          select: {
+            id: true,
+            date: true,
+            startTime: true,
+            endTime: true,
+            hostelId: true,
+          },
+        },
+        aiScan: true,
+        laundryOrder: {
+          include: {
+            itemCount: true,
+            aiScan: true,
+          },
+        },
+      },
+      orderBy: [{ slot: { date: 'asc' } }, { slot: { startTime: 'asc' } }],
+    });
+
+    return res.status(200).json({
+      success: true,
+      resident: {
+        id: student.id,
+        name: student.name,
+        studentId: student.studentId,
+        department: student.department,
+        hostelId: student.hostelId,
+      },
+      eligibleBookingsCount: eligibleBookings.length,
+      bookings: eligibleBookings.map((b) => ({
+        id: b.id,
+        status: b.status,
+        bookedAt: b.bookedAt,
+        batchGroupId: b.batchGroupId,
+        batchNumber: b.batchNumber,
+        totalBatches: b.totalBatches,
+        weightGrams: b.weightGrams,
+        student: {
+          id: student.id,
+          name: student.name,
+          studentId: student.studentId,
+          department: student.department,
+          hostelId: student.hostelId,
+        },
+        slot: {
+          id: b.slot.id,
+          date: b.slot.date,
+          startTime: b.slot.startTime,
+          endTime: b.slot.endTime,
+          hostelId: b.slot.hostelId,
+        },
+        aiScan: b.aiScan || b.laundryOrder?.aiScan || null,
+        laundryOrder: b.laundryOrder
+          ? {
+              id: b.laundryOrder.id,
+              status: b.laundryOrder.status,
+              startedAt: b.laundryOrder.startedAt ? b.laundryOrder.startedAt.toISOString() : null,
+              itemCount: b.laundryOrder.itemCount,
+              rackShelf: null,
+              staff: null,
+            }
+          : null,
+      })),
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+

@@ -5,6 +5,7 @@ export interface Hostel {
   name: string;
   code: string;
   description?: string;
+  environment?: 'COLLEGE' | 'PG_SHARED';
 }
 
 export interface User {
@@ -18,6 +19,7 @@ export interface User {
   department?: string | null;
   admissionYear?: number | null;
   staffId?: string | null;
+  environment?: 'COLLEGE' | 'PG_SHARED';
 }
 
 export interface AuthState {
@@ -54,17 +56,53 @@ export interface LaundrySlot {
 }
 
 export interface ItemCount {
+  shirtCount?: number;
+  tshirtCount?: number;
+  pantsCount?: number;
+  jeansCount?: number;
+  shortsCount?: number;
+  totalWeightGrams?: number;
   tShirtShirtCount: number;
   pantsTrackCount: number;
   totalCount: number;
+  isLocked?: boolean;
+}
+
+export interface ActiveBookingBatch {
+  id: string;
+  status: string;
+  bookedAt: string;
+  batchGroupId?: string | null;
+  batchNumber?: number;
+  totalBatches?: number;
+  weightGrams?: number | null;
+  orderId?: string | null;
+  orderStatus: string | null;
+  canCancel: boolean;
+  slot: {
+    id: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  };
+  itemCount: ItemCount | null;
+  complaint?: ComplaintInfo | null;
+  aiScan?: AiScanData | null;
 }
 
 export interface ActiveBooking {
   id: string;
   status: string;
   orderStatus: string | null;
+  orderId?: string | null;
   canCancel: boolean;
   bookedAt: string;
+  batchGroupId?: string | null;
+  batchNumber?: number;
+  totalBatches?: number;
+  weightGrams?: number | null;
+  isMultiBatch?: boolean;
+  batches?: ActiveBookingBatch[];
   slot: {
     id: string;
     date: string;
@@ -146,10 +184,27 @@ export interface StaffBooking {
   status: string;
   bookedAt: string;
   cancelledAt: string | null;
+  batchGroupId?: string | null;
+  batchNumber?: number;
+  totalBatches?: number;
+  weightGrams?: number | null;
   student: StaffBookingStudent;
   slot: StaffBookingSlot;
   laundryOrder: StaffOrderSummary | null;
   aiScan?: AiScanData | null;
+}
+
+export interface StaffQrLookupResponse {
+  success: boolean;
+  message?: string;
+  resident?: {
+    id: string;
+    name: string;
+    studentId: string;
+    department: string;
+  };
+  eligibleBookingsCount?: number;
+  bookings?: StaffBooking[];
 }
 
 export interface RackShelfLocation {
@@ -493,5 +548,189 @@ export interface AiScanResponse {
   disclaimer: string;
 }
 
+// ── AI Clothing Detection (YOLO) Types ────────────────────────
 
+export interface ClothingBBox {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
 
+export interface ClothingDetection {
+  class: string;
+  classDisplay: string;
+  emoji: string;
+  confidence: number;
+  bbox: ClothingBBox;
+}
+
+export interface ClothingScanSummary {
+  totalItems: number;
+  counts: Record<string, number>;
+  averageConfidence: number;
+}
+
+export interface AiClothingScanResult {
+  success: boolean;
+  scanId?: string | null;
+  isMock: boolean;
+  mockWarning: string | null;
+  detections: ClothingDetection[];
+  summary: ClothingScanSummary;
+  annotatedImage: string | null;
+  message?: string;
+}
+
+export interface AiServiceHealth {
+  status: string;
+  mode: string;
+  modelLoaded: boolean;
+  classes: string[];
+  threshold: number;
+}
+
+// ── Phase 3: Weight Calculation, Weekly Allowance & Batch Planning ──
+
+export interface ApprovedGarmentCounts {
+  shirt: number;
+  tshirt: number;
+  pants: number;
+  jeans: number;
+  shorts: number;
+}
+
+export interface WeightCalculationResult {
+  totalApprovedWeightGrams: number;
+  isConfirmed: boolean;
+  requiresReview: boolean;
+  approvedCounts: Record<string, number>;
+  breakdown: Record<
+    string,
+    { count: number; unitWeightGrams: number; subtotalGrams: number }
+  >;
+  unresolvedItems: Array<{
+    className: string;
+    count: number;
+    reason: string;
+  }>;
+}
+
+export interface BatchPlanItem {
+  batchNumber: number;
+  totalBatches: number;
+  weightGrams: number;
+  maxLimitGrams: number;
+  itemCount: number;
+  garmentCounts: Record<string, number>;
+}
+
+export interface BatchPlanResult {
+  totalWeightGrams: number;
+  totalBatches: number;
+  batches: BatchPlanItem[];
+  isConfirmed: boolean;
+  unbatchableGarments?: Array<{ className: string; weightGrams: number }>;
+}
+
+export interface ScheduledWeekInfo {
+  weekStartDateStr: string;
+  weekEndDateStr: string;
+  weekStartIstIso: string;
+  weekEndIstIso: string;
+  weekLabel: string;
+  slotDateStr: string;
+}
+
+export interface WeeklyAllowanceStatus {
+  scheduledWeek: ScheduledWeekInfo;
+  maxWeeklyAllowanceGrams: number;
+  committedWeightGrams: number;
+  remainingAllowanceGrams: number;
+  proposedWeightGrams: number;
+  projectedTotalWeightGrams: number;
+  fitsWithinAllowance: boolean;
+  isReliable: boolean;
+  hasLegacyUnweightedBookings: boolean;
+  legacyUnweightedBookingCount: number;
+  warning?: string;
+  activeBookingCount: number;
+}
+
+export interface RecommendedSlot {
+  slotId: string;
+  hostelId: string;
+  hostelName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+  capacity: number;
+  availableSpots: number;
+  scheduledWeekLabel: string;
+}
+
+export interface BatchRecommendation {
+  batch: BatchPlanItem;
+  recommendedSlots: RecommendedSlot[];
+  hasAvailableSlots: boolean;
+}
+
+export interface SmartPlanningResponse {
+  success: boolean;
+  planningStatus: 'CONFIRMED' | 'REQUIRES_REVIEW' | 'EXCEEDS_ALLOWANCE' | 'NO_SLOTS' | 'UNBATCHABLE' | 'EMPTY';
+  weightCalculation: WeightCalculationResult;
+  batchPlan?: BatchPlanResult;
+  weeklyAllowance: WeeklyAllowanceStatus;
+  batchRecommendations: BatchRecommendation[];
+  warnings: string[];
+  isActionable: boolean;
+  facility: {
+    id: string;
+    name: string;
+    environment: string;
+  };
+}
+
+export interface BatchSlotAssignment {
+  batchNumber: number;
+  slotId: string;
+}
+
+export interface MultiBatchBookingRequest {
+  garmentCounts: Record<string, number>;
+  batchSlotAssignments: BatchSlotAssignment[];
+  idempotencyKey: string;
+}
+
+export interface BookedBatchItem {
+  id: string;
+  batchNumber: number;
+  totalBatches: number;
+  weightGrams: number;
+  status: string;
+  slot: {
+    id: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  };
+  garmentCounts: Record<string, number>;
+}
+
+export interface MultiBatchBookingResponse {
+  success: boolean;
+  isIdempotentReplay: boolean;
+  batchGroupId: string;
+  totalBatches: number;
+  totalWeightGrams: number;
+  bookings: BookedBatchItem[];
+  message: string;
+}
+
+export interface CancelBatchGroupResponse {
+  success: boolean;
+  message: string;
+  batchGroupId: string;
+  cancelledBatches: number;
+  totalBatches: number;
+}

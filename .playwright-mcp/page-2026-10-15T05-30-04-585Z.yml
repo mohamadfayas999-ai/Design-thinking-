@@ -1,0 +1,29 @@
+- generic [ref=f10e3]:
+  - banner [ref=f10e4]:
+    - generic [ref=f10e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f10e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f10e11]:
+          - generic [ref=f10e12]:
+            - generic [ref=f10e13]: WASHWISE
+            - generic [ref=f10e14]: REC
+          - paragraph [ref=f10e15]: Campus Laundry Management
+      - generic [ref=f10e16]:
+        - button "Toggle Sound Effects" [ref=f10e17] [cursor=pointer]:
+          - generic [ref=f10e22]: Sound ON
+        - generic [ref=f10e23]:
+          - generic [ref=f10e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=f10e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=f10e27]:
+    - paragraph [ref=f10e33]: Authenticating session...
+  - contentinfo [ref=f10e34]:
+    - generic [ref=f10e35]:
+      - generic [ref=f10e36]:
+        - generic [ref=f10e37]: WASHWISE
+        - generic [ref=f10e38]: "-"
+        - generic [ref=f10e39]: Rajalakshmi Engineering College
+      - generic [ref=f10e40]:
+        - generic [ref=f10e41]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f10e42]: "-"
+        - generic [ref=f10e43]: Campus Laundry Services

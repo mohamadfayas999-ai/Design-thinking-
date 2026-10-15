@@ -13,6 +13,10 @@ import {
   performAiLaundryScan,
   getStudentAiScan,
 } from '../controllers/aiScan.controller.js';
+import {
+  startPgSelfServiceWash,
+  completePgSelfServiceWash,
+} from '../controllers/pgSelfService.controller.js';
 
 const router = Router();
 
@@ -36,6 +40,10 @@ router.get('/history', getStudentHistory);
 
 // Complaint status list
 router.get('/complaints', getStudentComplaints);
+
+// PG & Shared Living Self-Service Laundry Endpoints
+router.post('/pg/orders/:id/start-wash', startPgSelfServiceWash);
+router.post('/pg/orders/:id/complete-wash', completePgSelfServiceWash);
 
 // Optional AI Laundry Scanner
 router.post('/ai-laundry-scan', performAiLaundryScan);

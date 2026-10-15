@@ -17,20 +17,41 @@ export async function getAdminSummary(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId } = req.query;
-    const hostelFilter = hostelId && typeof hostelId === 'string' && hostelId !== 'ALL'
-      ? hostelId
-      : undefined;
+
+    let verifiedHostelId: string | undefined = undefined;
+    if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
+    }
 
     const todayStr = new Date().toISOString().split('T')[0];
     const now = new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 
-    // 1. Core Counts
-    const studentWhere = hostelFilter ? { hostelId: hostelFilter } : {};
-    const staffWhere = hostelFilter ? { hostelId: hostelFilter } : {};
-    const orderWhere = hostelFilter ? { hostelId: hostelFilter } : {};
-    const storageWhere = hostelFilter ? { hostelId: hostelFilter, isActive: true } : { isActive: true };
+    // 1. Core Counts scoped to Admin Environment
+    const studentWhere = verifiedHostelId
+      ? { hostelId: verifiedHostelId, hostel: { environment: env } }
+      : { hostel: { environment: env } };
+    const staffWhere = verifiedHostelId
+      ? { hostelId: verifiedHostelId, hostel: { environment: env } }
+      : { hostel: { environment: env } };
+    const orderWhere = verifiedHostelId
+      ? { hostelId: verifiedHostelId, hostel: { environment: env } }
+      : { hostel: { environment: env } };
+    const storageWhere = verifiedHostelId
+      ? { hostelId: verifiedHostelId, isActive: true, hostel: { environment: env } }
+      : { isActive: true, hostel: { environment: env } };
 
     const [
       totalStudents,
@@ -51,7 +72,8 @@ export async function getAdminSummary(
         where: {
           slot: {
             date: todayStr,
-            ...(hostelFilter ? { hostelId: hostelFilter } : {}),
+            hostel: { environment: env },
+            ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
           },
           status: 'BOOKED',
         },
@@ -77,13 +99,19 @@ export async function getAdminSummary(
       prisma.complaint.count({
         where: {
           status: ComplaintStatus.UNDER_REVIEW,
-          ...(hostelFilter ? { student: { hostelId: hostelFilter } } : {}),
+          student: {
+            hostel: { environment: env },
+            ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+          },
         },
       }),
       prisma.complaint.count({
         where: {
           status: ComplaintStatus.RESOLVED,
-          ...(hostelFilter ? { student: { hostelId: hostelFilter } } : {}),
+          student: {
+            hostel: { environment: env },
+            ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+          },
         },
       }),
       prisma.rackShelfLocation.count({ where: storageWhere }),
@@ -98,13 +126,14 @@ export async function getAdminSummary(
         },
       }),
       prisma.hostel.findMany({
+        where: { environment: env },
         orderBy: { name: 'asc' },
       }),
     ]);
 
     // 2. Hostel-wise Breakdown
-    const targetHostels = hostelFilter
-      ? allHostels.filter((h) => h.id === hostelFilter)
+    const targetHostels = verifiedHostelId
+      ? allHostels.filter((h) => h.id === verifiedHostelId)
       : allHostels;
 
     const hostelSummaries = await Promise.all(
@@ -171,11 +200,13 @@ export async function getAdminSummary(
       })
     );
 
-    // 3. Demand Insights (transparent descriptive analytics from real database data)
-    // Find busiest hostel
+    // 3. Demand Insights scoped to Admin Environment
     let busiestHostel = 'N/A';
     const ordersByHostel = await prisma.laundryOrder.groupBy({
       by: ['hostelId'],
+      where: {
+        hostel: { environment: env },
+      },
       _count: { id: true },
       orderBy: { _count: { id: 'desc' } },
       take: 1,
@@ -185,9 +216,12 @@ export async function getAdminSummary(
       if (bh) busiestHostel = bh.name;
     }
 
-    // Find peak slot time across all bookings
+    // Find peak slot time across all bookings in this environment
     let peakSlotTime = '02:00 PM – 03:00 PM';
     const allBookingsWithSlots = await prisma.slotBooking.findMany({
+      where: {
+        slot: { hostel: { environment: env } },
+      },
       select: {
         slot: {
           select: { startTime: true, endTime: true },
@@ -212,14 +246,17 @@ export async function getAdminSummary(
       }
     }
 
-    // Average clothes count across orders
+    // Average clothes count across orders in this environment
     const itemCountAgg = await prisma.itemCount.aggregate({
+      where: {
+        laundryOrder: { hostel: { environment: env } },
+      },
       _avg: { totalCount: true },
       _count: { id: true },
     });
     const avgClothes = itemCountAgg._avg.totalCount ? Math.round(itemCountAgg._avg.totalCount) : 0;
 
-    // 7-day usage trends
+    // 7-day usage trends in this environment
     const recent7DaysTrends: { date: string; count: number }[] = [];
     for (let i = 6; i >= 0; i--) {
       const d = new Date();
@@ -229,7 +266,8 @@ export async function getAdminSummary(
         where: {
           slot: {
             date: dateKey,
-            ...(hostelFilter ? { hostelId: hostelFilter } : {}),
+            hostel: { environment: env },
+            ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
           },
         },
       });
@@ -261,7 +299,12 @@ export async function getAdminSummary(
       insights: {
         busiestHostel,
         peakSlotTime,
-        totalOrdersAllTime: await prisma.laundryOrder.count(hostelFilter ? { where: { hostelId: hostelFilter } } : undefined),
+        totalOrdersAllTime: await prisma.laundryOrder.count({
+          where: {
+            hostel: { environment: env },
+            ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+          },
+        }),
         avgClothesPerOrder: avgClothes,
         recent7DaysTrends,
       },
@@ -285,13 +328,28 @@ export async function getAdminOrders(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId, status, dateRange, search } = req.query;
 
-    const where: any = {};
-
+    let verifiedHostelId: string | undefined = undefined;
     if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.hostelId = hostelId;
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
     }
+
+    const where: any = {
+      hostel: { environment: env },
+      ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+    };
 
     if (status && typeof status === 'string' && status !== 'ALL') {
       where.status = status;
@@ -431,16 +489,33 @@ export async function getAdminComplaints(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId, status } = req.query;
 
-    const where: any = {};
+    let verifiedHostelId: string | undefined = undefined;
+    if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
+    }
+
+    const where: any = {
+      student: {
+        hostel: { environment: env },
+        ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+      },
+    };
 
     if (status && typeof status === 'string' && status !== 'ALL') {
       where.status = status;
-    }
-
-    if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.student = { hostelId };
     }
 
     const complaints = await prisma.complaint.findMany({
@@ -517,17 +592,29 @@ export async function resolveComplaint(
       });
     }
 
+    const env = req.user.environment;
     const { id: complaintId } = req.params;
 
     const complaint = await prisma.complaint.findUnique({
       where: { id: complaintId },
-      include: { laundryOrder: true },
+      include: {
+        laundryOrder: {
+          include: { hostel: true },
+        },
+      },
     });
 
     if (!complaint) {
       return res.status(404).json({
         success: false,
         message: 'Complaint not found.',
+      });
+    }
+
+    if (complaint.laundryOrder?.hostel?.environment !== env) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: complaint belongs to another environment.',
       });
     }
 
@@ -623,11 +710,29 @@ export async function getAdminStorage(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId } = req.query;
-    const where: any = { isActive: true };
+
+    let verifiedHostelId: string | undefined = undefined;
     if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.hostelId = hostelId;
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
     }
+
+    const where: any = {
+      isActive: true,
+      hostel: { environment: env },
+      ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+    };
 
     const locations = await prisma.rackShelfLocation.findMany({
       where,
@@ -704,16 +809,31 @@ export async function getAdminTodaySlots(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId } = req.query;
     const todayStr = new Date().toISOString().split('T')[0];
+
+    let verifiedHostelId: string | undefined = undefined;
+    if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
+    }
 
     const where: any = {
       date: todayStr,
       isActive: true,
+      hostel: { environment: env },
+      ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
     };
-    if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.hostelId = hostelId;
-    }
 
     const slots = await prisma.laundrySlot.findMany({
       where,
@@ -771,18 +891,39 @@ export async function getAdminStudents(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId, search } = req.query;
 
-    const where: any = {};
+    let verifiedHostelId: string | undefined = undefined;
     if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.hostelId = hostelId;
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
     }
+
+    const where: any = {
+      hostel: { environment: env },
+      ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+    };
+
     if (search && typeof search === 'string' && search.trim().length > 0) {
       const q = search.trim();
-      where.OR = [
-        { name: { contains: q } },
-        { studentId: { contains: q } },
-        { user: { email: { contains: q } } },
+      where.AND = [
+        {
+          OR: [
+            { name: { contains: q } },
+            { studentId: { contains: q } },
+            { user: { email: { contains: q } } },
+          ],
+        },
       ];
     }
 
@@ -800,6 +941,7 @@ export async function getAdminStudents(
             id: true,
             name: true,
             code: true,
+            environment: true,
           },
         },
       },
@@ -866,11 +1008,28 @@ export async function getAdminStaff(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { hostelId } = req.query;
-    const where: any = {};
+
+    let verifiedHostelId: string | undefined = undefined;
     if (hostelId && typeof hostelId === 'string' && hostelId !== 'ALL') {
-      where.hostelId = hostelId;
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== env) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: requested facility belongs to another environment or does not exist.',
+        });
+      }
+      verifiedHostelId = targetHostel.id;
     }
+
+    const where: any = {
+      hostel: { environment: env },
+      ...(verifiedHostelId ? { hostelId: verifiedHostelId } : {}),
+    };
 
     const staffMembers = await prisma.staffProfile.findMany({
       where,
@@ -886,6 +1045,7 @@ export async function getAdminStaff(
             id: true,
             name: true,
             code: true,
+            environment: true,
           },
         },
       },
@@ -923,9 +1083,14 @@ export async function getAdminAuditLogs(
       return res.status(403).json({ success: false, message: 'Admin access only.' });
     }
 
+    const env = req.user.environment;
     const { limit = '50', entityType, action } = req.query;
 
-    const where: any = {};
+    const where: any = {
+      actorUser: {
+        environment: env,
+      },
+    };
     if (entityType && typeof entityType === 'string') {
       where.entityType = entityType;
     }

@@ -20,6 +20,12 @@ import {
   AdminStudent,
   AdminStaff,
   AdminAuditLog,
+  AiClothingScanResult,
+  AiServiceHealth,
+  SmartPlanningResponse,
+  MultiBatchBookingRequest,
+  MultiBatchBookingResponse,
+  CancelBatchGroupResponse,
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || '/api';
@@ -49,10 +55,32 @@ async function request<T>(endpoint: string, options: RequestInit = {}): Promise<
     headers,
   });
 
-  const data = await response.json();
+  const contentType = response.headers.get('content-type') || '';
+  let data: any = null;
+
+  if (contentType.includes('application/json')) {
+    try {
+      data = await response.json();
+    } catch {
+      data = null;
+    }
+  }
 
   if (!response.ok) {
-    throw new ApiError(data.message || 'Request failed', response.status);
+    const errorMsg =
+      data?.message ||
+      data?.error ||
+      (response.status === 404
+        ? `API endpoint ${endpoint} was not found on the server (404).`
+        : `Request failed with status ${response.status}`);
+    throw new ApiError(errorMsg, response.status);
+  }
+
+  if (!data) {
+    throw new ApiError(
+      `Invalid server response format for ${endpoint}. Expected JSON but received ${contentType || 'non-JSON'}.`,
+      response.status
+    );
   }
 
   return data;
@@ -127,6 +155,29 @@ export const api = {
       body: JSON.stringify(data),
     }),
 
+  // Plan smart batches and get advisory slot recommendations (Phase 3)
+  planBatch: (data: {
+    garmentCounts: Record<string, number>;
+    targetDate?: string;
+  }) =>
+    request<SmartPlanningResponse>('/slots/plan-batch', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Book multiple batches atomically (Phase 4)
+  bookMultiBatch: (data: MultiBatchBookingRequest) =>
+    request<MultiBatchBookingResponse>('/slots/book-multi-batch', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  // Cancel an entire batch group atomically (Phase 4)
+  cancelBatchGroup: (batchGroupId: string) =>
+    request<CancelBatchGroupResponse>(`/slots/cancel-batch-group/${batchGroupId}`, {
+      method: 'DELETE',
+    }),
+
   // Cancel a booking
   cancelBooking: (bookingId: string) =>
     request<{ success: boolean; message: string }>(`/slots/cancel/${bookingId}`, {
@@ -156,6 +207,13 @@ export const api = {
     request<{ success: boolean; booking: import('../types').StaffBooking }>(
       `/staff/bookings/${bookingId}`
     ),
+
+  // Secure Staff QR lookup (token submitted safely in body)
+  qrLookup: (qrToken: string) =>
+    request<import('../types').StaffQrLookupResponse>('/staff/qr-lookup', {
+      method: 'POST',
+      body: JSON.stringify({ qrToken }),
+    }),
 
   // Intake (atomic)
   performIntake: (
@@ -247,6 +305,20 @@ export const api = {
   // Get student complaints
   getStudentComplaints: () =>
     request<{ success: boolean; complaints: any[] }>('/student/complaints'),
+
+  // PG Self-Service: Start wash cycle on machine
+  startPgSelfServiceWash: (orderId: string) =>
+    request<{ success: boolean; message: string; order: any }>(
+      `/student/pg/orders/${orderId}/start-wash`,
+      { method: 'POST' }
+    ),
+
+  // PG Self-Service: Mark wash cycle finished
+  completePgSelfServiceWash: (orderId: string) =>
+    request<{ success: boolean; message: string; order: any }>(
+      `/student/pg/orders/${orderId}/complete-wash`,
+      { method: 'POST' }
+    ),
 
   // ── Phase 5: Admin Portal & Operational Analytics ───────────────────────
 
@@ -363,4 +435,55 @@ export const api = {
         body: JSON.stringify(confirmation),
       }
     ),
+
+  // ── YOLOv8 AI Laundry Cloth Detection ─────────────
+  scanLaundryClothYolo: async (imageFile: File): Promise<AiClothingScanResult> => {
+    const token = localStorage.getItem('washwise_token');
+    const formData = new FormData();
+    formData.append('image', imageFile);
+
+    const headers: Record<string, string> = {};
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const response = await fetch(`${API_BASE}/ai/laundry-scan`, {
+      method: 'POST',
+      headers,
+      body: formData,
+    });
+
+    const contentType = response.headers.get('content-type') || '';
+    let data: any = null;
+
+    if (contentType.includes('application/json')) {
+      try {
+        data = await response.json();
+      } catch {
+        data = null;
+      }
+    }
+
+    if (!response.ok || !data) {
+      let errorMessage = data?.message || data?.error;
+      if (!errorMessage) {
+        if (response.status === 404) {
+          errorMessage =
+            'AI cloth scanner endpoint not found on server (404). Please ensure the backend is deployed.';
+        } else if (response.status === 502 || response.status === 503 || response.status === 504) {
+          errorMessage = 'AI detection service is currently unavailable or offline.';
+        } else if (response.status === 401 || response.status === 403) {
+          errorMessage = 'Authentication error. Please log in as a student.';
+        } else {
+          errorMessage = `AI laundry scan request failed with HTTP ${response.status}.`;
+        }
+      }
+      throw new ApiError(errorMessage, response.status);
+    }
+
+    return data;
+  },
+
+  getAiHealthStatus: () =>
+    request<{ success: boolean; aiService: AiServiceHealth | null; message?: string }>('/ai/status'),
 };

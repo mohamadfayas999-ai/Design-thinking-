@@ -1,0 +1,83 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=e11]:
+          - generic [ref=e12]:
+            - generic [ref=e13]: WASHWISE
+            - generic [ref=e14]: REC
+          - paragraph [ref=e15]: Campus Laundry Management
+      - generic [ref=e16]:
+        - button "Toggle Sound Effects" [ref=e17] [cursor=pointer]:
+          - generic [ref=e22]: Sound ON
+        - generic [ref=e23]:
+          - generic [ref=e228]:
+            - generic [ref=e229]: User 1
+            - generic [ref=e230]: STUDENT (Oak House)
+          - generic [ref=e231]: STUDENT
+          - button "Logout" [ref=e238] [cursor=pointer]
+  - main [ref=e27]:
+    - generic [ref=e243]:
+      - generic [ref=e249]:
+        - generic [ref=e250]:
+          - generic [ref=e251]:
+            - generic [ref=e252]: Student
+            - generic [ref=e254]: Oak House Hostel
+          - heading "Good morning, User" [level=1] [ref=e255]
+          - paragraph [ref=e256]: Manage your campus laundry bookings.
+          - generic [ref=e257]:
+            - generic [ref=e258]:
+              - generic [ref=e259]: Student ID
+              - text: RES-OAK-001
+            - generic [ref=e260]:
+              - generic [ref=e261]: Dept
+              - generic [ref=e262]: PG Resident · 2024
+        - button "Sign Out" [ref=e263] [cursor=pointer]
+      - generic [ref=e269]:
+        - generic [ref=e271]:
+          - generic [ref=e280]:
+            - heading "Permanent ID QR" [level=3] [ref=e281]
+            - paragraph [ref=e282]: Display-only digital identity
+          - paragraph [ref=e288]: Loading QR...
+          - paragraph [ref=e292]: This QR permanently identifies you. It is display-only and cannot be scanned.
+        - generic [ref=e293]:
+          - generic [ref=e295]:
+            - heading "Monthly Usage" [level=3] [ref=e296]
+            - button "Refresh dashboard" [ref=e297] [cursor=pointer]
+          - generic [ref=e309]:
+            - generic [ref=e314]:
+              - generic [ref=e315]:
+                - generic [ref=e316]: AI Laundry Cloth Scanner
+                - generic [ref=e317]: YOLOv8
+              - paragraph [ref=e318]: Snap a photo of your clothes to automatically detect garments & counts.
+            - button "Launch Scanner" [ref=e319] [cursor=pointer]
+          - button [ref=e324] [cursor=pointer]:
+            - generic [ref=e331]:
+              - paragraph [ref=e332]: Laundry History
+              - paragraph [ref=e333]: View your past laundry submissions
+          - generic [ref=e336]:
+            - heading "Laundry Rules" [level=3] [ref=e337]
+            - generic [ref=e340]:
+              - generic [ref=e341]:
+                - paragraph [ref=e342]: 4 uses / month
+                - paragraph [ref=e343]: Calendar month limit
+              - generic [ref=e344]:
+                - paragraph [ref=e345]: Max 20 clothes
+                - paragraph [ref=e346]: Per submission
+              - generic [ref=e347]:
+                - paragraph [ref=e348]: T-shirt / Shirt
+                - paragraph [ref=e349]: Category 1
+              - generic [ref=e350]:
+                - paragraph [ref=e351]: Pants / Track
+                - paragraph [ref=e352]: Category 2
+  - contentinfo [ref=e124]:
+    - generic [ref=e125]:
+      - generic [ref=e126]:
+        - generic [ref=e127]: WASHWISE
+        - generic [ref=e128]: "-"
+        - generic [ref=e129]: Rajalakshmi Engineering College
+      - generic [ref=e130]:
+        - generic [ref=e131]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=e132]: "-"
+        - generic [ref=e133]: Campus Laundry Services

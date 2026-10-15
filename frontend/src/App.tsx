@@ -78,6 +78,7 @@ export const App: React.FC = () => {
                     {/* Public */}
                     <Route path="/" element={<LandingPage />} />
                     <Route path="/student/login" element={<StudentLoginPage />} />
+                    <Route path="/pg/login" element={<Navigate to="/student/login?portal=pg" replace />} />
                     <Route path="/staff/login" element={<StaffLoginPage />} />
                     <Route path="/admin/login" element={<AdminLoginPage />} />
 

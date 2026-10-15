@@ -1,0 +1,1248 @@
+- generic [ref=f10e3]:
+  - banner [ref=f10e4]:
+    - generic [ref=f10e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f10e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f10e11]:
+          - generic [ref=f10e12]:
+            - generic [ref=f10e13]: WASHWISE
+            - generic [ref=f10e14]: REC
+          - paragraph [ref=f10e15]: Campus Laundry Management
+      - generic [ref=f10e16]:
+        - button "Toggle Sound Effects" [ref=f10e17] [cursor=pointer]:
+          - generic [ref=f10e22]: Sound ON
+        - generic [ref=f10e23]:
+          - generic [ref=f10e44]:
+            - generic [ref=f10e45]: User 1
+            - generic [ref=f10e46]: STUDENT (Oak House)
+          - generic [ref=f10e47]: STUDENT
+          - button "Logout" [ref=f10e54] [cursor=pointer]
+  - main [ref=f10e27]:
+    - generic [ref=f10e59]:
+      - generic [ref=f10e60]:
+        - button "Back to Dashboard" [ref=f10e61] [cursor=pointer]
+        - heading "Book Laundry" [level=1] [ref=f10e64]
+        - paragraph [ref=f10e65]: Complete all 3 steps to confirm your booking.
+      - generic [ref=f10e66]:
+        - generic [ref=f10e67]:
+          - generic [ref=f10e68]: "1"
+          - generic [ref=f10e69]: Select Slot
+        - generic [ref=f10e71]:
+          - generic [ref=f10e72]: "2"
+          - generic [ref=f10e73]: Clothes Count
+        - generic [ref=f10e75]:
+          - generic [ref=f10e76]: "3"
+          - generic [ref=f10e77]: Review
+      - generic [ref=f10e78]: 0 of 4 monthly uses — 4 remaining for October.
+      - generic [ref=f10e82]:
+        - generic [ref=f10e83]:
+          - generic [ref=f10e84]:
+            - heading "Today" [level=3] [ref=f10e87]
+            - generic [ref=f10e88]: · Thursday, 15 October 2026
+          - generic [ref=f10e89]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [active] [ref=f10e90] [cursor=pointer]:
+              - generic [ref=f10e92]:
+                - generic [ref=f10e96]: 06:00 PM
+                - generic [ref=f10e99]: 07:00 PM
+              - generic [ref=f10e104]:
+                - generic [ref=f10e105]: 0 / 10 booked
+                - generic [ref=f10e111]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e113] [cursor=pointer]:
+              - generic [ref=f10e115]:
+                - generic [ref=f10e119]: 07:00 PM
+                - generic [ref=f10e122]: 08:00 PM
+              - generic [ref=f10e124]:
+                - generic [ref=f10e125]: 0 / 10 booked
+                - generic [ref=f10e131]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e133] [cursor=pointer]:
+              - generic [ref=f10e135]:
+                - generic [ref=f10e139]: 08:00 PM
+                - generic [ref=f10e142]: 09:00 PM
+              - generic [ref=f10e144]:
+                - generic [ref=f10e145]: 0 / 10 booked
+                - generic [ref=f10e151]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e153] [cursor=pointer]:
+              - generic [ref=f10e155]:
+                - generic [ref=f10e159]: 09:00 PM
+                - generic [ref=f10e162]: 10:00 PM
+              - generic [ref=f10e164]:
+                - generic [ref=f10e165]: 0 / 10 booked
+                - generic [ref=f10e171]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e173] [cursor=pointer]:
+              - generic [ref=f10e175]:
+                - generic [ref=f10e179]: 10:00 PM
+                - generic [ref=f10e182]: 11:00 PM
+              - generic [ref=f10e184]:
+                - generic [ref=f10e185]: 0 / 10 booked
+                - generic [ref=f10e191]: 10 left
+        - generic [ref=f10e193]:
+          - generic [ref=f10e194]:
+            - heading "Tomorrow" [level=3] [ref=f10e197]
+            - generic [ref=f10e198]: · Friday, 16 October 2026
+          - generic [ref=f10e199]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e200] [cursor=pointer]:
+              - generic [ref=f10e202]:
+                - generic [ref=f10e206]: 06:00 PM
+                - generic [ref=f10e209]: 07:00 PM
+              - generic [ref=f10e211]:
+                - generic [ref=f10e212]: 0 / 10 booked
+                - generic [ref=f10e218]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e220] [cursor=pointer]:
+              - generic [ref=f10e222]:
+                - generic [ref=f10e226]: 07:00 PM
+                - generic [ref=f10e229]: 08:00 PM
+              - generic [ref=f10e231]:
+                - generic [ref=f10e232]: 0 / 10 booked
+                - generic [ref=f10e238]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e240] [cursor=pointer]:
+              - generic [ref=f10e242]:
+                - generic [ref=f10e246]: 08:00 PM
+                - generic [ref=f10e249]: 09:00 PM
+              - generic [ref=f10e251]:
+                - generic [ref=f10e252]: 0 / 10 booked
+                - generic [ref=f10e258]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e260] [cursor=pointer]:
+              - generic [ref=f10e262]:
+                - generic [ref=f10e266]: 09:00 PM
+                - generic [ref=f10e269]: 10:00 PM
+              - generic [ref=f10e271]:
+                - generic [ref=f10e272]: 0 / 10 booked
+                - generic [ref=f10e278]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e280] [cursor=pointer]:
+              - generic [ref=f10e282]:
+                - generic [ref=f10e286]: 10:00 PM
+                - generic [ref=f10e289]: 11:00 PM
+              - generic [ref=f10e291]:
+                - generic [ref=f10e292]: 0 / 10 booked
+                - generic [ref=f10e298]: 10 left
+        - generic [ref=f10e300]:
+          - generic [ref=f10e301]:
+            - heading "Sat, 17 Oct" [level=3] [ref=f10e304]
+            - generic [ref=f10e305]: · Saturday, 17 October 2026
+          - generic [ref=f10e306]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e307] [cursor=pointer]:
+              - generic [ref=f10e309]:
+                - generic [ref=f10e313]: 06:00 PM
+                - generic [ref=f10e316]: 07:00 PM
+              - generic [ref=f10e318]:
+                - generic [ref=f10e319]: 0 / 10 booked
+                - generic [ref=f10e325]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e327] [cursor=pointer]:
+              - generic [ref=f10e329]:
+                - generic [ref=f10e333]: 07:00 PM
+                - generic [ref=f10e336]: 08:00 PM
+              - generic [ref=f10e338]:
+                - generic [ref=f10e339]: 0 / 10 booked
+                - generic [ref=f10e345]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e347] [cursor=pointer]:
+              - generic [ref=f10e349]:
+                - generic [ref=f10e353]: 08:00 PM
+                - generic [ref=f10e356]: 09:00 PM
+              - generic [ref=f10e358]:
+                - generic [ref=f10e359]: 0 / 10 booked
+                - generic [ref=f10e365]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e367] [cursor=pointer]:
+              - generic [ref=f10e369]:
+                - generic [ref=f10e373]: 09:00 PM
+                - generic [ref=f10e376]: 10:00 PM
+              - generic [ref=f10e378]:
+                - generic [ref=f10e379]: 0 / 10 booked
+                - generic [ref=f10e385]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e387] [cursor=pointer]:
+              - generic [ref=f10e389]:
+                - generic [ref=f10e393]: 10:00 PM
+                - generic [ref=f10e396]: 11:00 PM
+              - generic [ref=f10e398]:
+                - generic [ref=f10e399]: 0 / 10 booked
+                - generic [ref=f10e405]: 10 left
+        - generic [ref=f10e407]:
+          - generic [ref=f10e408]:
+            - heading "Sun, 18 Oct" [level=3] [ref=f10e411]
+            - generic [ref=f10e412]: · Sunday, 18 October 2026
+          - generic [ref=f10e413]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e414] [cursor=pointer]:
+              - generic [ref=f10e416]:
+                - generic [ref=f10e420]: 06:00 PM
+                - generic [ref=f10e423]: 07:00 PM
+              - generic [ref=f10e425]:
+                - generic [ref=f10e426]: 0 / 10 booked
+                - generic [ref=f10e432]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e434] [cursor=pointer]:
+              - generic [ref=f10e436]:
+                - generic [ref=f10e440]: 07:00 PM
+                - generic [ref=f10e443]: 08:00 PM
+              - generic [ref=f10e445]:
+                - generic [ref=f10e446]: 0 / 10 booked
+                - generic [ref=f10e452]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e454] [cursor=pointer]:
+              - generic [ref=f10e456]:
+                - generic [ref=f10e460]: 08:00 PM
+                - generic [ref=f10e463]: 09:00 PM
+              - generic [ref=f10e465]:
+                - generic [ref=f10e466]: 0 / 10 booked
+                - generic [ref=f10e472]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e474] [cursor=pointer]:
+              - generic [ref=f10e476]:
+                - generic [ref=f10e480]: 09:00 PM
+                - generic [ref=f10e483]: 10:00 PM
+              - generic [ref=f10e485]:
+                - generic [ref=f10e486]: 0 / 10 booked
+                - generic [ref=f10e492]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e494] [cursor=pointer]:
+              - generic [ref=f10e496]:
+                - generic [ref=f10e500]: 10:00 PM
+                - generic [ref=f10e503]: 11:00 PM
+              - generic [ref=f10e505]:
+                - generic [ref=f10e506]: 0 / 10 booked
+                - generic [ref=f10e512]: 10 left
+        - generic [ref=f10e514]:
+          - generic [ref=f10e515]:
+            - heading "Mon, 19 Oct" [level=3] [ref=f10e518]
+            - generic [ref=f10e519]: · Monday, 19 October 2026
+          - generic [ref=f10e520]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e521] [cursor=pointer]:
+              - generic [ref=f10e523]:
+                - generic [ref=f10e527]: 06:00 PM
+                - generic [ref=f10e530]: 07:00 PM
+              - generic [ref=f10e532]:
+                - generic [ref=f10e533]: 0 / 10 booked
+                - generic [ref=f10e539]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e541] [cursor=pointer]:
+              - generic [ref=f10e543]:
+                - generic [ref=f10e547]: 07:00 PM
+                - generic [ref=f10e550]: 08:00 PM
+              - generic [ref=f10e552]:
+                - generic [ref=f10e553]: 0 / 10 booked
+                - generic [ref=f10e559]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e561] [cursor=pointer]:
+              - generic [ref=f10e563]:
+                - generic [ref=f10e567]: 08:00 PM
+                - generic [ref=f10e570]: 09:00 PM
+              - generic [ref=f10e572]:
+                - generic [ref=f10e573]: 0 / 10 booked
+                - generic [ref=f10e579]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e581] [cursor=pointer]:
+              - generic [ref=f10e583]:
+                - generic [ref=f10e587]: 09:00 PM
+                - generic [ref=f10e590]: 10:00 PM
+              - generic [ref=f10e592]:
+                - generic [ref=f10e593]: 0 / 10 booked
+                - generic [ref=f10e599]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e601] [cursor=pointer]:
+              - generic [ref=f10e603]:
+                - generic [ref=f10e607]: 10:00 PM
+                - generic [ref=f10e610]: 11:00 PM
+              - generic [ref=f10e612]:
+                - generic [ref=f10e613]: 0 / 10 booked
+                - generic [ref=f10e619]: 10 left
+        - generic [ref=f10e621]:
+          - generic [ref=f10e622]:
+            - heading "Tue, 20 Oct" [level=3] [ref=f10e625]
+            - generic [ref=f10e626]: · Tuesday, 20 October 2026
+          - generic [ref=f10e627]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e628] [cursor=pointer]:
+              - generic [ref=f10e630]:
+                - generic [ref=f10e634]: 06:00 PM
+                - generic [ref=f10e637]: 07:00 PM
+              - generic [ref=f10e639]:
+                - generic [ref=f10e640]: 0 / 10 booked
+                - generic [ref=f10e646]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e648] [cursor=pointer]:
+              - generic [ref=f10e650]:
+                - generic [ref=f10e654]: 07:00 PM
+                - generic [ref=f10e657]: 08:00 PM
+              - generic [ref=f10e659]:
+                - generic [ref=f10e660]: 0 / 10 booked
+                - generic [ref=f10e666]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e668] [cursor=pointer]:
+              - generic [ref=f10e670]:
+                - generic [ref=f10e674]: 08:00 PM
+                - generic [ref=f10e677]: 09:00 PM
+              - generic [ref=f10e679]:
+                - generic [ref=f10e680]: 0 / 10 booked
+                - generic [ref=f10e686]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e688] [cursor=pointer]:
+              - generic [ref=f10e690]:
+                - generic [ref=f10e694]: 09:00 PM
+                - generic [ref=f10e697]: 10:00 PM
+              - generic [ref=f10e699]:
+                - generic [ref=f10e700]: 0 / 10 booked
+                - generic [ref=f10e706]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e708] [cursor=pointer]:
+              - generic [ref=f10e710]:
+                - generic [ref=f10e714]: 10:00 PM
+                - generic [ref=f10e717]: 11:00 PM
+              - generic [ref=f10e719]:
+                - generic [ref=f10e720]: 0 / 10 booked
+                - generic [ref=f10e726]: 10 left
+        - generic [ref=f10e728]:
+          - generic [ref=f10e729]:
+            - heading "Wed, 21 Oct" [level=3] [ref=f10e732]
+            - generic [ref=f10e733]: · Wednesday, 21 October 2026
+          - generic [ref=f10e734]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e735] [cursor=pointer]:
+              - generic [ref=f10e737]:
+                - generic [ref=f10e741]: 06:00 PM
+                - generic [ref=f10e744]: 07:00 PM
+              - generic [ref=f10e746]:
+                - generic [ref=f10e747]: 0 / 10 booked
+                - generic [ref=f10e753]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e755] [cursor=pointer]:
+              - generic [ref=f10e757]:
+                - generic [ref=f10e761]: 07:00 PM
+                - generic [ref=f10e764]: 08:00 PM
+              - generic [ref=f10e766]:
+                - generic [ref=f10e767]: 0 / 10 booked
+                - generic [ref=f10e773]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e775] [cursor=pointer]:
+              - generic [ref=f10e777]:
+                - generic [ref=f10e781]: 08:00 PM
+                - generic [ref=f10e784]: 09:00 PM
+              - generic [ref=f10e786]:
+                - generic [ref=f10e787]: 0 / 10 booked
+                - generic [ref=f10e793]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e795] [cursor=pointer]:
+              - generic [ref=f10e797]:
+                - generic [ref=f10e801]: 09:00 PM
+                - generic [ref=f10e804]: 10:00 PM
+              - generic [ref=f10e806]:
+                - generic [ref=f10e807]: 0 / 10 booked
+                - generic [ref=f10e813]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e815] [cursor=pointer]:
+              - generic [ref=f10e817]:
+                - generic [ref=f10e821]: 10:00 PM
+                - generic [ref=f10e824]: 11:00 PM
+              - generic [ref=f10e826]:
+                - generic [ref=f10e827]: 0 / 10 booked
+                - generic [ref=f10e833]: 10 left
+        - generic [ref=f10e835]:
+          - generic [ref=f10e836]:
+            - heading "Thu, 22 Oct" [level=3] [ref=f10e839]
+            - generic [ref=f10e840]: · Thursday, 22 October 2026
+          - generic [ref=f10e841]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e842] [cursor=pointer]:
+              - generic [ref=f10e844]:
+                - generic [ref=f10e848]: 06:00 PM
+                - generic [ref=f10e851]: 07:00 PM
+              - generic [ref=f10e853]:
+                - generic [ref=f10e854]: 0 / 10 booked
+                - generic [ref=f10e860]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e862] [cursor=pointer]:
+              - generic [ref=f10e864]:
+                - generic [ref=f10e868]: 07:00 PM
+                - generic [ref=f10e871]: 08:00 PM
+              - generic [ref=f10e873]:
+                - generic [ref=f10e874]: 0 / 10 booked
+                - generic [ref=f10e880]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e882] [cursor=pointer]:
+              - generic [ref=f10e884]:
+                - generic [ref=f10e888]: 08:00 PM
+                - generic [ref=f10e891]: 09:00 PM
+              - generic [ref=f10e893]:
+                - generic [ref=f10e894]: 0 / 10 booked
+                - generic [ref=f10e900]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e902] [cursor=pointer]:
+              - generic [ref=f10e904]:
+                - generic [ref=f10e908]: 09:00 PM
+                - generic [ref=f10e911]: 10:00 PM
+              - generic [ref=f10e913]:
+                - generic [ref=f10e914]: 0 / 10 booked
+                - generic [ref=f10e920]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e922] [cursor=pointer]:
+              - generic [ref=f10e924]:
+                - generic [ref=f10e928]: 10:00 PM
+                - generic [ref=f10e931]: 11:00 PM
+              - generic [ref=f10e933]:
+                - generic [ref=f10e934]: 0 / 10 booked
+                - generic [ref=f10e940]: 10 left
+        - generic [ref=f10e942]:
+          - generic [ref=f10e943]:
+            - heading "Fri, 23 Oct" [level=3] [ref=f10e946]
+            - generic [ref=f10e947]: · Friday, 23 October 2026
+          - generic [ref=f10e948]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e949] [cursor=pointer]:
+              - generic [ref=f10e951]:
+                - generic [ref=f10e955]: 06:00 PM
+                - generic [ref=f10e958]: 07:00 PM
+              - generic [ref=f10e960]:
+                - generic [ref=f10e961]: 0 / 10 booked
+                - generic [ref=f10e967]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e969] [cursor=pointer]:
+              - generic [ref=f10e971]:
+                - generic [ref=f10e975]: 07:00 PM
+                - generic [ref=f10e978]: 08:00 PM
+              - generic [ref=f10e980]:
+                - generic [ref=f10e981]: 0 / 10 booked
+                - generic [ref=f10e987]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e989] [cursor=pointer]:
+              - generic [ref=f10e991]:
+                - generic [ref=f10e995]: 08:00 PM
+                - generic [ref=f10e998]: 09:00 PM
+              - generic [ref=f10e1000]:
+                - generic [ref=f10e1001]: 0 / 10 booked
+                - generic [ref=f10e1007]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1009] [cursor=pointer]:
+              - generic [ref=f10e1011]:
+                - generic [ref=f10e1015]: 09:00 PM
+                - generic [ref=f10e1018]: 10:00 PM
+              - generic [ref=f10e1020]:
+                - generic [ref=f10e1021]: 0 / 10 booked
+                - generic [ref=f10e1027]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1029] [cursor=pointer]:
+              - generic [ref=f10e1031]:
+                - generic [ref=f10e1035]: 10:00 PM
+                - generic [ref=f10e1038]: 11:00 PM
+              - generic [ref=f10e1040]:
+                - generic [ref=f10e1041]: 0 / 10 booked
+                - generic [ref=f10e1047]: 10 left
+        - generic [ref=f10e1049]:
+          - generic [ref=f10e1050]:
+            - heading "Sat, 24 Oct" [level=3] [ref=f10e1053]
+            - generic [ref=f10e1054]: · Saturday, 24 October 2026
+          - generic [ref=f10e1055]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1056] [cursor=pointer]:
+              - generic [ref=f10e1058]:
+                - generic [ref=f10e1062]: 06:00 PM
+                - generic [ref=f10e1065]: 07:00 PM
+              - generic [ref=f10e1067]:
+                - generic [ref=f10e1068]: 0 / 10 booked
+                - generic [ref=f10e1074]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1076] [cursor=pointer]:
+              - generic [ref=f10e1078]:
+                - generic [ref=f10e1082]: 07:00 PM
+                - generic [ref=f10e1085]: 08:00 PM
+              - generic [ref=f10e1087]:
+                - generic [ref=f10e1088]: 0 / 10 booked
+                - generic [ref=f10e1094]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1096] [cursor=pointer]:
+              - generic [ref=f10e1098]:
+                - generic [ref=f10e1102]: 08:00 PM
+                - generic [ref=f10e1105]: 09:00 PM
+              - generic [ref=f10e1107]:
+                - generic [ref=f10e1108]: 0 / 10 booked
+                - generic [ref=f10e1114]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1116] [cursor=pointer]:
+              - generic [ref=f10e1118]:
+                - generic [ref=f10e1122]: 09:00 PM
+                - generic [ref=f10e1125]: 10:00 PM
+              - generic [ref=f10e1127]:
+                - generic [ref=f10e1128]: 0 / 10 booked
+                - generic [ref=f10e1134]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1136] [cursor=pointer]:
+              - generic [ref=f10e1138]:
+                - generic [ref=f10e1142]: 10:00 PM
+                - generic [ref=f10e1145]: 11:00 PM
+              - generic [ref=f10e1147]:
+                - generic [ref=f10e1148]: 0 / 10 booked
+                - generic [ref=f10e1154]: 10 left
+        - generic [ref=f10e1156]:
+          - generic [ref=f10e1157]:
+            - heading "Sun, 25 Oct" [level=3] [ref=f10e1160]
+            - generic [ref=f10e1161]: · Sunday, 25 October 2026
+          - generic [ref=f10e1162]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1163] [cursor=pointer]:
+              - generic [ref=f10e1165]:
+                - generic [ref=f10e1169]: 06:00 PM
+                - generic [ref=f10e1172]: 07:00 PM
+              - generic [ref=f10e1174]:
+                - generic [ref=f10e1175]: 0 / 10 booked
+                - generic [ref=f10e1181]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1183] [cursor=pointer]:
+              - generic [ref=f10e1185]:
+                - generic [ref=f10e1189]: 07:00 PM
+                - generic [ref=f10e1192]: 08:00 PM
+              - generic [ref=f10e1194]:
+                - generic [ref=f10e1195]: 0 / 10 booked
+                - generic [ref=f10e1201]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1203] [cursor=pointer]:
+              - generic [ref=f10e1205]:
+                - generic [ref=f10e1209]: 08:00 PM
+                - generic [ref=f10e1212]: 09:00 PM
+              - generic [ref=f10e1214]:
+                - generic [ref=f10e1215]: 0 / 10 booked
+                - generic [ref=f10e1221]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1223] [cursor=pointer]:
+              - generic [ref=f10e1225]:
+                - generic [ref=f10e1229]: 09:00 PM
+                - generic [ref=f10e1232]: 10:00 PM
+              - generic [ref=f10e1234]:
+                - generic [ref=f10e1235]: 0 / 10 booked
+                - generic [ref=f10e1241]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1243] [cursor=pointer]:
+              - generic [ref=f10e1245]:
+                - generic [ref=f10e1249]: 10:00 PM
+                - generic [ref=f10e1252]: 11:00 PM
+              - generic [ref=f10e1254]:
+                - generic [ref=f10e1255]: 0 / 10 booked
+                - generic [ref=f10e1261]: 10 left
+        - generic [ref=f10e1263]:
+          - generic [ref=f10e1264]:
+            - heading "Mon, 26 Oct" [level=3] [ref=f10e1267]
+            - generic [ref=f10e1268]: · Monday, 26 October 2026
+          - generic [ref=f10e1269]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1270] [cursor=pointer]:
+              - generic [ref=f10e1272]:
+                - generic [ref=f10e1276]: 06:00 PM
+                - generic [ref=f10e1279]: 07:00 PM
+              - generic [ref=f10e1281]:
+                - generic [ref=f10e1282]: 0 / 10 booked
+                - generic [ref=f10e1288]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1290] [cursor=pointer]:
+              - generic [ref=f10e1292]:
+                - generic [ref=f10e1296]: 07:00 PM
+                - generic [ref=f10e1299]: 08:00 PM
+              - generic [ref=f10e1301]:
+                - generic [ref=f10e1302]: 0 / 10 booked
+                - generic [ref=f10e1308]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1310] [cursor=pointer]:
+              - generic [ref=f10e1312]:
+                - generic [ref=f10e1316]: 08:00 PM
+                - generic [ref=f10e1319]: 09:00 PM
+              - generic [ref=f10e1321]:
+                - generic [ref=f10e1322]: 0 / 10 booked
+                - generic [ref=f10e1328]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1330] [cursor=pointer]:
+              - generic [ref=f10e1332]:
+                - generic [ref=f10e1336]: 09:00 PM
+                - generic [ref=f10e1339]: 10:00 PM
+              - generic [ref=f10e1341]:
+                - generic [ref=f10e1342]: 0 / 10 booked
+                - generic [ref=f10e1348]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1350] [cursor=pointer]:
+              - generic [ref=f10e1352]:
+                - generic [ref=f10e1356]: 10:00 PM
+                - generic [ref=f10e1359]: 11:00 PM
+              - generic [ref=f10e1361]:
+                - generic [ref=f10e1362]: 0 / 10 booked
+                - generic [ref=f10e1368]: 10 left
+        - generic [ref=f10e1370]:
+          - generic [ref=f10e1371]:
+            - heading "Tue, 27 Oct" [level=3] [ref=f10e1374]
+            - generic [ref=f10e1375]: · Tuesday, 27 October 2026
+          - generic [ref=f10e1376]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1377] [cursor=pointer]:
+              - generic [ref=f10e1379]:
+                - generic [ref=f10e1383]: 06:00 PM
+                - generic [ref=f10e1386]: 07:00 PM
+              - generic [ref=f10e1388]:
+                - generic [ref=f10e1389]: 0 / 10 booked
+                - generic [ref=f10e1395]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1397] [cursor=pointer]:
+              - generic [ref=f10e1399]:
+                - generic [ref=f10e1403]: 07:00 PM
+                - generic [ref=f10e1406]: 08:00 PM
+              - generic [ref=f10e1408]:
+                - generic [ref=f10e1409]: 0 / 10 booked
+                - generic [ref=f10e1415]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1417] [cursor=pointer]:
+              - generic [ref=f10e1419]:
+                - generic [ref=f10e1423]: 08:00 PM
+                - generic [ref=f10e1426]: 09:00 PM
+              - generic [ref=f10e1428]:
+                - generic [ref=f10e1429]: 0 / 10 booked
+                - generic [ref=f10e1435]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1437] [cursor=pointer]:
+              - generic [ref=f10e1439]:
+                - generic [ref=f10e1443]: 09:00 PM
+                - generic [ref=f10e1446]: 10:00 PM
+              - generic [ref=f10e1448]:
+                - generic [ref=f10e1449]: 0 / 10 booked
+                - generic [ref=f10e1455]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1457] [cursor=pointer]:
+              - generic [ref=f10e1459]:
+                - generic [ref=f10e1463]: 10:00 PM
+                - generic [ref=f10e1466]: 11:00 PM
+              - generic [ref=f10e1468]:
+                - generic [ref=f10e1469]: 0 / 10 booked
+                - generic [ref=f10e1475]: 10 left
+        - generic [ref=f10e1477]:
+          - generic [ref=f10e1478]:
+            - heading "Wed, 28 Oct" [level=3] [ref=f10e1481]
+            - generic [ref=f10e1482]: · Wednesday, 28 October 2026
+          - generic [ref=f10e1483]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1484] [cursor=pointer]:
+              - generic [ref=f10e1486]:
+                - generic [ref=f10e1490]: 06:00 PM
+                - generic [ref=f10e1493]: 07:00 PM
+              - generic [ref=f10e1495]:
+                - generic [ref=f10e1496]: 0 / 10 booked
+                - generic [ref=f10e1502]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1504] [cursor=pointer]:
+              - generic [ref=f10e1506]:
+                - generic [ref=f10e1510]: 07:00 PM
+                - generic [ref=f10e1513]: 08:00 PM
+              - generic [ref=f10e1515]:
+                - generic [ref=f10e1516]: 0 / 10 booked
+                - generic [ref=f10e1522]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1524] [cursor=pointer]:
+              - generic [ref=f10e1526]:
+                - generic [ref=f10e1530]: 08:00 PM
+                - generic [ref=f10e1533]: 09:00 PM
+              - generic [ref=f10e1535]:
+                - generic [ref=f10e1536]: 0 / 10 booked
+                - generic [ref=f10e1542]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1544] [cursor=pointer]:
+              - generic [ref=f10e1546]:
+                - generic [ref=f10e1550]: 09:00 PM
+                - generic [ref=f10e1553]: 10:00 PM
+              - generic [ref=f10e1555]:
+                - generic [ref=f10e1556]: 0 / 10 booked
+                - generic [ref=f10e1562]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1564] [cursor=pointer]:
+              - generic [ref=f10e1566]:
+                - generic [ref=f10e1570]: 10:00 PM
+                - generic [ref=f10e1573]: 11:00 PM
+              - generic [ref=f10e1575]:
+                - generic [ref=f10e1576]: 0 / 10 booked
+                - generic [ref=f10e1582]: 10 left
+        - generic [ref=f10e1584]:
+          - generic [ref=f10e1585]:
+            - heading "Thu, 29 Oct" [level=3] [ref=f10e1588]
+            - generic [ref=f10e1589]: · Thursday, 29 October 2026
+          - generic [ref=f10e1590]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1591] [cursor=pointer]:
+              - generic [ref=f10e1593]:
+                - generic [ref=f10e1597]: 06:00 PM
+                - generic [ref=f10e1600]: 07:00 PM
+              - generic [ref=f10e1602]:
+                - generic [ref=f10e1603]: 0 / 10 booked
+                - generic [ref=f10e1609]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1611] [cursor=pointer]:
+              - generic [ref=f10e1613]:
+                - generic [ref=f10e1617]: 07:00 PM
+                - generic [ref=f10e1620]: 08:00 PM
+              - generic [ref=f10e1622]:
+                - generic [ref=f10e1623]: 0 / 10 booked
+                - generic [ref=f10e1629]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1631] [cursor=pointer]:
+              - generic [ref=f10e1633]:
+                - generic [ref=f10e1637]: 08:00 PM
+                - generic [ref=f10e1640]: 09:00 PM
+              - generic [ref=f10e1642]:
+                - generic [ref=f10e1643]: 0 / 10 booked
+                - generic [ref=f10e1649]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1651] [cursor=pointer]:
+              - generic [ref=f10e1653]:
+                - generic [ref=f10e1657]: 09:00 PM
+                - generic [ref=f10e1660]: 10:00 PM
+              - generic [ref=f10e1662]:
+                - generic [ref=f10e1663]: 0 / 10 booked
+                - generic [ref=f10e1669]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1671] [cursor=pointer]:
+              - generic [ref=f10e1673]:
+                - generic [ref=f10e1677]: 10:00 PM
+                - generic [ref=f10e1680]: 11:00 PM
+              - generic [ref=f10e1682]:
+                - generic [ref=f10e1683]: 0 / 10 booked
+                - generic [ref=f10e1689]: 10 left
+        - generic [ref=f10e1691]:
+          - generic [ref=f10e1692]:
+            - heading "Fri, 30 Oct" [level=3] [ref=f10e1695]
+            - generic [ref=f10e1696]: · Friday, 30 October 2026
+          - generic [ref=f10e1697]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1698] [cursor=pointer]:
+              - generic [ref=f10e1700]:
+                - generic [ref=f10e1704]: 06:00 PM
+                - generic [ref=f10e1707]: 07:00 PM
+              - generic [ref=f10e1709]:
+                - generic [ref=f10e1710]: 0 / 10 booked
+                - generic [ref=f10e1716]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1718] [cursor=pointer]:
+              - generic [ref=f10e1720]:
+                - generic [ref=f10e1724]: 07:00 PM
+                - generic [ref=f10e1727]: 08:00 PM
+              - generic [ref=f10e1729]:
+                - generic [ref=f10e1730]: 0 / 10 booked
+                - generic [ref=f10e1736]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1738] [cursor=pointer]:
+              - generic [ref=f10e1740]:
+                - generic [ref=f10e1744]: 08:00 PM
+                - generic [ref=f10e1747]: 09:00 PM
+              - generic [ref=f10e1749]:
+                - generic [ref=f10e1750]: 0 / 10 booked
+                - generic [ref=f10e1756]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1758] [cursor=pointer]:
+              - generic [ref=f10e1760]:
+                - generic [ref=f10e1764]: 09:00 PM
+                - generic [ref=f10e1767]: 10:00 PM
+              - generic [ref=f10e1769]:
+                - generic [ref=f10e1770]: 0 / 10 booked
+                - generic [ref=f10e1776]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1778] [cursor=pointer]:
+              - generic [ref=f10e1780]:
+                - generic [ref=f10e1784]: 10:00 PM
+                - generic [ref=f10e1787]: 11:00 PM
+              - generic [ref=f10e1789]:
+                - generic [ref=f10e1790]: 0 / 10 booked
+                - generic [ref=f10e1796]: 10 left
+        - generic [ref=f10e1798]:
+          - generic [ref=f10e1799]:
+            - heading "Sat, 31 Oct" [level=3] [ref=f10e1802]
+            - generic [ref=f10e1803]: · Saturday, 31 October 2026
+          - generic [ref=f10e1804]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1805] [cursor=pointer]:
+              - generic [ref=f10e1807]:
+                - generic [ref=f10e1811]: 06:00 PM
+                - generic [ref=f10e1814]: 07:00 PM
+              - generic [ref=f10e1816]:
+                - generic [ref=f10e1817]: 0 / 10 booked
+                - generic [ref=f10e1823]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1825] [cursor=pointer]:
+              - generic [ref=f10e1827]:
+                - generic [ref=f10e1831]: 07:00 PM
+                - generic [ref=f10e1834]: 08:00 PM
+              - generic [ref=f10e1836]:
+                - generic [ref=f10e1837]: 0 / 10 booked
+                - generic [ref=f10e1843]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1845] [cursor=pointer]:
+              - generic [ref=f10e1847]:
+                - generic [ref=f10e1851]: 08:00 PM
+                - generic [ref=f10e1854]: 09:00 PM
+              - generic [ref=f10e1856]:
+                - generic [ref=f10e1857]: 0 / 10 booked
+                - generic [ref=f10e1863]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1865] [cursor=pointer]:
+              - generic [ref=f10e1867]:
+                - generic [ref=f10e1871]: 09:00 PM
+                - generic [ref=f10e1874]: 10:00 PM
+              - generic [ref=f10e1876]:
+                - generic [ref=f10e1877]: 0 / 10 booked
+                - generic [ref=f10e1883]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1885] [cursor=pointer]:
+              - generic [ref=f10e1887]:
+                - generic [ref=f10e1891]: 10:00 PM
+                - generic [ref=f10e1894]: 11:00 PM
+              - generic [ref=f10e1896]:
+                - generic [ref=f10e1897]: 0 / 10 booked
+                - generic [ref=f10e1903]: 10 left
+        - generic [ref=f10e1905]:
+          - generic [ref=f10e1906]:
+            - heading "Sun, 1 Nov" [level=3] [ref=f10e1909]
+            - generic [ref=f10e1910]: · Sunday, 1 November 2026
+          - generic [ref=f10e1911]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e1912] [cursor=pointer]:
+              - generic [ref=f10e1914]:
+                - generic [ref=f10e1918]: 06:00 PM
+                - generic [ref=f10e1921]: 07:00 PM
+              - generic [ref=f10e1923]:
+                - generic [ref=f10e1924]: 0 / 10 booked
+                - generic [ref=f10e1930]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e1932] [cursor=pointer]:
+              - generic [ref=f10e1934]:
+                - generic [ref=f10e1938]: 07:00 PM
+                - generic [ref=f10e1941]: 08:00 PM
+              - generic [ref=f10e1943]:
+                - generic [ref=f10e1944]: 0 / 10 booked
+                - generic [ref=f10e1950]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e1952] [cursor=pointer]:
+              - generic [ref=f10e1954]:
+                - generic [ref=f10e1958]: 08:00 PM
+                - generic [ref=f10e1961]: 09:00 PM
+              - generic [ref=f10e1963]:
+                - generic [ref=f10e1964]: 0 / 10 booked
+                - generic [ref=f10e1970]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e1972] [cursor=pointer]:
+              - generic [ref=f10e1974]:
+                - generic [ref=f10e1978]: 09:00 PM
+                - generic [ref=f10e1981]: 10:00 PM
+              - generic [ref=f10e1983]:
+                - generic [ref=f10e1984]: 0 / 10 booked
+                - generic [ref=f10e1990]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e1992] [cursor=pointer]:
+              - generic [ref=f10e1994]:
+                - generic [ref=f10e1998]: 10:00 PM
+                - generic [ref=f10e2001]: 11:00 PM
+              - generic [ref=f10e2003]:
+                - generic [ref=f10e2004]: 0 / 10 booked
+                - generic [ref=f10e2010]: 10 left
+        - generic [ref=f10e2012]:
+          - generic [ref=f10e2013]:
+            - heading "Mon, 2 Nov" [level=3] [ref=f10e2016]
+            - generic [ref=f10e2017]: · Monday, 2 November 2026
+          - generic [ref=f10e2018]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2019] [cursor=pointer]:
+              - generic [ref=f10e2021]:
+                - generic [ref=f10e2025]: 06:00 PM
+                - generic [ref=f10e2028]: 07:00 PM
+              - generic [ref=f10e2030]:
+                - generic [ref=f10e2031]: 0 / 10 booked
+                - generic [ref=f10e2037]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2039] [cursor=pointer]:
+              - generic [ref=f10e2041]:
+                - generic [ref=f10e2045]: 07:00 PM
+                - generic [ref=f10e2048]: 08:00 PM
+              - generic [ref=f10e2050]:
+                - generic [ref=f10e2051]: 0 / 10 booked
+                - generic [ref=f10e2057]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2059] [cursor=pointer]:
+              - generic [ref=f10e2061]:
+                - generic [ref=f10e2065]: 08:00 PM
+                - generic [ref=f10e2068]: 09:00 PM
+              - generic [ref=f10e2070]:
+                - generic [ref=f10e2071]: 0 / 10 booked
+                - generic [ref=f10e2077]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2079] [cursor=pointer]:
+              - generic [ref=f10e2081]:
+                - generic [ref=f10e2085]: 09:00 PM
+                - generic [ref=f10e2088]: 10:00 PM
+              - generic [ref=f10e2090]:
+                - generic [ref=f10e2091]: 0 / 10 booked
+                - generic [ref=f10e2097]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2099] [cursor=pointer]:
+              - generic [ref=f10e2101]:
+                - generic [ref=f10e2105]: 10:00 PM
+                - generic [ref=f10e2108]: 11:00 PM
+              - generic [ref=f10e2110]:
+                - generic [ref=f10e2111]: 0 / 10 booked
+                - generic [ref=f10e2117]: 10 left
+        - generic [ref=f10e2119]:
+          - generic [ref=f10e2120]:
+            - heading "Tue, 3 Nov" [level=3] [ref=f10e2123]
+            - generic [ref=f10e2124]: · Tuesday, 3 November 2026
+          - generic [ref=f10e2125]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2126] [cursor=pointer]:
+              - generic [ref=f10e2128]:
+                - generic [ref=f10e2132]: 06:00 PM
+                - generic [ref=f10e2135]: 07:00 PM
+              - generic [ref=f10e2137]:
+                - generic [ref=f10e2138]: 0 / 10 booked
+                - generic [ref=f10e2144]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2146] [cursor=pointer]:
+              - generic [ref=f10e2148]:
+                - generic [ref=f10e2152]: 07:00 PM
+                - generic [ref=f10e2155]: 08:00 PM
+              - generic [ref=f10e2157]:
+                - generic [ref=f10e2158]: 0 / 10 booked
+                - generic [ref=f10e2164]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2166] [cursor=pointer]:
+              - generic [ref=f10e2168]:
+                - generic [ref=f10e2172]: 08:00 PM
+                - generic [ref=f10e2175]: 09:00 PM
+              - generic [ref=f10e2177]:
+                - generic [ref=f10e2178]: 0 / 10 booked
+                - generic [ref=f10e2184]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2186] [cursor=pointer]:
+              - generic [ref=f10e2188]:
+                - generic [ref=f10e2192]: 09:00 PM
+                - generic [ref=f10e2195]: 10:00 PM
+              - generic [ref=f10e2197]:
+                - generic [ref=f10e2198]: 0 / 10 booked
+                - generic [ref=f10e2204]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2206] [cursor=pointer]:
+              - generic [ref=f10e2208]:
+                - generic [ref=f10e2212]: 10:00 PM
+                - generic [ref=f10e2215]: 11:00 PM
+              - generic [ref=f10e2217]:
+                - generic [ref=f10e2218]: 0 / 10 booked
+                - generic [ref=f10e2224]: 10 left
+        - generic [ref=f10e2226]:
+          - generic [ref=f10e2227]:
+            - heading "Wed, 4 Nov" [level=3] [ref=f10e2230]
+            - generic [ref=f10e2231]: · Wednesday, 4 November 2026
+          - generic [ref=f10e2232]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2233] [cursor=pointer]:
+              - generic [ref=f10e2235]:
+                - generic [ref=f10e2239]: 06:00 PM
+                - generic [ref=f10e2242]: 07:00 PM
+              - generic [ref=f10e2244]:
+                - generic [ref=f10e2245]: 0 / 10 booked
+                - generic [ref=f10e2251]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2253] [cursor=pointer]:
+              - generic [ref=f10e2255]:
+                - generic [ref=f10e2259]: 07:00 PM
+                - generic [ref=f10e2262]: 08:00 PM
+              - generic [ref=f10e2264]:
+                - generic [ref=f10e2265]: 0 / 10 booked
+                - generic [ref=f10e2271]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2273] [cursor=pointer]:
+              - generic [ref=f10e2275]:
+                - generic [ref=f10e2279]: 08:00 PM
+                - generic [ref=f10e2282]: 09:00 PM
+              - generic [ref=f10e2284]:
+                - generic [ref=f10e2285]: 0 / 10 booked
+                - generic [ref=f10e2291]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2293] [cursor=pointer]:
+              - generic [ref=f10e2295]:
+                - generic [ref=f10e2299]: 09:00 PM
+                - generic [ref=f10e2302]: 10:00 PM
+              - generic [ref=f10e2304]:
+                - generic [ref=f10e2305]: 0 / 10 booked
+                - generic [ref=f10e2311]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2313] [cursor=pointer]:
+              - generic [ref=f10e2315]:
+                - generic [ref=f10e2319]: 10:00 PM
+                - generic [ref=f10e2322]: 11:00 PM
+              - generic [ref=f10e2324]:
+                - generic [ref=f10e2325]: 0 / 10 booked
+                - generic [ref=f10e2331]: 10 left
+        - generic [ref=f10e2333]:
+          - generic [ref=f10e2334]:
+            - heading "Thu, 5 Nov" [level=3] [ref=f10e2337]
+            - generic [ref=f10e2338]: · Thursday, 5 November 2026
+          - generic [ref=f10e2339]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2340] [cursor=pointer]:
+              - generic [ref=f10e2342]:
+                - generic [ref=f10e2346]: 06:00 PM
+                - generic [ref=f10e2349]: 07:00 PM
+              - generic [ref=f10e2351]:
+                - generic [ref=f10e2352]: 0 / 10 booked
+                - generic [ref=f10e2358]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2360] [cursor=pointer]:
+              - generic [ref=f10e2362]:
+                - generic [ref=f10e2366]: 07:00 PM
+                - generic [ref=f10e2369]: 08:00 PM
+              - generic [ref=f10e2371]:
+                - generic [ref=f10e2372]: 0 / 10 booked
+                - generic [ref=f10e2378]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2380] [cursor=pointer]:
+              - generic [ref=f10e2382]:
+                - generic [ref=f10e2386]: 08:00 PM
+                - generic [ref=f10e2389]: 09:00 PM
+              - generic [ref=f10e2391]:
+                - generic [ref=f10e2392]: 0 / 10 booked
+                - generic [ref=f10e2398]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2400] [cursor=pointer]:
+              - generic [ref=f10e2402]:
+                - generic [ref=f10e2406]: 09:00 PM
+                - generic [ref=f10e2409]: 10:00 PM
+              - generic [ref=f10e2411]:
+                - generic [ref=f10e2412]: 0 / 10 booked
+                - generic [ref=f10e2418]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2420] [cursor=pointer]:
+              - generic [ref=f10e2422]:
+                - generic [ref=f10e2426]: 10:00 PM
+                - generic [ref=f10e2429]: 11:00 PM
+              - generic [ref=f10e2431]:
+                - generic [ref=f10e2432]: 0 / 10 booked
+                - generic [ref=f10e2438]: 10 left
+        - generic [ref=f10e2440]:
+          - generic [ref=f10e2441]:
+            - heading "Fri, 6 Nov" [level=3] [ref=f10e2444]
+            - generic [ref=f10e2445]: · Friday, 6 November 2026
+          - generic [ref=f10e2446]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2447] [cursor=pointer]:
+              - generic [ref=f10e2449]:
+                - generic [ref=f10e2453]: 06:00 PM
+                - generic [ref=f10e2456]: 07:00 PM
+              - generic [ref=f10e2458]:
+                - generic [ref=f10e2459]: 0 / 10 booked
+                - generic [ref=f10e2465]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2467] [cursor=pointer]:
+              - generic [ref=f10e2469]:
+                - generic [ref=f10e2473]: 07:00 PM
+                - generic [ref=f10e2476]: 08:00 PM
+              - generic [ref=f10e2478]:
+                - generic [ref=f10e2479]: 0 / 10 booked
+                - generic [ref=f10e2485]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2487] [cursor=pointer]:
+              - generic [ref=f10e2489]:
+                - generic [ref=f10e2493]: 08:00 PM
+                - generic [ref=f10e2496]: 09:00 PM
+              - generic [ref=f10e2498]:
+                - generic [ref=f10e2499]: 0 / 10 booked
+                - generic [ref=f10e2505]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2507] [cursor=pointer]:
+              - generic [ref=f10e2509]:
+                - generic [ref=f10e2513]: 09:00 PM
+                - generic [ref=f10e2516]: 10:00 PM
+              - generic [ref=f10e2518]:
+                - generic [ref=f10e2519]: 0 / 10 booked
+                - generic [ref=f10e2525]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2527] [cursor=pointer]:
+              - generic [ref=f10e2529]:
+                - generic [ref=f10e2533]: 10:00 PM
+                - generic [ref=f10e2536]: 11:00 PM
+              - generic [ref=f10e2538]:
+                - generic [ref=f10e2539]: 0 / 10 booked
+                - generic [ref=f10e2545]: 10 left
+        - generic [ref=f10e2547]:
+          - generic [ref=f10e2548]:
+            - heading "Sat, 7 Nov" [level=3] [ref=f10e2551]
+            - generic [ref=f10e2552]: · Saturday, 7 November 2026
+          - generic [ref=f10e2553]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2554] [cursor=pointer]:
+              - generic [ref=f10e2556]:
+                - generic [ref=f10e2560]: 06:00 PM
+                - generic [ref=f10e2563]: 07:00 PM
+              - generic [ref=f10e2565]:
+                - generic [ref=f10e2566]: 0 / 10 booked
+                - generic [ref=f10e2572]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2574] [cursor=pointer]:
+              - generic [ref=f10e2576]:
+                - generic [ref=f10e2580]: 07:00 PM
+                - generic [ref=f10e2583]: 08:00 PM
+              - generic [ref=f10e2585]:
+                - generic [ref=f10e2586]: 0 / 10 booked
+                - generic [ref=f10e2592]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2594] [cursor=pointer]:
+              - generic [ref=f10e2596]:
+                - generic [ref=f10e2600]: 08:00 PM
+                - generic [ref=f10e2603]: 09:00 PM
+              - generic [ref=f10e2605]:
+                - generic [ref=f10e2606]: 0 / 10 booked
+                - generic [ref=f10e2612]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2614] [cursor=pointer]:
+              - generic [ref=f10e2616]:
+                - generic [ref=f10e2620]: 09:00 PM
+                - generic [ref=f10e2623]: 10:00 PM
+              - generic [ref=f10e2625]:
+                - generic [ref=f10e2626]: 0 / 10 booked
+                - generic [ref=f10e2632]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2634] [cursor=pointer]:
+              - generic [ref=f10e2636]:
+                - generic [ref=f10e2640]: 10:00 PM
+                - generic [ref=f10e2643]: 11:00 PM
+              - generic [ref=f10e2645]:
+                - generic [ref=f10e2646]: 0 / 10 booked
+                - generic [ref=f10e2652]: 10 left
+        - generic [ref=f10e2654]:
+          - generic [ref=f10e2655]:
+            - heading "Sun, 8 Nov" [level=3] [ref=f10e2658]
+            - generic [ref=f10e2659]: · Sunday, 8 November 2026
+          - generic [ref=f10e2660]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2661] [cursor=pointer]:
+              - generic [ref=f10e2663]:
+                - generic [ref=f10e2667]: 06:00 PM
+                - generic [ref=f10e2670]: 07:00 PM
+              - generic [ref=f10e2672]:
+                - generic [ref=f10e2673]: 0 / 10 booked
+                - generic [ref=f10e2679]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2681] [cursor=pointer]:
+              - generic [ref=f10e2683]:
+                - generic [ref=f10e2687]: 07:00 PM
+                - generic [ref=f10e2690]: 08:00 PM
+              - generic [ref=f10e2692]:
+                - generic [ref=f10e2693]: 0 / 10 booked
+                - generic [ref=f10e2699]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2701] [cursor=pointer]:
+              - generic [ref=f10e2703]:
+                - generic [ref=f10e2707]: 08:00 PM
+                - generic [ref=f10e2710]: 09:00 PM
+              - generic [ref=f10e2712]:
+                - generic [ref=f10e2713]: 0 / 10 booked
+                - generic [ref=f10e2719]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2721] [cursor=pointer]:
+              - generic [ref=f10e2723]:
+                - generic [ref=f10e2727]: 09:00 PM
+                - generic [ref=f10e2730]: 10:00 PM
+              - generic [ref=f10e2732]:
+                - generic [ref=f10e2733]: 0 / 10 booked
+                - generic [ref=f10e2739]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2741] [cursor=pointer]:
+              - generic [ref=f10e2743]:
+                - generic [ref=f10e2747]: 10:00 PM
+                - generic [ref=f10e2750]: 11:00 PM
+              - generic [ref=f10e2752]:
+                - generic [ref=f10e2753]: 0 / 10 booked
+                - generic [ref=f10e2759]: 10 left
+        - generic [ref=f10e2761]:
+          - generic [ref=f10e2762]:
+            - heading "Mon, 9 Nov" [level=3] [ref=f10e2765]
+            - generic [ref=f10e2766]: · Monday, 9 November 2026
+          - generic [ref=f10e2767]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2768] [cursor=pointer]:
+              - generic [ref=f10e2770]:
+                - generic [ref=f10e2774]: 06:00 PM
+                - generic [ref=f10e2777]: 07:00 PM
+              - generic [ref=f10e2779]:
+                - generic [ref=f10e2780]: 0 / 10 booked
+                - generic [ref=f10e2786]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2788] [cursor=pointer]:
+              - generic [ref=f10e2790]:
+                - generic [ref=f10e2794]: 07:00 PM
+                - generic [ref=f10e2797]: 08:00 PM
+              - generic [ref=f10e2799]:
+                - generic [ref=f10e2800]: 0 / 10 booked
+                - generic [ref=f10e2806]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2808] [cursor=pointer]:
+              - generic [ref=f10e2810]:
+                - generic [ref=f10e2814]: 08:00 PM
+                - generic [ref=f10e2817]: 09:00 PM
+              - generic [ref=f10e2819]:
+                - generic [ref=f10e2820]: 0 / 10 booked
+                - generic [ref=f10e2826]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2828] [cursor=pointer]:
+              - generic [ref=f10e2830]:
+                - generic [ref=f10e2834]: 09:00 PM
+                - generic [ref=f10e2837]: 10:00 PM
+              - generic [ref=f10e2839]:
+                - generic [ref=f10e2840]: 0 / 10 booked
+                - generic [ref=f10e2846]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2848] [cursor=pointer]:
+              - generic [ref=f10e2850]:
+                - generic [ref=f10e2854]: 10:00 PM
+                - generic [ref=f10e2857]: 11:00 PM
+              - generic [ref=f10e2859]:
+                - generic [ref=f10e2860]: 0 / 10 booked
+                - generic [ref=f10e2866]: 10 left
+        - generic [ref=f10e2868]:
+          - generic [ref=f10e2869]:
+            - heading "Tue, 10 Nov" [level=3] [ref=f10e2872]
+            - generic [ref=f10e2873]: · Tuesday, 10 November 2026
+          - generic [ref=f10e2874]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2875] [cursor=pointer]:
+              - generic [ref=f10e2877]:
+                - generic [ref=f10e2881]: 06:00 PM
+                - generic [ref=f10e2884]: 07:00 PM
+              - generic [ref=f10e2886]:
+                - generic [ref=f10e2887]: 0 / 10 booked
+                - generic [ref=f10e2893]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e2895] [cursor=pointer]:
+              - generic [ref=f10e2897]:
+                - generic [ref=f10e2901]: 07:00 PM
+                - generic [ref=f10e2904]: 08:00 PM
+              - generic [ref=f10e2906]:
+                - generic [ref=f10e2907]: 0 / 10 booked
+                - generic [ref=f10e2913]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e2915] [cursor=pointer]:
+              - generic [ref=f10e2917]:
+                - generic [ref=f10e2921]: 08:00 PM
+                - generic [ref=f10e2924]: 09:00 PM
+              - generic [ref=f10e2926]:
+                - generic [ref=f10e2927]: 0 / 10 booked
+                - generic [ref=f10e2933]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e2935] [cursor=pointer]:
+              - generic [ref=f10e2937]:
+                - generic [ref=f10e2941]: 09:00 PM
+                - generic [ref=f10e2944]: 10:00 PM
+              - generic [ref=f10e2946]:
+                - generic [ref=f10e2947]: 0 / 10 booked
+                - generic [ref=f10e2953]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e2955] [cursor=pointer]:
+              - generic [ref=f10e2957]:
+                - generic [ref=f10e2961]: 10:00 PM
+                - generic [ref=f10e2964]: 11:00 PM
+              - generic [ref=f10e2966]:
+                - generic [ref=f10e2967]: 0 / 10 booked
+                - generic [ref=f10e2973]: 10 left
+        - generic [ref=f10e2975]:
+          - generic [ref=f10e2976]:
+            - heading "Wed, 11 Nov" [level=3] [ref=f10e2979]
+            - generic [ref=f10e2980]: · Wednesday, 11 November 2026
+          - generic [ref=f10e2981]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e2982] [cursor=pointer]:
+              - generic [ref=f10e2984]:
+                - generic [ref=f10e2988]: 06:00 PM
+                - generic [ref=f10e2991]: 07:00 PM
+              - generic [ref=f10e2993]:
+                - generic [ref=f10e2994]: 0 / 10 booked
+                - generic [ref=f10e3000]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e3002] [cursor=pointer]:
+              - generic [ref=f10e3004]:
+                - generic [ref=f10e3008]: 07:00 PM
+                - generic [ref=f10e3011]: 08:00 PM
+              - generic [ref=f10e3013]:
+                - generic [ref=f10e3014]: 0 / 10 booked
+                - generic [ref=f10e3020]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e3022] [cursor=pointer]:
+              - generic [ref=f10e3024]:
+                - generic [ref=f10e3028]: 08:00 PM
+                - generic [ref=f10e3031]: 09:00 PM
+              - generic [ref=f10e3033]:
+                - generic [ref=f10e3034]: 0 / 10 booked
+                - generic [ref=f10e3040]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e3042] [cursor=pointer]:
+              - generic [ref=f10e3044]:
+                - generic [ref=f10e3048]: 09:00 PM
+                - generic [ref=f10e3051]: 10:00 PM
+              - generic [ref=f10e3053]:
+                - generic [ref=f10e3054]: 0 / 10 booked
+                - generic [ref=f10e3060]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e3062] [cursor=pointer]:
+              - generic [ref=f10e3064]:
+                - generic [ref=f10e3068]: 10:00 PM
+                - generic [ref=f10e3071]: 11:00 PM
+              - generic [ref=f10e3073]:
+                - generic [ref=f10e3074]: 0 / 10 booked
+                - generic [ref=f10e3080]: 10 left
+        - generic [ref=f10e3082]:
+          - generic [ref=f10e3083]:
+            - heading "Thu, 12 Nov" [level=3] [ref=f10e3086]
+            - generic [ref=f10e3087]: · Thursday, 12 November 2026
+          - generic [ref=f10e3088]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e3089] [cursor=pointer]:
+              - generic [ref=f10e3091]:
+                - generic [ref=f10e3095]: 06:00 PM
+                - generic [ref=f10e3098]: 07:00 PM
+              - generic [ref=f10e3100]:
+                - generic [ref=f10e3101]: 0 / 10 booked
+                - generic [ref=f10e3107]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e3109] [cursor=pointer]:
+              - generic [ref=f10e3111]:
+                - generic [ref=f10e3115]: 07:00 PM
+                - generic [ref=f10e3118]: 08:00 PM
+              - generic [ref=f10e3120]:
+                - generic [ref=f10e3121]: 0 / 10 booked
+                - generic [ref=f10e3127]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e3129] [cursor=pointer]:
+              - generic [ref=f10e3131]:
+                - generic [ref=f10e3135]: 08:00 PM
+                - generic [ref=f10e3138]: 09:00 PM
+              - generic [ref=f10e3140]:
+                - generic [ref=f10e3141]: 0 / 10 booked
+                - generic [ref=f10e3147]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e3149] [cursor=pointer]:
+              - generic [ref=f10e3151]:
+                - generic [ref=f10e3155]: 09:00 PM
+                - generic [ref=f10e3158]: 10:00 PM
+              - generic [ref=f10e3160]:
+                - generic [ref=f10e3161]: 0 / 10 booked
+                - generic [ref=f10e3167]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e3169] [cursor=pointer]:
+              - generic [ref=f10e3171]:
+                - generic [ref=f10e3175]: 10:00 PM
+                - generic [ref=f10e3178]: 11:00 PM
+              - generic [ref=f10e3180]:
+                - generic [ref=f10e3181]: 0 / 10 booked
+                - generic [ref=f10e3187]: 10 left
+        - generic [ref=f10e3189]:
+          - generic [ref=f10e3190]:
+            - heading "Fri, 13 Nov" [level=3] [ref=f10e3193]
+            - generic [ref=f10e3194]: · Friday, 13 November 2026
+          - generic [ref=f10e3195]:
+            - button "06:00 PM to 07:00 PM, 10 spots available" [ref=f10e3196] [cursor=pointer]:
+              - generic [ref=f10e3198]:
+                - generic [ref=f10e3202]: 06:00 PM
+                - generic [ref=f10e3205]: 07:00 PM
+              - generic [ref=f10e3207]:
+                - generic [ref=f10e3208]: 0 / 10 booked
+                - generic [ref=f10e3214]: 10 left
+            - button "07:00 PM to 08:00 PM, 10 spots available" [ref=f10e3216] [cursor=pointer]:
+              - generic [ref=f10e3218]:
+                - generic [ref=f10e3222]: 07:00 PM
+                - generic [ref=f10e3225]: 08:00 PM
+              - generic [ref=f10e3227]:
+                - generic [ref=f10e3228]: 0 / 10 booked
+                - generic [ref=f10e3234]: 10 left
+            - button "08:00 PM to 09:00 PM, 10 spots available" [ref=f10e3236] [cursor=pointer]:
+              - generic [ref=f10e3238]:
+                - generic [ref=f10e3242]: 08:00 PM
+                - generic [ref=f10e3245]: 09:00 PM
+              - generic [ref=f10e3247]:
+                - generic [ref=f10e3248]: 0 / 10 booked
+                - generic [ref=f10e3254]: 10 left
+            - button "09:00 PM to 10:00 PM, 10 spots available" [ref=f10e3256] [cursor=pointer]:
+              - generic [ref=f10e3258]:
+                - generic [ref=f10e3262]: 09:00 PM
+                - generic [ref=f10e3265]: 10:00 PM
+              - generic [ref=f10e3267]:
+                - generic [ref=f10e3268]: 0 / 10 booked
+                - generic [ref=f10e3274]: 10 left
+            - button "10:00 PM to 11:00 PM, 10 spots available" [ref=f10e3276] [cursor=pointer]:
+              - generic [ref=f10e3278]:
+                - generic [ref=f10e3282]: 10:00 PM
+                - generic [ref=f10e3285]: 11:00 PM
+              - generic [ref=f10e3287]:
+                - generic [ref=f10e3288]: 0 / 10 booked
+                - generic [ref=f10e3294]: 10 left
+        - button "Continue with 06:00 PM – 07:00 PM" [ref=f10e3296] [cursor=pointer]
+  - contentinfo [ref=f10e34]:
+    - generic [ref=f10e35]:
+      - generic [ref=f10e36]:
+        - generic [ref=f10e37]: WASHWISE
+        - generic [ref=f10e38]: "-"
+        - generic [ref=f10e39]: Rajalakshmi Engineering College
+      - generic [ref=f10e40]:
+        - generic [ref=f10e41]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f10e42]: "-"
+        - generic [ref=f10e43]: Campus Laundry Services

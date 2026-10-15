@@ -1,0 +1,52 @@
+- generic [ref=f2e3]:
+  - banner [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f2e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f2e11]:
+          - generic [ref=f2e12]:
+            - generic [ref=f2e13]: WASHWISE
+            - generic [ref=f2e14]: REC
+          - paragraph [ref=f2e15]: Campus Laundry Management
+      - generic [ref=f2e16]:
+        - button "Toggle Sound Effects" [ref=f2e17] [cursor=pointer]:
+          - generic [ref=f2e22]: Sound ON
+        - generic [ref=f2e23]:
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]: User 1
+            - generic [ref=f2e46]: STUDENT (Oak House)
+          - generic [ref=f2e47]: STUDENT
+          - button "Logout" [ref=f2e54] [cursor=pointer]
+  - main [ref=f2e27]:
+    - generic [ref=f2e59]:
+      - generic [ref=f2e60]:
+        - button "Back" [ref=f2e3301] [cursor=pointer]
+        - heading "Book Laundry" [level=1] [ref=f2e64]
+        - paragraph [ref=f2e65]: Complete all 3 steps to confirm your booking.
+      - generic [ref=f2e66]:
+        - generic [ref=f2e67]: Select Slot
+        - generic [ref=f2e71]: Clothes Count
+        - generic [ref=f2e75]:
+          - generic [ref=f2e76]: "3"
+          - generic [ref=f2e77]: Review
+      - generic [ref=f2e78]: 0 of 4 monthly uses — 4 remaining for October.
+      - generic [ref=f2e3422]:
+        - alert [ref=f2e3423]:
+          - paragraph [ref=f2e3427]: "Endpoint not found: POST /api/slots/plan-batch"
+          - button "Dismiss" [ref=f2e3428] [cursor=pointer]
+        - generic [ref=f2e3436]:
+          - strong [ref=f2e3437]: Atomic Multi-Batch Guarantee
+          - text: All batch reservations are processed together in a single interactive transaction. If any slot becomes full or validation fails, all bookings roll back completely.
+        - generic [ref=f2e3438]:
+          - button "Edit Garments" [ref=f2e3439] [cursor=pointer]
+          - button "Multi-Batch Booking" [disabled]
+  - contentinfo [ref=f2e34]:
+    - generic [ref=f2e35]:
+      - generic [ref=f2e36]:
+        - generic [ref=f2e37]: WASHWISE
+        - generic [ref=f2e38]: "-"
+        - generic [ref=f2e39]: Rajalakshmi Engineering College
+      - generic [ref=f2e40]:
+        - generic [ref=f2e41]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f2e42]: "-"
+        - generic [ref=f2e43]: Campus Laundry Services

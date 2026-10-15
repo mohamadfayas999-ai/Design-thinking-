@@ -5,6 +5,12 @@ export const Role = {
 } as const;
 export type Role = (typeof Role)[keyof typeof Role];
 
+export const EnvironmentType = {
+  COLLEGE: 'COLLEGE',
+  PG_SHARED: 'PG_SHARED',
+} as const;
+export type EnvironmentType = (typeof EnvironmentType)[keyof typeof EnvironmentType];
+
 export const BookingStatus = {
   BOOKED: 'BOOKED',
   CANCELLED: 'CANCELLED',

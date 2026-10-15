@@ -3,43 +3,13 @@ import { prisma } from '../prisma.js';
 import { AuthenticatedRequest } from '../middlewares/auth.middleware.js';
 import { Role } from '../types/models.js';
 import { isSlotInFuture } from '../utils/date.js';
+import { planSmartBatches } from '../services/batchPlanning.service.js';
+import { bookMultiBatch, MultiBatchError } from '../services/multiBatchBooking.service.js';
+import { getMonthlyUsageCount } from '../utils/weekAllowance.js';
 
 const MAX_MONTHLY_USES = 4;
 const MAX_CLOTHES_TOTAL = 20;
 const MAX_CLOTHES_PER_CATEGORY = 20; // per individual category sanity check
-
-// ────────────────────────────────────────────────
-// Helper: count monthly uses for a student
-// A "use" is a booking that went beyond BOOKED status OR is currently active (BOOKED).
-// A CANCELLED booking that never progressed past BOOKED does NOT count.
-// ────────────────────────────────────────────────
-async function getMonthlyUsageCount(studentId: string): Promise<number> {
-  const now = new Date();
-  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
-  const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
-
-  // Count bookings that are BOOKED (active) OR have a related LaundryOrder (meaning they progressed)
-  const count = await prisma.slotBooking.count({
-    where: {
-      studentId,
-      createdAt: {
-        gte: startOfMonth,
-        lte: endOfMonth,
-      },
-      OR: [
-        { status: 'BOOKED' }, // Currently active booking
-        {
-          // Had a laundry order created (progressed into workflow)
-          laundryOrder: {
-            isNot: null,
-          },
-        },
-      ],
-    },
-  });
-
-  return count;
-}
 
 // ────────────────────────────────────────────────
 // GET /api/slots/available
@@ -57,10 +27,15 @@ export async function getAvailableSlots(
 
     const studentProfile = await prisma.studentProfile.findUnique({
       where: { userId: req.user.userId },
+      include: { hostel: true },
     });
 
     if (!studentProfile) {
       return res.status(404).json({ success: false, message: 'Student profile not found' });
+    }
+
+    if (studentProfile.hostel.environment !== req.user.environment) {
+      return res.status(403).json({ success: false, message: 'Access restricted: environment mismatch.' });
     }
 
     const hostelId = studentProfile.hostelId;
@@ -131,10 +106,15 @@ export async function getMyActiveBooking(
       return res.status(404).json({ success: false, message: 'Student profile not found' });
     }
 
-    const booking = await prisma.slotBooking.findFirst({
+    // 1. Find the resident's active booking (status = 'BOOKED' and not completed/verified/resolved)
+    const activeBooking = await prisma.slotBooking.findFirst({
       where: {
         studentId: studentProfile.id,
         status: 'BOOKED',
+        OR: [
+          { laundryOrder: null },
+          { laundryOrder: { status: { notIn: ['VERIFIED', 'RESOLVED'] } } },
+        ],
       },
       include: {
         slot: true,
@@ -147,72 +127,124 @@ export async function getMyActiveBooking(
           },
         },
       },
-      orderBy: { createdAt: 'desc' },
+      orderBy: [{ batchNumber: 'asc' }, { createdAt: 'desc' }],
     });
 
-    if (!booking || ['VERIFIED', 'RESOLVED'].includes(booking.laundryOrder?.status ?? '')) {
-      return res.status(200).json({ success: true, booking: null });
+    if (!activeBooking) {
+      return res.status(200).json({ success: true, booking: null, batches: [] });
     }
 
-    // Determine if student can still cancel (can only cancel if BOOKED and not in processing/completed/complained)
-    const orderStatus = booking.laundryOrder?.status ?? null;
-    const canCancel =
-      booking.status === 'BOOKED' && (!orderStatus || orderStatus === 'BOOKED');
+    // Helper to format a booking item
+    const formatBatchItem = (b: any) => {
+      const orderStatus = b.laundryOrder?.status ?? null;
+      const canCancel = b.status === 'BOOKED' && (!orderStatus || orderStatus === 'BOOKED');
+      const scan = b.aiScan || b.laundryOrder?.aiScan || null;
 
-    // Return booking info — rack/shelf/staff NEVER exposed to students
-    return res.status(200).json({
-      success: true,
-      booking: {
-        id: booking.id,
-        status: booking.status,
-        bookedAt: booking.bookedAt,
-        // Student-visible order status (IN_PROGRESS etc.) but NOT rack/shelf/staff
-        orderStatus: orderStatus,
+      return {
+        id: b.id,
+        status: b.status,
+        bookedAt: b.bookedAt,
+        batchGroupId: b.batchGroupId,
+        batchNumber: b.batchNumber,
+        totalBatches: b.totalBatches,
+        weightGrams: b.weightGrams,
+        orderId: b.laundryOrder?.id ?? null,
+        orderStatus,
         canCancel,
         slot: {
-          id: booking.slot.id,
-          date: booking.slot.date,
-          startTime: booking.slot.startTime,
-          endTime: booking.slot.endTime,
+          id: b.slot.id,
+          date: b.slot.date,
+          startTime: b.slot.startTime,
+          endTime: b.slot.endTime,
         },
-        itemCount: booking.laundryOrder?.itemCount
+        itemCount: b.laundryOrder?.itemCount
           ? {
-              tShirtShirtCount: booking.laundryOrder.itemCount.tShirtShirtCount,
-              pantsTrackCount: booking.laundryOrder.itemCount.pantsTrackCount,
-              totalCount: booking.laundryOrder.itemCount.totalCount,
+              shirtCount: b.laundryOrder.itemCount.shirtCount,
+              tshirtCount: b.laundryOrder.itemCount.tshirtCount,
+              pantsCount: b.laundryOrder.itemCount.pantsCount,
+              jeansCount: b.laundryOrder.itemCount.jeansCount,
+              shortsCount: b.laundryOrder.itemCount.shortsCount,
+              totalWeightGrams: b.laundryOrder.itemCount.totalWeightGrams,
+              tShirtShirtCount: b.laundryOrder.itemCount.tShirtShirtCount,
+              pantsTrackCount: b.laundryOrder.itemCount.pantsTrackCount,
+              totalCount: b.laundryOrder.itemCount.totalCount,
             }
           : null,
-        complaint: booking.laundryOrder?.complaint
+        complaint: b.laundryOrder?.complaint
           ? {
-              id: booking.laundryOrder.complaint.id,
-              type: booking.laundryOrder.complaint.type,
-              status: booking.laundryOrder.complaint.status,
-              additionalDetails: booking.laundryOrder.complaint.additionalDetails,
-              createdAt: booking.laundryOrder.complaint.createdAt,
-              resolvedAt: booking.laundryOrder.complaint.resolvedAt,
+              id: b.laundryOrder.complaint.id,
+              type: b.laundryOrder.complaint.type,
+              status: b.laundryOrder.complaint.status,
+              additionalDetails: b.laundryOrder.complaint.additionalDetails,
+              createdAt: b.laundryOrder.complaint.createdAt,
+              resolvedAt: b.laundryOrder.complaint.resolvedAt,
             }
           : null,
-        aiScan: (booking.aiScan || booking.laundryOrder?.aiScan)
+        aiScan: scan
           ? {
-              id: (booking.aiScan || booking.laundryOrder?.aiScan)!.id,
-              visibleClothingCount: (booking.aiScan || booking.laundryOrder?.aiScan)!.visibleClothingCount,
-              clothingType: (booking.aiScan || booking.laundryOrder?.aiScan)!.clothingType,
-              mainColor: (booking.aiScan || booking.laundryOrder?.aiScan)!.mainColor,
-              possibleStain: (booking.aiScan || booking.laundryOrder?.aiScan)!.possibleStain,
-              stainSeverity: (booking.aiScan || booking.laundryOrder?.aiScan)!.stainSeverity,
-              confidence: (booking.aiScan || booking.laundryOrder?.aiScan)!.confidence,
-              washMode: (booking.aiScan || booking.laundryOrder?.aiScan)!.washMode,
-              preTreatment: (booking.aiScan || booking.laundryOrder?.aiScan)!.preTreatment,
-              detergentLevel: (booking.aiScan || booking.laundryOrder?.aiScan)!.detergentLevel,
-              staffConfirmed: (booking.aiScan || booking.laundryOrder?.aiScan)!.staffConfirmed,
-              confirmedType: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedType,
-              confirmedColor: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedColor,
-              confirmedStain: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedStain,
-              confirmedSeverity: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedSeverity,
-              confirmedRecommendation: (booking.aiScan || booking.laundryOrder?.aiScan)!.confirmedRecommendation,
+              id: scan.id,
+              visibleClothingCount: scan.visibleClothingCount,
+              clothingType: scan.clothingType,
+              mainColor: scan.mainColor,
+              possibleStain: scan.possibleStain,
+              stainSeverity: scan.stainSeverity,
+              confidence: scan.confidence,
+              washMode: scan.washMode,
+              preTreatment: scan.preTreatment,
+              detergentLevel: scan.detergentLevel,
+              staffConfirmed: scan.staffConfirmed,
+              confirmedType: scan.confirmedType,
+              confirmedColor: scan.confirmedColor,
+              confirmedStain: scan.confirmedStain,
+              confirmedSeverity: scan.confirmedSeverity,
+              confirmedRecommendation: scan.confirmedRecommendation,
             }
           : null,
+      };
+    };
+
+    // 2. If part of a multi-batch group, query all batches in the group for this student
+    let allBatches: any[] = [];
+    if (activeBooking.batchGroupId) {
+      const groupBookings = await prisma.slotBooking.findMany({
+        where: {
+          studentId: studentProfile.id,
+          batchGroupId: activeBooking.batchGroupId,
+        },
+        include: {
+          slot: true,
+          aiScan: true,
+          laundryOrder: {
+            include: {
+              itemCount: true,
+              complaint: true,
+              aiScan: true,
+            },
+          },
+        },
+        orderBy: { batchNumber: 'asc' },
+      });
+      allBatches = groupBookings.map(formatBatchItem);
+    } else {
+      allBatches = [formatBatchItem(activeBooking)];
+    }
+
+    const primaryFormatted = formatBatchItem(activeBooking);
+    const isMultiBatch = (activeBooking.totalBatches ?? 1) > 1 || allBatches.length > 1;
+
+    // Return primary booking enriched with batches array for 100% backward compatibility
+    return res.status(200).json({
+      success: true,
+      hasActiveBooking: true,
+      isMultiBatch,
+      batchGroupId: activeBooking.batchGroupId ?? null,
+      totalBatches: activeBooking.totalBatches ?? 1,
+      booking: {
+        ...primaryFormatted,
+        isMultiBatch,
+        batches: allBatches,
       },
+      batches: allBatches,
     });
   } catch (error) {
     next(error);
@@ -318,10 +350,26 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
     // ── 4. Get the slot & verify it exists ──
     const slot = await prisma.laundrySlot.findUnique({
       where: { id: slotId },
+      include: { hostel: true },
     });
 
     if (!slot) {
       return res.status(404).json({ success: false, message: 'Laundry slot not found.' });
+    }
+
+    if (slot.hostel.environment !== req.user.environment) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: slot belongs to another environment.',
+      });
+    }
+
+    // ── 5. Hostel isolation: slot must belong to student's hostel ──
+    if (slot.hostelId !== studentProfile.hostelId) {
+      return res.status(403).json({
+        success: false,
+        message: 'You are not authorized to book this laundry slot.',
+      });
     }
 
     if (!slot.isActive) {
@@ -336,81 +384,68 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
       });
     }
 
-    // ── 5. Hostel isolation: slot must belong to student's hostel ──
-    if (slot.hostelId !== studentProfile.hostelId) {
-      return res.status(403).json({
-        success: false,
-        message: 'You are not authorized to book this laundry slot.',
-      });
-    }
-
-    // ── 6. Monthly usage check ──
-    const usedCount = await getMonthlyUsageCount(studentProfile.id);
-    if (usedCount >= MAX_MONTHLY_USES) {
-      return res.status(400).json({
-        success: false,
-        message: `You have reached your monthly laundry limit of ${MAX_MONTHLY_USES} uses.`,
-      });
-    }
-
-    // ── 7. Duplicate booking check: student can't have 2 active bookings for same slot ──
-    const existingBooking = await prisma.slotBooking.findFirst({
-      where: {
-        studentId: studentProfile.id,
-        slotId,
-        status: 'BOOKED',
-      },
-    });
-
-    if (existingBooking) {
-      return res.status(409).json({
-        success: false,
-        message: 'You already have a booking for this laundry slot.',
-      });
-    }
-
-    // Also check: student can't have more than 1 active booking at any time
-    const anyActiveBooking = await prisma.slotBooking.findFirst({
-      where: {
-        studentId: studentProfile.id,
-        status: 'BOOKED',
-        OR: [
-          { laundryOrder: null },
-          { laundryOrder: { status: { in: ['BOOKED', 'IN_PROGRESS', 'COMPLETED', 'UNDER_REVIEW'] } } },
-        ],
-      },
-    });
-
-    if (anyActiveBooking) {
-      return res.status(409).json({
-        success: false,
-        message: 'You already have an active laundry booking. Please cancel it before booking a new one.',
-      });
-    }
-
-    // ── 8. Re-check slot capacity (race condition safety) ──
-    const bookedCount = await prisma.slotBooking.count({
-      where: {
-        slotId,
-        status: 'BOOKED',
-      },
-    });
-
-    if (bookedCount >= slot.capacity) {
-      return res.status(409).json({
-        success: false,
-        message: 'This laundry slot is full. Please choose another slot.',
-      });
-    }
-
-    // ── 9. Create booking + item count atomically ──
+    // ── 6. Execute atomic booking under resident and slot locks ──
     const result = await prisma.$transaction(async (tx) => {
-      // Create the slot booking
+      // Step A: Resident-level advisory lock (consistent lock ordering with multi-batch: Resident -> Slot)
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('resident-booking-' || ${studentProfile.id})::bigint)`;
+
+      // Step B: Monthly usage check under lock (Policy: 1 session = 1 use in current creation month)
+      const usedCount = await getMonthlyUsageCount(studentProfile.id, new Date(), tx);
+      if (usedCount >= MAX_MONTHLY_USES) {
+        throw new Error(`MONTHLY_LIMIT_REACHED: You have reached your monthly laundry limit of ${MAX_MONTHLY_USES} uses.`);
+      }
+
+      // Step C: Duplicate booking check: student can't have 2 active bookings for same slot
+      const existingBooking = await tx.slotBooking.findFirst({
+        where: {
+          studentId: studentProfile.id,
+          slotId,
+          status: 'BOOKED',
+        },
+      });
+
+      if (existingBooking) {
+        throw new Error('DUPLICATE_SLOT_BOOKING: You already have a booking for this laundry slot.');
+      }
+
+      // Step D: Active booking guard: student can't have more than 1 active booking at any time
+      const anyActiveBooking = await tx.slotBooking.findFirst({
+        where: {
+          studentId: studentProfile.id,
+          status: 'BOOKED',
+          OR: [
+            { laundryOrder: null },
+            { laundryOrder: { status: { in: ['BOOKED', 'IN_PROGRESS', 'COMPLETED', 'UNDER_REVIEW'] } } },
+          ],
+        },
+      });
+
+      if (anyActiveBooking) {
+        throw new Error('ACTIVE_BOOKING_EXISTS: You already have an active laundry booking. Please cancel it before booking a new one.');
+      }
+
+      // Step E: Row-level lock on LaundrySlot to protect capacity
+      await tx.$executeRaw`SELECT id FROM "LaundrySlot" WHERE id = ${slotId} FOR UPDATE`;
+
+      const bookedCount = await tx.slotBooking.count({
+        where: {
+          slotId,
+          status: 'BOOKED',
+        },
+      });
+
+      if (bookedCount >= slot.capacity) {
+        throw new Error('SLOT_FULL: This laundry slot is full. Please choose another slot.');
+      }
+
+      // Step F: Create the slot booking with recorded weight
+      const estimatedWeight = (tCount * 190) + (pCount * 450);
       const booking = await tx.slotBooking.create({
         data: {
           studentId: studentProfile.id,
           slotId,
           status: 'BOOKED',
+          weightGrams: estimatedWeight,
         },
       });
 
@@ -420,6 +455,7 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
           tShirtShirtCount: tCount,
           pantsTrackCount: pCount,
           totalCount: totalClothes,
+          totalWeightGrams: estimatedWeight,
           isLocked: false,
         },
       });
@@ -484,7 +520,31 @@ export async function bookSlot(req: AuthenticatedRequest, res: Response, next: N
         },
       },
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error.message && error.message.startsWith('MONTHLY_LIMIT_REACHED:')) {
+      return res.status(400).json({
+        success: false,
+        message: error.message.replace('MONTHLY_LIMIT_REACHED: ', ''),
+      });
+    }
+    if (error.message && error.message.startsWith('DUPLICATE_SLOT_BOOKING:')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message.replace('DUPLICATE_SLOT_BOOKING: ', ''),
+      });
+    }
+    if (error.message && error.message.startsWith('ACTIVE_BOOKING_EXISTS:')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message.replace('ACTIVE_BOOKING_EXISTS: ', ''),
+      });
+    }
+    if (error.message && error.message.startsWith('SLOT_FULL:')) {
+      return res.status(409).json({
+        success: false,
+        message: error.message.replace('SLOT_FULL: ', ''),
+      });
+    }
     next(error);
   }
 }
@@ -517,10 +577,10 @@ export async function cancelBooking(
       return res.status(404).json({ success: false, message: 'Student profile not found.' });
     }
 
-    // Fetch the booking
+    // Fetch the booking with slot and hostel info for facility/environment checks
     const booking = await prisma.slotBooking.findUnique({
       where: { id: bookingId },
-      include: { laundryOrder: true },
+      include: { laundryOrder: true, slot: { include: { hostel: true } } },
     });
 
     if (!booking) {
@@ -535,6 +595,17 @@ export async function cancelBooking(
       });
     }
 
+    // Verify facility and environment isolation
+    if (
+      booking.slot.hostelId !== studentProfile.hostelId ||
+      booking.slot.hostel.environment !== req.user.environment
+    ) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: booking facility or environment mismatch.',
+      });
+    }
+
     // Can only cancel while BOOKED and NOT yet in processing
     if (booking.status !== 'BOOKED') {
       return res.status(400).json({
@@ -543,7 +614,15 @@ export async function cancelBooking(
       });
     }
 
-    // Phase 3: Prevent cancellation if laundry order is IN_PROGRESS (staff already processed intake)
+    // Phase 4 requirement: cancellation strictly before slot start time
+    if (!isSlotInFuture(booking.slot.date, booking.slot.startTime)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Cancellation is only permitted strictly before the slot start time.',
+      });
+    }
+
+    // Prevent cancellation if laundry order is IN_PROGRESS (staff already processed intake)
     if (booking.laundryOrder && booking.laundryOrder.status === 'IN_PROGRESS') {
       return res.status(400).json({
         success: false,
@@ -551,9 +630,11 @@ export async function cancelBooking(
       });
     }
 
-    // Cancel the booking and remove the laundry order (since it never progressed)
+    // Cancel the booking and update order status (preserve records and history)
     await prisma.$transaction(async (tx) => {
-      // Update booking status to CANCELLED
+      // Serialize cancellation with any concurrent booking attempts for this resident
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('resident-booking-' || ${studentProfile.id})::bigint)`;
+
       await tx.slotBooking.update({
         where: { id: bookingId },
         data: {
@@ -562,26 +643,280 @@ export async function cancelBooking(
         },
       });
 
-      // If a laundry order was created, delete it so the pre-intake cancel
-      // doesn't permanently count against the monthly quota
       if (booking.laundryOrder) {
-        // Also delete the item count
-        if (booking.laundryOrder.itemCountId) {
-          await tx.itemCount.delete({
-            where: { id: booking.laundryOrder.itemCountId },
-          }).catch(() => {}); // ignore if already gone
-        }
-        await tx.laundryOrder.delete({
+        await tx.laundryOrder.update({
           where: { id: booking.laundryOrder.id },
+          data: {
+            status: 'CANCELLED',
+          },
         });
       }
     });
 
     return res.status(200).json({
       success: true,
-      message: 'Booking cancelled successfully. The slot has been released.',
+      message: 'Booking cancelled successfully. Slot capacity and weekly allowance have been restored.',
     });
   } catch (error) {
     next(error);
   }
 }
+
+// ────────────────────────────────────────────────
+// POST /api/slots/plan-batch
+// Phase 3: Smart batch planning and advisory slot recommendations
+// Read-only advisory calculation; zero database writes.
+// ────────────────────────────────────────────────
+export async function planBatchHandler(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user || req.user.role !== Role.STUDENT) {
+      return res.status(403).json({ success: false, message: 'Student access only.' });
+    }
+
+    const { garmentCounts, targetDate } = req.body;
+
+    if (!garmentCounts || typeof garmentCounts !== 'object' || Array.isArray(garmentCounts)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "garmentCounts" must be an object with garment counts.',
+      });
+    }
+
+    if (targetDate && typeof targetDate !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "targetDate" must be a string formatted as YYYY-MM-DD.',
+      });
+    }
+
+    const planningResult = await planSmartBatches({
+      studentUserId: req.user.userId,
+      garmentCounts,
+      targetDate,
+    });
+
+    return res.status(200).json(planningResult);
+  } catch (error: any) {
+    if (error.message && error.message.includes('must be a non-negative integer')) {
+      return res.status(400).json({ success: false, message: error.message });
+    }
+    next(error);
+  }
+}
+
+// ────────────────────────────────────────────────
+// POST /api/slots/book-multi-batch
+// Phase 4: Atomic multi-batch booking with row locks, capacity demand aggregation,
+// scheduled-week allowance checking, and idempotency protection.
+// ────────────────────────────────────────────────
+export async function bookMultiBatchHandler(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user || req.user.role !== Role.STUDENT) {
+      return res.status(403).json({ success: false, message: 'Student access only.' });
+    }
+
+    const { garmentCounts, batchSlotAssignments, idempotencyKey } = req.body;
+
+    if (!idempotencyKey || typeof idempotencyKey !== 'string' || idempotencyKey.trim().length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "idempotencyKey" must be a non-empty string UUID.',
+      });
+    }
+
+    if (!garmentCounts || typeof garmentCounts !== 'object' || Array.isArray(garmentCounts)) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "garmentCounts" must be an object with garment counts.',
+      });
+    }
+
+    if (!Array.isArray(batchSlotAssignments) || batchSlotAssignments.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "batchSlotAssignments" must be a non-empty array of batch-to-slot mappings.',
+      });
+    }
+
+    const result = await bookMultiBatch({
+      studentUserId: req.user.userId,
+      garmentCounts,
+      batchSlotAssignments,
+      idempotencyKey: idempotencyKey.trim(),
+    });
+
+    const statusCode = result.isIdempotentReplay ? 200 : 201;
+    return res.status(statusCode).json({
+      success: true,
+      ...result,
+    });
+  } catch (error: any) {
+    if (error instanceof MultiBatchError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        details: error.details,
+      });
+    }
+    next(error);
+  }
+}
+
+// ────────────────────────────────────────────────
+// DELETE /api/slots/cancel-batch-group/:groupId
+// Phase 4: Atomic batch-group cancellation
+// All-or-nothing cancellation with strict future slot check and historical record preservation.
+// ────────────────────────────────────────────────
+export async function cancelBatchGroupHandler(
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    if (!req.user || req.user.role !== Role.STUDENT) {
+      return res.status(403).json({ success: false, message: 'Student access only.' });
+    }
+
+    const { groupId } = req.params;
+    if (!groupId || typeof groupId !== 'string') {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid request: "groupId" parameter is required.',
+      });
+    }
+
+    const studentProfile = await prisma.studentProfile.findUnique({
+      where: { userId: req.user.userId },
+    });
+
+    if (!studentProfile) {
+      return res.status(404).json({ success: false, message: 'Student profile not found.' });
+    }
+
+    const bookings = await prisma.slotBooking.findMany({
+      where: { batchGroupId: groupId },
+      include: {
+        slot: {
+          include: {
+            hostel: true,
+          },
+        },
+        laundryOrder: true,
+      },
+      orderBy: { batchNumber: 'asc' },
+    });
+
+    if (bookings.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: 'Batch group not found.',
+      });
+    }
+
+    // Verify ownership
+    const nonOwned = bookings.find((b) => b.studentId !== studentProfile.id);
+    if (nonOwned) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access denied: You do not own all bookings in this batch group.',
+      });
+    }
+
+    // Verify environment and facility isolation
+    const isolationMismatch = bookings.find(
+      (b) =>
+        b.slot.hostelId !== studentProfile.hostelId ||
+        b.slot.hostel.environment !== req.user!.environment
+    );
+    if (isolationMismatch) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: booking facility or environment mismatch.',
+      });
+    }
+
+    // Check if entire group is already cancelled
+    const activeBookings = bookings.filter((b) => b.status !== 'CANCELLED');
+    if (activeBookings.length === 0) {
+      return res.status(400).json({
+        success: false,
+        message: 'All bookings in this batch group have already been cancelled.',
+      });
+    }
+
+    // Validate every active booking's eligibility for cancellation (all-or-nothing)
+    for (const b of activeBookings) {
+      if (b.status !== 'BOOKED') {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot cancel batch group: batch ${b.batchNumber} has status "${b.status}".`,
+        });
+      }
+
+      // Must be strictly before slot start time
+      if (!isSlotInFuture(b.slot.date, b.slot.startTime)) {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot cancel batch group: batch ${b.batchNumber} slot start time has already arrived or passed.`,
+        });
+      }
+
+      // Check if order is already being processed
+      if (b.laundryOrder && b.laundryOrder.status === 'IN_PROGRESS') {
+        return res.status(400).json({
+          success: false,
+          message: `Cannot cancel batch group: batch ${b.batchNumber} is already in progress.`,
+        });
+      }
+    }
+
+    // Atomic cancellation in transaction
+    await prisma.$transaction(async (tx) => {
+      // Serialize cancellation with any concurrent booking attempts for this resident
+      await tx.$executeRaw`SELECT pg_advisory_xact_lock(hashtext('resident-booking-' || ${studentProfile.id})::bigint)`;
+
+      const now = new Date();
+      const activeBookingIds = activeBookings.map((b) => b.id);
+      const activeOrderIds = activeBookings
+        .map((b) => b.laundryOrder?.id)
+        .filter((id): id is string => typeof id === 'string');
+
+      await tx.slotBooking.updateMany({
+        where: { id: { in: activeBookingIds } },
+        data: {
+          status: 'CANCELLED',
+          cancelledAt: now,
+        },
+      });
+
+      if (activeOrderIds.length > 0) {
+        await tx.laundryOrder.updateMany({
+          where: { id: { in: activeOrderIds } },
+          data: {
+            status: 'CANCELLED',
+          },
+        });
+      }
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: `Batch group ${groupId} cancelled successfully. Slot capacity and weekly allowance have been restored.`,
+      batchGroupId: groupId,
+      cancelledBatches: activeBookings.length,
+      totalBatches: bookings.length,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+

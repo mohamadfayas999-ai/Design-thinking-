@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, useReducedMotion } from 'framer-motion';
-import { GraduationCap, Shirt, ShieldCheck, ArrowRight, Droplets, Clock, CheckCircle2, Building2 } from 'lucide-react';
+import { GraduationCap, Shirt, ArrowRight, Droplets, Clock, CheckCircle2, Building2 } from 'lucide-react';
 import { Card } from '../components/common/Card';
 import { PageTransition } from '../components/common/PageTransition';
 import {
@@ -74,11 +74,11 @@ export const LandingPage: React.FC = () => {
         </motion.div>
       </section>
 
-      {/* Primary Role Choice Cards (Exactly 3 choices: Student, Laundry Staff, Admin) */}
-      <section className="max-w-5xl mx-auto">
+      {/* Primary Login Choice Cards (Exactly 2 choices: Rajalakshmi Engineering College & PG Hostel) */}
+      <section className="max-w-4xl mx-auto">
         <div className="text-center mb-6">
           <h2 className="text-xs uppercase tracking-widest font-bold text-slate-500">
-            Select Your Portal to Continue
+            Select Your Accommodation Portal
           </h2>
         </div>
 
@@ -86,14 +86,14 @@ export const LandingPage: React.FC = () => {
           variants={staggerContainerVariants}
           initial={shouldReduceMotion ? false : 'initial'}
           animate="animate"
-          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+          className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
-          {/* Choice 1: Student */}
+          {/* Option 1: Rajalakshmi Engineering College */}
           <motion.div variants={staggerItemVariants}>
             <Card
               hoverEffect
               className="h-full flex flex-col justify-between border-slate-200/80 hover:border-water-400 group cursor-pointer"
-              onClick={() => navigate('/student/login')}
+              onClick={() => navigate('/student/login?portal=rec')}
             >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-water-50 text-water-600 border border-water-100 flex items-center justify-center mb-5 group-hover:bg-water-600 group-hover:text-white transition-colors duration-200">
@@ -101,86 +101,88 @@ export const LandingPage: React.FC = () => {
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold text-slate-900 group-hover:text-water-700 transition-colors">
-                    Student
+                    Rajalakshmi Engineering College
                   </h3>
                   <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-water-50 text-water-700 border border-water-200">
-                    Hostel Access
+                    REC Campus
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Select your hostel, sign in with your student ID, book laundry slots, and track processing till pickup.
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  Official on-campus laundry service exclusively for REC students. Select from <strong>Girls</strong>, <strong>Thandalam</strong>, or <strong>Habitat</strong> hostels to schedule and track laundry runs.
                 </p>
+                <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-water-800 font-medium mb-6">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">Girls Hostel</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">Thandalam Hostel</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">Habitat Hostel</span>
+                </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-water-700 group-hover:text-water-800">
-                <span>Enter Student Portal</span>
+                <span>Enter REC Portal</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </Card>
           </motion.div>
 
-          {/* Choice 2: Laundry Staff */}
+          {/* Option 2: PG Hostel */}
           <motion.div variants={staggerItemVariants}>
             <Card
               hoverEffect
               className="h-full flex flex-col justify-between border-slate-200/80 hover:border-water-400 group cursor-pointer"
-              onClick={() => navigate('/staff/login')}
+              onClick={() => navigate('/student/login?portal=pg')}
             >
               <div>
                 <div className="w-12 h-12 rounded-xl bg-water-50 text-water-600 border border-water-100 flex items-center justify-center mb-5 group-hover:bg-water-600 group-hover:text-white transition-colors duration-200">
-                  <Shirt className="w-6 h-6" />
+                  <Building2 className="w-6 h-6" />
                 </div>
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="text-xl font-bold text-slate-900 group-hover:text-water-700 transition-colors">
-                    Laundry Staff
+                    PG Hostel
                   </h3>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-amber-50 text-amber-700 border border-amber-200">
-                    Operations
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-cyan-50 text-cyan-700 border border-cyan-200">
+                    PG & Shared Living
                   </span>
                 </div>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Manage hostel laundry intake, assign rack and shelf locations, update washing status, and handle student returns.
+                <p className="text-xs text-slate-600 leading-relaxed mb-4">
+                  Dedicated shared accommodation laundry portal. Access demo resident accounts for <strong>User 1</strong>, <strong>User 2</strong>, <strong>User 3</strong>, and <strong>User 4</strong> across PG facilities.
                 </p>
+                <div className="flex items-center gap-1.5 flex-wrap text-[11px] text-slate-600 font-medium mb-6">
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">User 1</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">User 2</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">User 3</span>
+                  <span className="px-2 py-0.5 rounded bg-slate-100 border border-slate-200/60">User 4</span>
+                </div>
               </div>
 
               <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-water-700 group-hover:text-water-800">
-                <span>Enter Staff Portal</span>
-                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </Card>
-          </motion.div>
-
-          {/* Choice 3: Admin */}
-          <motion.div variants={staggerItemVariants}>
-            <Card
-              hoverEffect
-              className="h-full flex flex-col justify-between border-slate-200/80 hover:border-water-400 group cursor-pointer"
-              onClick={() => navigate('/admin/login')}
-            >
-              <div>
-                <div className="w-12 h-12 rounded-xl bg-water-50 text-water-600 border border-water-100 flex items-center justify-center mb-5 group-hover:bg-water-600 group-hover:text-white transition-colors duration-200">
-                  <ShieldCheck className="w-6 h-6" />
-                </div>
-                <div className="flex items-center justify-between mb-2">
-                  <h3 className="text-xl font-bold text-slate-900 group-hover:text-water-700 transition-colors">
-                    Admin
-                  </h3>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
-                    College Wide
-                  </span>
-                </div>
-                <p className="text-xs text-slate-600 leading-relaxed mb-6">
-                  Centralized monitoring across all three hostels, review booking capacity, resolve student complaints, and audit records.
-                </p>
-              </div>
-
-              <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-water-700 group-hover:text-water-800">
-                <span>Enter Admin Portal</span>
+                <span>Enter PG Hostel Portal</span>
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </div>
             </Card>
           </motion.div>
         </motion.div>
+
+        {/* Secondary Staff & Administrative Access */}
+        <div className="mt-8 pt-4 border-t border-slate-200/60 text-center">
+          <p className="text-xs text-slate-500">
+            Staff & Administrative Operations:{' '}
+            <button
+              type="button"
+              onClick={() => navigate('/staff/login')}
+              className="text-water-700 hover:text-water-800 font-semibold underline underline-offset-2 ml-1"
+            >
+              Laundry Staff Login
+            </button>
+            <span className="mx-2 text-slate-300">|</span>
+            <button
+              type="button"
+              onClick={() => navigate('/admin/login')}
+              className="text-water-700 hover:text-water-800 font-semibold underline underline-offset-2"
+            >
+              College Administrator Login
+            </button>
+          </p>
+        </div>
       </section>
 
       {/* Key System Highlights */}

@@ -1,63 +1,73 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
-generator client {
-  provider = "prisma-client-js"
+enum EnvironmentType {
+  COLLEGE
+  PG_SHARED
 }
 
 model Hostel {
   id                 String              @id @default(cuid())
-  name               String              @unique // "Habitat", "Thandalam", "Girls"
-  code               String              @unique // "HABITAT", "THANDALAM", "GIRLS"
+  name               String              @unique
+  code               String              @unique
   description        String?
-  users              User[]
-  students           StudentProfile[]
-  staff              StaffProfile[]
-  laundrySlots       LaundrySlot[]
-  rackShelfLocations RackShelfLocation[]
-  laundryOrders      LaundryOrder[]
+  environment        EnvironmentType     @default(COLLEGE)
   createdAt          DateTime            @default(now())
   updatedAt          DateTime            @updatedAt
+  laundryOrders      LaundryOrder[]
+  laundrySlots       LaundrySlot[]
+  rackShelfLocations RackShelfLocation[]
+  staff              StaffProfile[]
+  students           StudentProfile[]
+  users              User[]
+
+  @@index([environment])
 }
 
 model User {
   id             String          @id @default(cuid())
   email          String          @unique
   passwordHash   String
-  role           String // "STUDENT", "STAFF", "ADMIN"
+  role           String
   hostelId       String?
-  hostel         Hostel?         @relation(fields: [hostelId], references: [id])
+  environment    EnvironmentType @default(COLLEGE)
   isActive       Boolean         @default(true)
-  studentProfile StudentProfile?
-  staffProfile   StaffProfile?
-  notifications  Notification[]
-  auditLogs      AuditLog[]      @relation("UserAuditLogs")
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
+  auditLogs      AuditLog[]      @relation("UserAuditLogs")
+  notifications  Notification[]
+  staffProfile   StaffProfile?
+  studentProfile StudentProfile?
+  hostel         Hostel?         @relation(fields: [hostelId], references: [id])
 
   @@index([email])
   @@index([role])
+  @@index([environment])
 }
 
 model StudentProfile {
   id               String           @id @default(cuid())
   userId           String           @unique
-  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
-  studentId        String           @unique // e.g. "2024CSD001"
-  name             String // e.g. "Student One"
-  department       String // e.g. "CSD"
-  admissionYear    Int // e.g. 2024
+  studentId        String           @unique
+  name             String
+  department       String
+  admissionYear    Int
   hostelId         String
-  hostel           Hostel           @relation(fields: [hostelId], references: [id])
-  permanentQrToken String           @unique // Opaque random token - no PII
-  slotBookings     SlotBooking[]
-  laundryOrders    LaundryOrder[]
-  complaints       Complaint[]
-  laundryHistories LaundryHistory[]
+  permanentQrToken String           @unique
   createdAt        DateTime         @default(now())
   updatedAt        DateTime         @updatedAt
+  complaints       Complaint[]
+  laundryHistories LaundryHistory[]
+  laundryOrders    LaundryOrder[]
+  slotBookings     SlotBooking[]
+  hostel           Hostel           @relation(fields: [hostelId], references: [id])
+  user             User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([hostelId])
 }
@@ -65,14 +75,14 @@ model StudentProfile {
 model StaffProfile {
   id            String         @id @default(cuid())
   userId        String         @unique
-  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
-  staffId       String         @unique // e.g. "STF-HAB-001"
+  staffId       String         @unique
   name          String
   hostelId      String
-  hostel        Hostel         @relation(fields: [hostelId], references: [id])
-  laundryOrders LaundryOrder[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  laundryOrders LaundryOrder[]
+  hostel        Hostel         @relation(fields: [hostelId], references: [id])
+  user          User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([hostelId])
 }
@@ -80,60 +90,72 @@ model StaffProfile {
 model LaundrySlot {
   id           String        @id @default(cuid())
   hostelId     String
-  hostel       Hostel        @relation(fields: [hostelId], references: [id])
-  date         String // YYYY-MM-DD
-  startTime    String // e.g. "09:00 AM"
-  endTime      String // e.g. "10:00 AM"
+  date         String
+  startTime    String
+  endTime      String
   capacity     Int           @default(10)
   isActive     Boolean       @default(true)
-  slotBookings SlotBooking[]
   createdAt    DateTime      @default(now())
   updatedAt    DateTime      @updatedAt
+  hostel       Hostel        @relation(fields: [hostelId], references: [id])
+  slotBookings SlotBooking[]
 
   @@index([hostelId, date])
 }
 
 model SlotBooking {
-  id           String        @id @default(cuid())
+  id           String         @id @default(cuid())
   studentId    String
-  student      StudentProfile @relation(fields: [studentId], references: [id])
   slotId       String
-  slot         LaundrySlot   @relation(fields: [slotId], references: [id])
-  status       String        @default("BOOKED") // "BOOKED", "CANCELLED"
-  bookedAt     DateTime      @default(now())
+  status       String         @default("BOOKED")
+  batchGroupId String?
+  batchNumber  Int            @default(1)
+  totalBatches Int            @default(1)
+  weightGrams  Int?
+  bookedAt     DateTime       @default(now())
   cancelledAt  DateTime?
-  laundryOrder LaundryOrder?
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   aiScan       AiScan?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  laundryOrder LaundryOrder?
+  slot         LaundrySlot    @relation(fields: [slotId], references: [id])
+  student      StudentProfile @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
   @@index([slotId])
+  @@index([batchGroupId])
 }
 
 model ItemCount {
-  id               String        @id @default(cuid())
-  tShirtShirtCount Int           @default(0)
-  pantsTrackCount  Int           @default(0)
-  totalCount       Int           @default(0)
-  isLocked         Boolean       @default(false)
-  lockedAt         DateTime?
-  laundryOrder     LaundryOrder?
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  id                 String        @id @default(cuid())
+  tShirtShirtCount   Int           @default(0)
+  pantsTrackCount    Int           @default(0)
+  totalCount         Int           @default(0)
+  shirtCount         Int           @default(0)
+  tshirtCount        Int           @default(0)
+  pantsCount         Int           @default(0)
+  jeansCount         Int           @default(0)
+  shortsCount        Int           @default(0)
+  totalWeightGrams   Int           @default(0)
+  unmappedReviewJson String?
+  isLocked           Boolean       @default(false)
+  lockedAt           DateTime?
+  createdAt          DateTime      @default(now())
+  updatedAt          DateTime      @updatedAt
+  laundryOrder       LaundryOrder?
 }
 
 model RackShelfLocation {
   id            String         @id @default(cuid())
   hostelId      String
-  hostel        Hostel         @relation(fields: [hostelId], references: [id])
   rackNumber    Int
   shelfNumber   Int
-  label         String // e.g. "Rack 1 - Shelf 2"
+  label         String
   isActive      Boolean        @default(true)
-  laundryOrders LaundryOrder[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
+  laundryOrders LaundryOrder[]
+  hostel        Hostel         @relation(fields: [hostelId], references: [id])
 
   @@unique([hostelId, rackNumber, shelfNumber])
 }
@@ -141,27 +163,27 @@ model RackShelfLocation {
 model LaundryOrder {
   id          String             @id @default(cuid())
   studentId   String
-  student     StudentProfile     @relation(fields: [studentId], references: [id])
   bookingId   String             @unique
-  booking     SlotBooking        @relation(fields: [bookingId], references: [id])
   hostelId    String
-  hostel      Hostel             @relation(fields: [hostelId], references: [id])
   staffId     String?
-  staff       StaffProfile?      @relation(fields: [staffId], references: [id])
   rackShelfId String?
-  rackShelf   RackShelfLocation? @relation(fields: [rackShelfId], references: [id])
   itemCountId String?            @unique
-  itemCount   ItemCount?         @relation(fields: [itemCountId], references: [id])
-  status      String             @default("BOOKED") // "BOOKED", "IN_PROGRESS", "COMPLETED", "VERIFIED", "COMPLAINT", "UNDER_REVIEW", "RESOLVED"
+  status      String             @default("BOOKED")
   submittedAt DateTime?
   startedAt   DateTime?
   completedAt DateTime?
   verifiedAt  DateTime?
-  complaint   Complaint?
-  histories   LaundryHistory[]
-  aiScan      AiScan?
   createdAt   DateTime           @default(now())
   updatedAt   DateTime           @updatedAt
+  aiScan      AiScan?
+  complaint   Complaint?
+  histories   LaundryHistory[]
+  booking     SlotBooking        @relation(fields: [bookingId], references: [id])
+  hostel      Hostel             @relation(fields: [hostelId], references: [id])
+  itemCount   ItemCount?         @relation(fields: [itemCountId], references: [id])
+  rackShelf   RackShelfLocation? @relation(fields: [rackShelfId], references: [id])
+  staff       StaffProfile?      @relation(fields: [staffId], references: [id])
+  student     StudentProfile     @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
   @@index([hostelId])
@@ -171,49 +193,49 @@ model LaundryOrder {
 model Notification {
   id        String   @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   type      String   @default("LAUNDRY_COMPLETED")
   title     String
   message   String
   isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
 }
 
 model Complaint {
-  id                String    @id @default(cuid())
-  laundryOrderId    String    @unique
-  laundryOrder      LaundryOrder @relation(fields: [laundryOrderId], references: [id])
+  id                String         @id @default(cuid())
+  laundryOrderId    String         @unique
   studentId         String
-  student           StudentProfile @relation(fields: [studentId], references: [id])
-  type              String // "CLOTHES_TORN", "NUMBER_OF_CLOTHES_REDUCED", "OTHER_ISSUE"
+  type              String
   additionalDetails String?
-  status            String    @default("UNDER_REVIEW") // "UNDER_REVIEW", "RESOLVED"
-  createdAt         DateTime  @default(now())
+  status            String         @default("UNDER_REVIEW")
+  createdAt         DateTime       @default(now())
   resolvedAt        DateTime?
+  laundryOrder      LaundryOrder   @relation(fields: [laundryOrderId], references: [id])
+  student           StudentProfile @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
   @@index([status])
 }
 
 model LaundryHistory {
-  id               String        @id @default(cuid())
+  id               String         @id @default(cuid())
   studentId        String
-  student          StudentProfile @relation(fields: [studentId], references: [id])
   laundryOrderId   String?
-  laundryOrder     LaundryOrder?  @relation(fields: [laundryOrderId], references: [id])
   bookingDate      String
   slotTiming       String
   clothesCount     Int
   processStartedAt DateTime?
   completedAt      DateTime?
-  finalOutcome     String // "VERIFIED" or "COMPLAINT"
+  finalOutcome     String
   complaintType    String?
   complaintDetails String?
   complaintStatus  String?
   resolvedAt       DateTime?
-  createdAt        DateTime      @default(now())
+  createdAt        DateTime       @default(now())
+  laundryOrder     LaundryOrder?  @relation(fields: [laundryOrderId], references: [id])
+  student          StudentProfile @relation(fields: [studentId], references: [id])
 
   @@index([studentId])
 }
@@ -221,14 +243,14 @@ model LaundryHistory {
 model AuditLog {
   id          String   @id @default(cuid())
   actorUserId String?
-  actorUser   User?    @relation("UserAuditLogs", fields: [actorUserId], references: [id])
-  action      String // e.g. "INTAKE", "COUNT_CONFIRM", "STATUS_CHANGE"
-  entityType  String // e.g. "LaundryOrder", "ItemCount"
+  action      String
+  entityType  String
   entityId    String
   oldValue    String?
   newValue    String?
   reason      String?
   createdAt   DateTime @default(now())
+  actorUser   User?    @relation("UserAuditLogs", fields: [actorUserId], references: [id])
 
   @@index([entityType, entityId])
 }
@@ -238,25 +260,17 @@ model AiScan {
   studentId               String
   hostelId                String
   bookingId               String?       @unique
-  slotBooking             SlotBooking?  @relation(fields: [bookingId], references: [id])
   laundryOrderId          String?       @unique
-  laundryOrder            LaundryOrder? @relation(fields: [laundryOrderId], references: [id])
-
-  // AI Estimates
   visibleClothingCount    Int
-  clothingType            String        // "T-Shirt/Shirt", "Pants/Track", or "UNKNOWN"
-  mainColor               String        // e.g. "Blue", "Black", "White", etc.
-  possibleStain           String        // e.g. "Possible food stain", "None visible"
-  stainSeverity           String        // "None", "Low", "Medium", "High", "Unknown"
-  confidence              String        @default("Medium") // "High", "Medium", "Low"
+  clothingType            String
+  mainColor               String
+  possibleStain           String
+  stainSeverity           String
+  confidence              String        @default("Medium")
   itemsJson               String?
-
-  // Deterministic Recommendations
   washMode                String
   preTreatment            String
   detergentLevel          String
-
-  // Staff Confirmation
   staffConfirmed          Boolean       @default(false)
   confirmedType           String?
   confirmedColor          String?
@@ -267,9 +281,10 @@ model AiScan {
   confirmedRecommendation String?
   confirmedAt             DateTime?
   confirmedByStaffId      String?
-
   createdAt               DateTime      @default(now())
   updatedAt               DateTime      @updatedAt
+  slotBooking             SlotBooking?  @relation(fields: [bookingId], references: [id])
+  laundryOrder            LaundryOrder? @relation(fields: [laundryOrderId], references: [id])
 
   @@index([studentId])
   @@index([hostelId])

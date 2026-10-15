@@ -17,6 +17,9 @@ import {
   History,
   AlertTriangle,
   ShieldCheck,
+  Sparkles,
+  Camera,
+  Play,
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../services/api';
@@ -28,6 +31,7 @@ import { LoadingSpinner } from '../../components/common/LoadingSpinner';
 import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { Modal } from '../../components/common/Modal';
 import { CompletionPopup } from '../../components/common/CompletionPopup';
+import { AiLaundryScannerModal } from '../../components/common/AiLaundryScannerModal';
 import { PageTransition } from '../../components/common/PageTransition';
 import { staggerContainerVariants, staggerItemVariants } from '../../utils/animations';
 
@@ -100,15 +104,101 @@ interface ActiveBookingCardProps {
   booking: ActiveBooking;
   onCancel: () => void;
   isCancelling: boolean;
+  isPgShared?: boolean;
+  onRefresh?: () => void;
 }
 
-const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel, isCancelling }) => {
+const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({
+  booking,
+  onCancel,
+  isCancelling,
+  isPgShared = false,
+  onRefresh,
+}) => {
+  const [pgActionLoading, setPgActionLoading] = useState<string | null>(null);
+  const [pgActionSuccess, setPgActionSuccess] = useState<string | null>(null);
+  const [pgActionError, setPgActionError] = useState<string | null>(null);
+
+  const batches = booking.batches && booking.batches.length > 0 ? booking.batches : null;
+  const isMultiBatch = Boolean(batches && batches.length > 1);
+
+  async function handleStartWash(orderId: string) {
+    setPgActionLoading(orderId);
+    setPgActionError(null);
+    try {
+      const res = await api.startPgSelfServiceWash(orderId);
+      setPgActionSuccess(res.message || 'Wash cycle started!');
+      if (onRefresh) onRefresh();
+      setTimeout(() => setPgActionSuccess(null), 4000);
+    } catch (err: any) {
+      setPgActionError(err.message || 'Failed to start wash cycle.');
+    } finally {
+      setPgActionLoading(null);
+    }
+  }
+
+  async function handleCompleteWash(orderId: string) {
+    setPgActionLoading(orderId);
+    setPgActionError(null);
+    try {
+      const res = await api.completePgSelfServiceWash(orderId);
+      setPgActionSuccess(res.message || 'Wash cycle marked as completed!');
+      if (onRefresh) onRefresh();
+      setTimeout(() => setPgActionSuccess(null), 4000);
+    } catch (err: any) {
+      setPgActionError(err.message || 'Failed to complete wash cycle.');
+    } finally {
+      setPgActionLoading(null);
+    }
+  }
+
   const isComplaint =
     booking.orderStatus === 'UNDER_REVIEW' ||
     booking.orderStatus === 'COMPLAINT' ||
     Boolean(booking.complaint);
   const isInProgress = booking.orderStatus === 'IN_PROGRESS';
   const isCompleted = booking.orderStatus === 'COMPLETED';
+
+  // Helper for batch status badge
+  const renderStatusBadge = (status: string, orderStatus: string | null) => {
+    if (status === 'CANCELLED') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200 text-[10px] font-bold">
+          CANCELLED
+        </span>
+      );
+    }
+    if (orderStatus === 'UNDER_REVIEW' || orderStatus === 'COMPLAINT') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
+          UNDER REVIEW
+        </span>
+      );
+    }
+    if (orderStatus === 'IN_PROGRESS') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-800 border border-blue-200 text-[10px] font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
+          IN PROGRESS
+        </span>
+      );
+    }
+    if (orderStatus === 'COMPLETED') {
+      return (
+        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-water-100 text-water-800 border border-water-200 text-[10px] font-bold">
+          <span className="w-1.5 h-1.5 rounded-full bg-water-500" />
+          COMPLETED
+        </span>
+      );
+    }
+    return (
+      <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-bold">
+        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+        {status}
+      </span>
+    );
+  };
 
   return (
     <Card
@@ -118,6 +208,21 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
           : 'border-water-200 bg-gradient-to-br from-white to-water-50/50'
       }`}
     >
+      {/* Toast notifications for PG Self-Service actions */}
+      {pgActionSuccess && (
+        <div className="mb-4 flex items-center gap-2 p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-xs text-emerald-800">
+          <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+          <span>{pgActionSuccess}</span>
+        </div>
+      )}
+      {pgActionError && (
+        <div className="mb-4 flex items-center gap-2 p-2.5 rounded-lg bg-red-50 border border-red-200 text-xs text-red-700">
+          <AlertCircle className="w-4 h-4 text-red-600 flex-shrink-0" />
+          <span>{pgActionError}</span>
+        </div>
+      )}
+
+      {/* Header */}
       <div className="flex items-start justify-between gap-3 mb-4">
         <div>
           <h3 className="text-sm font-bold text-slate-900 flex items-center gap-2">
@@ -128,10 +233,16 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
             ) : (
               <CheckCircle2 className="w-4 h-4 text-emerald-500" />
             )}
-            {isComplaint ? 'Active Laundry' : 'Active Booking'}
+            {isMultiBatch
+              ? `Multi-Batch Booking (${batches!.length} Batches)`
+              : isComplaint
+              ? 'Active Laundry'
+              : 'Active Booking'}
           </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            {isComplaint
+            {isMultiBatch
+              ? 'Individual batch statuses, scheduled slots, and garment breakdowns below'
+              : isComplaint
               ? 'Complaint submitted · under administrative review'
               : isInProgress
               ? 'Your laundry is currently being processed'
@@ -141,64 +252,239 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
           </p>
         </div>
 
-        {/* Status Badge */}
-        {isComplaint ? (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 text-amber-800 border border-amber-300 text-[11px] font-bold flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse" />
-            COMPLAINT UNDER REVIEW
-          </span>
-        ) : isInProgress ? (
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-blue-100 text-blue-800 text-[11px] font-bold flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-blue-500" />
-            IN PROGRESS
-          </span>
-        ) : isCompleted ? (
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-water-100 text-water-800 text-[11px] font-bold flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-water-500" />
-            COMPLETED
+        {/* Top-level Status Badge for single-batch or overall group pill */}
+        {isMultiBatch ? (
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-water-100 text-water-800 border border-water-300 text-[11px] font-bold flex-shrink-0">
+            MULTI-BATCH GROUP
           </span>
         ) : (
-          <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-bold flex-shrink-0">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
-            {booking.status}
-          </span>
+          renderStatusBadge(booking.status, booking.orderStatus)
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
-        <div className="p-3 rounded-xl bg-white border border-slate-200">
-          <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-            <Calendar className="w-3.5 h-3.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-wide">Date</span>
-          </div>
-          <p className="text-xs font-bold text-slate-800">{formatDate(booking.slot.date)}</p>
-        </div>
-        <div className="p-3 rounded-xl bg-white border border-slate-200">
-          <div className="flex items-center gap-1.5 text-slate-500 mb-1">
-            <Clock className="w-3.5 h-3.5" />
-            <span className="text-[11px] font-semibold uppercase tracking-wide">Time</span>
-          </div>
-          <p className="text-xs font-bold text-slate-800">
-            {booking.slot.startTime} – {booking.slot.endTime}
-          </p>
-        </div>
-      </div>
+      {/* Multi-Batch Group Display */}
+      {isMultiBatch ? (
+        <div className="space-y-3 mb-4">
+          {batches!.map((batch, index) => {
+            const bItemCount = batch.itemCount;
+            const bWeight = batch.weightGrams ?? bItemCount?.totalWeightGrams ?? 0;
+            const bHas5Cat =
+              bItemCount?.shirtCount !== undefined || bItemCount?.tshirtCount !== undefined;
+            const canSelfStart =
+              isPgShared &&
+              batch.orderId &&
+              batch.status === 'BOOKED' &&
+              (!batch.orderStatus || batch.orderStatus === 'BOOKED');
+            const canSelfComplete =
+              isPgShared && batch.orderId && batch.orderStatus === 'IN_PROGRESS';
 
-      {booking.itemCount && (
-        <div className="grid grid-cols-3 gap-2 mb-4">
-          <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
-            <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Shirts</p>
-            <p className="text-sm font-extrabold text-water-900">{booking.itemCount.tShirtShirtCount}</p>
-          </div>
-          <div className="p-2.5 rounded-lg bg-water-50 border border-water-200 text-center">
-            <p className="text-[10px] text-water-600 font-semibold uppercase tracking-wide">Pants</p>
-            <p className="text-sm font-extrabold text-water-900">{booking.itemCount.pantsTrackCount}</p>
-          </div>
-          <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 text-center">
-            <p className="text-[10px] text-slate-600 font-semibold uppercase tracking-wide">Total</p>
-            <p className="text-sm font-extrabold text-slate-900">{booking.itemCount.totalCount}</p>
-          </div>
+            return (
+              <div
+                key={batch.id || index}
+                className="p-3.5 rounded-xl border border-slate-200 bg-white/80 space-y-2.5"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-slate-800">
+                      Batch {batch.batchNumber || index + 1} of {batch.totalBatches || batches!.length}
+                    </span>
+                    {bWeight > 0 && (
+                      <span className="text-[10px] font-medium text-water-700 bg-water-50 px-2 py-0.5 rounded border border-water-100">
+                        {bWeight}g
+                      </span>
+                    )}
+                  </div>
+                  {renderStatusBadge(batch.status, batch.orderStatus)}
+                </div>
+
+                {/* Slot Details */}
+                <div className="grid grid-cols-2 gap-2 text-xs">
+                  <div className="flex items-center gap-1.5 text-slate-600">
+                    <Calendar className="w-3.5 h-3.5 text-slate-400" />
+                    <span>{formatDate(batch.slot.date)}</span>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-slate-600">
+                    <Clock className="w-3.5 h-3.5 text-slate-400" />
+                    <span>
+                      {batch.slot.startTime} – {batch.slot.endTime}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Garment Breakdown */}
+                {bItemCount && (
+                  <div className="p-2 rounded-lg bg-slate-50 border border-slate-100 text-[11px] text-slate-600">
+                    {bHas5Cat ? (
+                      <div className="flex flex-wrap gap-x-2 gap-y-1">
+                        <span>
+                          T-Shirts: <strong className="text-slate-800">{bItemCount.tshirtCount ?? 0}</strong>
+                        </span>
+                        <span>&bull;</span>
+                        <span>
+                          Shirts: <strong className="text-slate-800">{bItemCount.shirtCount ?? 0}</strong>
+                        </span>
+                        <span>&bull;</span>
+                        <span>
+                          Pants: <strong className="text-slate-800">{bItemCount.pantsCount ?? 0}</strong>
+                        </span>
+                        <span>&bull;</span>
+                        <span>
+                          Jeans: <strong className="text-slate-800">{bItemCount.jeansCount ?? 0}</strong>
+                        </span>
+                        <span>&bull;</span>
+                        <span>
+                          Shorts: <strong className="text-slate-800">{bItemCount.shortsCount ?? 0}</strong>
+                        </span>
+                        <span className="ml-auto font-bold text-water-800">
+                          Total: {bItemCount.totalCount} items
+                        </span>
+                      </div>
+                    ) : (
+                      <div className="flex justify-between">
+                        <span>
+                          Shirts: <strong className="text-slate-800">{bItemCount.tShirtShirtCount}</strong> &bull; Pants:{' '}
+                          <strong className="text-slate-800">{bItemCount.pantsTrackCount}</strong>
+                        </span>
+                        <span className="font-bold text-water-800">Total: {bItemCount.totalCount} items</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* PG Self-Service Controls per Batch */}
+                {canSelfStart && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full mt-2"
+                    onClick={() => handleStartWash(batch.orderId!)}
+                    isLoading={pgActionLoading === batch.orderId}
+                    icon={<Play className="w-3.5 h-3.5" />}
+                  >
+                    Start Wash Cycle (Self-Service)
+                  </Button>
+                )}
+
+                {canSelfComplete && (
+                  <Button
+                    variant="primary"
+                    size="sm"
+                    className="w-full mt-2 bg-emerald-600 hover:bg-emerald-700"
+                    onClick={() => handleCompleteWash(batch.orderId!)}
+                    isLoading={pgActionLoading === batch.orderId}
+                    icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+                  >
+                    Mark Wash Finished (Self-Service)
+                  </Button>
+                )}
+              </div>
+            );
+          })}
         </div>
+      ) : (
+        /* Single Batch / Legacy Display */
+        <>
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3 rounded-xl bg-white border border-slate-200">
+              <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+                <Calendar className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-semibold uppercase tracking-wide">Date</span>
+              </div>
+              <p className="text-xs font-bold text-slate-800">{formatDate(booking.slot.date)}</p>
+            </div>
+            <div className="p-3 rounded-xl bg-white border border-slate-200">
+              <div className="flex items-center gap-1.5 text-slate-500 mb-1">
+                <Clock className="w-3.5 h-3.5" />
+                <span className="text-[11px] font-semibold uppercase tracking-wide">Time</span>
+              </div>
+              <p className="text-xs font-bold text-slate-800">
+                {booking.slot.startTime} – {booking.slot.endTime}
+              </p>
+            </div>
+          </div>
+
+          {booking.itemCount && (
+            <div className="mb-4">
+              {booking.itemCount.shirtCount !== undefined || booking.itemCount.tshirtCount !== undefined ? (
+                <div className="grid grid-cols-5 gap-1.5 mb-2">
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[9px] text-water-600 font-semibold uppercase">T-Shirts</p>
+                    <p className="text-xs font-extrabold text-water-900">{booking.itemCount.tshirtCount ?? 0}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[9px] text-water-600 font-semibold uppercase">Shirts</p>
+                    <p className="text-xs font-extrabold text-water-900">{booking.itemCount.shirtCount ?? 0}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[9px] text-water-600 font-semibold uppercase">Pants</p>
+                    <p className="text-xs font-extrabold text-water-900">{booking.itemCount.pantsCount ?? 0}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[9px] text-water-600 font-semibold uppercase">Jeans</p>
+                    <p className="text-xs font-extrabold text-water-900">{booking.itemCount.jeansCount ?? 0}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[9px] text-water-600 font-semibold uppercase">Shorts</p>
+                    <p className="text-xs font-extrabold text-water-900">{booking.itemCount.shortsCount ?? 0}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 gap-2 mb-2">
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[10px] text-water-600 font-semibold uppercase">Shirts</p>
+                    <p className="text-sm font-extrabold text-water-900">{booking.itemCount.tShirtShirtCount}</p>
+                  </div>
+                  <div className="p-2 rounded-lg bg-water-50 border border-water-200 text-center">
+                    <p className="text-[10px] text-water-600 font-semibold uppercase">Pants</p>
+                    <p className="text-sm font-extrabold text-water-900">{booking.itemCount.pantsTrackCount}</p>
+                  </div>
+                </div>
+              )}
+              <div className="p-2.5 rounded-lg bg-slate-50 border border-slate-200 flex items-center justify-between text-xs">
+                <span className="font-semibold text-slate-700">Total Booked Quantity:</span>
+                <span className="font-bold text-water-800">
+                  {booking.itemCount.totalCount} items
+                  {(booking.weightGrams ?? booking.itemCount.totalWeightGrams ?? 0) > 0 &&
+                    ` (${booking.weightGrams ?? booking.itemCount.totalWeightGrams}g)`}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* PG Self-Service Controls for Single Batch */}
+          {isPgShared &&
+            booking.orderId &&
+            booking.status === 'BOOKED' &&
+            (!booking.orderStatus || booking.orderStatus === 'BOOKED') && (
+              <div className="mb-4">
+                <Button
+                  variant="primary"
+                  size="sm"
+                  className="w-full"
+                  onClick={() => handleStartWash(booking.orderId!)}
+                  isLoading={pgActionLoading === booking.orderId}
+                  icon={<Play className="w-3.5 h-3.5" />}
+                >
+                  Start Wash Cycle (Self-Service)
+                </Button>
+              </div>
+            )}
+
+          {isPgShared && booking.orderId && booking.orderStatus === 'IN_PROGRESS' && (
+            <div className="mb-4">
+              <Button
+                variant="primary"
+                size="sm"
+                className="w-full bg-emerald-600 hover:bg-emerald-700"
+                onClick={() => handleCompleteWash(booking.orderId!)}
+                isLoading={pgActionLoading === booking.orderId}
+                icon={<CheckCircle2 className="w-3.5 h-3.5" />}
+              >
+                Mark Wash Finished (Self-Service)
+              </Button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Complaint details box if under review / complained */}
@@ -206,9 +492,7 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
         <div className="p-3.5 rounded-xl bg-amber-50/90 border border-amber-200 space-y-2 mb-4">
           <div className="flex items-center gap-2">
             <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
-            <span className="text-xs font-bold text-amber-900">
-              Complaint Status: Under Review
-            </span>
+            <span className="text-xs font-bold text-amber-900">Complaint Status: Under Review</span>
             <span className="ml-auto inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200/80 text-amber-800">
               <span className="w-1.5 h-1.5 rounded-full bg-amber-600" />
               UNDER REVIEW
@@ -231,6 +515,7 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
         </div>
       )}
 
+      {/* Cancel button */}
       {booking.canCancel && (
         <Button
           variant="outline"
@@ -240,7 +525,7 @@ const ActiveBookingCard: React.FC<ActiveBookingCardProps> = ({ booking, onCancel
           isLoading={isCancelling}
           icon={<XCircle className="w-3.5 h-3.5" />}
         >
-          Cancel Booking
+          {isMultiBatch ? 'Cancel Entire Batch Group' : 'Cancel Booking'}
         </Button>
       )}
     </Card>
@@ -266,6 +551,7 @@ export const StudentDashboard: React.FC = () => {
   const [isCancelling, setIsCancelling] = useState(false);
   const [cancelError, setCancelError] = useState<string | null>(null);
   const [cancelSuccess, setCancelSuccess] = useState(false);
+  const [isAiScannerOpen, setIsAiScannerOpen] = useState(false);
 
   // Phase 4: Completion notification state
   const [completionNotification, setCompletionNotification] = useState<CompletionNotification | null>(null);
@@ -535,6 +821,8 @@ export const StudentDashboard: React.FC = () => {
               booking={activeBooking}
               onCancel={() => setShowCancelModal(true)}
               isCancelling={isCancelling}
+              isPgShared={user?.environment === 'PG_SHARED'}
+              onRefresh={loadDashboardData}
             />
           ) : complaints.some((c) => c.status === 'UNDER_REVIEW') ? (
             /* Fallback if complaint exists without active booking slot */
@@ -615,6 +903,34 @@ export const StudentDashboard: React.FC = () => {
               <p className="text-xs text-slate-500 mb-1 font-medium">You have an active booking above. Cancel it first to book a new slot.</p>
             </div>
           )}
+
+          {/* AI Cloth Scanner Quick Action */}
+          <div className="p-4 rounded-xl border border-cyan-200/90 bg-gradient-to-r from-cyan-50/80 via-sky-50/60 to-blue-50/70 shadow-2xs hover:shadow-sm transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-cyan-600 to-water-600 text-white flex items-center justify-center flex-shrink-0 shadow-xs">
+                <Sparkles className="w-5 h-5" />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-slate-900">AI Laundry Cloth Scanner</span>
+                  <span className="text-[10px] font-extrabold uppercase bg-cyan-200/80 text-cyan-900 px-2 py-0.5 rounded-full">
+                    YOLOv8
+                  </span>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Snap a photo of your clothes to automatically detect garments & counts.
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsAiScannerOpen(true)}
+              className="w-full sm:w-auto px-3.5 py-2 rounded-xl bg-white border border-cyan-300 text-xs font-bold text-cyan-800 hover:bg-cyan-50 hover:border-cyan-400 transition-all flex items-center justify-center gap-1.5 shadow-2xs cursor-pointer flex-shrink-0"
+            >
+              <Camera className="w-3.5 h-3.5 text-cyan-600" />
+              <span>Launch Scanner</span>
+            </button>
+          </div>
 
           {/* History Quick Link */}
           <button
@@ -744,6 +1060,15 @@ export const StudentDashboard: React.FC = () => {
           </div>
         )}
       </Modal>
+
+      {/* AI Laundry Scanner Modal */}
+      <AiLaundryScannerModal
+        isOpen={isAiScannerOpen}
+        onClose={() => setIsAiScannerOpen(false)}
+        onNavigateToBookingWithCounts={(_counts) => {
+          navigate('/student/book');
+        }}
+      />
     </PageTransition>
   );
 };

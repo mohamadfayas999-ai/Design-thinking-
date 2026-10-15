@@ -1,0 +1,143 @@
+- generic [ref=f2e3]:
+  - banner [ref=f2e4]:
+    - generic [ref=f2e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f2e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f2e11]:
+          - generic [ref=f2e12]:
+            - generic [ref=f2e13]: WASHWISE
+            - generic [ref=f2e14]: REC
+          - paragraph [ref=f2e15]: Campus Laundry Management
+      - generic [ref=f2e16]:
+        - button "Toggle Sound Effects" [ref=f2e17] [cursor=pointer]:
+          - generic [ref=f2e22]: Sound ON
+        - generic [ref=f2e23]:
+          - generic [ref=f2e44]:
+            - generic [ref=f2e45]: User 1
+            - generic [ref=f2e46]: STUDENT (Oak House)
+          - generic [ref=f2e47]: STUDENT
+          - button "Logout" [ref=f2e54] [cursor=pointer]
+  - main [ref=f2e27]:
+    - generic [ref=f2e59]:
+      - generic [ref=f2e60]:
+        - button "Back" [ref=f2e3301] [cursor=pointer]
+        - heading "Book Laundry" [level=1] [ref=f2e64]
+        - paragraph [ref=f2e65]: Complete all 3 steps to confirm your booking.
+      - generic [ref=f2e66]:
+        - generic [ref=f2e67]: Select Slot
+        - generic [ref=f2e71]:
+          - generic [ref=f2e72]: "2"
+          - generic [ref=f2e73]: Clothes Count
+        - generic [ref=f2e75]:
+          - generic [ref=f2e76]: "3"
+          - generic [ref=f2e77]: Review
+      - generic [ref=f2e78]: 0 of 4 monthly uses — 4 remaining for October.
+      - generic [ref=f2e3305]:
+        - generic [ref=f2e3310]:
+          - text: Thu, 15 Oct
+          - generic [ref=f2e3311]: 06:00 PM – 07:00 PM
+        - generic [ref=f2e3313]:
+          - generic [ref=f2e3319]:
+            - generic [ref=f2e3320]:
+              - generic [ref=f2e3321]: AI Laundry Scanner
+              - generic [ref=f2e3322]: Optional
+            - paragraph [ref=f2e3323]: Optional — analyze your clothes before booking.
+          - button "Scan Clothes" [ref=f2e3324] [cursor=pointer]
+        - generic [ref=f2e3328]:
+          - generic [ref=f2e3329]:
+            - heading "Garment Weight & Counts" [level=3] [ref=f2e3330]
+            - generic [ref=f2e3335]: Phase 3 Smart Weight
+          - paragraph [ref=f2e3336]: Approved reference weights apply. Session limit is 4,500 g; weekly allowance is 7,000 g.
+          - generic [ref=f2e3337]:
+            - generic [ref=f2e3338]:
+              - generic [ref=f2e3339]:
+                - generic [ref=f2e3340]: 👔
+                - generic [ref=f2e3341]:
+                  - generic [ref=f2e3342]:
+                    - generic [ref=f2e3343]: Shirt
+                    - generic [ref=f2e3344]: 200 g / item
+                  - generic [ref=f2e3345]:
+                    - text: "Subtotal:"
+                    - strong [ref=f2e3346]: 0 g
+              - generic [ref=f2e3347]:
+                - button "Decrease Shirt count" [ref=f2e3348] [cursor=pointer]: −
+                - spinbutton "Shirt count" [ref=f2e3349]: "0"
+                - button "Increase Shirt count" [ref=f2e3350] [cursor=pointer]: +
+            - generic [ref=f2e3351]:
+              - generic [ref=f2e3352]:
+                - generic [ref=f2e3353]: 👕
+                - generic [ref=f2e3354]:
+                  - generic [ref=f2e3355]:
+                    - generic [ref=f2e3356]: T-shirt
+                    - generic [ref=f2e3357]: 180 g / item
+                  - generic [ref=f2e3358]:
+                    - text: "Subtotal:"
+                    - strong [ref=f2e3359]: 0 g
+              - generic [ref=f2e3360]:
+                - button "Decrease T-shirt count" [ref=f2e3361] [cursor=pointer]: −
+                - spinbutton "T-shirt count" [ref=f2e3362]: "0"
+                - button "Increase T-shirt count" [ref=f2e3363] [cursor=pointer]: +
+            - generic [ref=f2e3364]:
+              - generic [ref=f2e3365]:
+                - generic [ref=f2e3366]: 👖
+                - generic [ref=f2e3367]:
+                  - generic [ref=f2e3368]:
+                    - generic [ref=f2e3369]: Pants
+                    - generic [ref=f2e3370]: 350 g / item
+                  - generic [ref=f2e3371]:
+                    - text: "Subtotal:"
+                    - strong [ref=f2e3372]: 0 g
+              - generic [ref=f2e3373]:
+                - button "Decrease Pants count" [ref=f2e3374] [cursor=pointer]: −
+                - spinbutton "Pants count" [ref=f2e3375]: "0"
+                - button "Increase Pants count" [ref=f2e3376] [cursor=pointer]: +
+            - generic [ref=f2e3377]:
+              - generic [ref=f2e3378]:
+                - generic [ref=f2e3379]: 👖
+                - generic [ref=f2e3380]:
+                  - generic [ref=f2e3381]:
+                    - generic [ref=f2e3382]: Jeans
+                    - generic [ref=f2e3383]: 600 g / item
+                  - generic [ref=f2e3384]:
+                    - text: "Subtotal:"
+                    - strong [ref=f2e3385]: 0 g
+              - generic [ref=f2e3386]:
+                - button "Decrease Jeans count" [ref=f2e3387] [cursor=pointer]: −
+                - spinbutton "Jeans count" [ref=f2e3388]: "0"
+                - button "Increase Jeans count" [ref=f2e3389] [cursor=pointer]: +
+            - generic [ref=f2e3390]:
+              - generic [ref=f2e3391]:
+                - generic [ref=f2e3392]: 🩳
+                - generic [ref=f2e3393]:
+                  - generic [ref=f2e3394]:
+                    - generic [ref=f2e3395]: Shorts
+                    - generic [ref=f2e3396]: 200 g / item
+                  - generic [ref=f2e3397]:
+                    - text: "Subtotal:"
+                    - strong [ref=f2e3398]: 0 g
+              - generic [ref=f2e3399]:
+                - button "Decrease Shorts count" [ref=f2e3400] [cursor=pointer]: −
+                - spinbutton "Shorts count" [ref=f2e3401]: "0"
+                - button "Increase Shorts count" [ref=f2e3402] [cursor=pointer]: +
+          - generic [ref=f2e3403]:
+            - generic [ref=f2e3404]:
+              - generic [ref=f2e3405]:
+                - generic [ref=f2e3406]: Total Estimated Weight
+                - generic [ref=f2e3411]: 0 garments selected
+              - generic [ref=f2e3412]:
+                - generic [ref=f2e3413]: 0 g
+                - generic [ref=f2e3414]: "Session Limit: 4,500 g"
+            - generic [ref=f2e3416]:
+              - generic [ref=f2e3417]: Fits in 1 session batch
+              - generic [ref=f2e3418]: "Weekly Max: 7,000 g"
+        - button "Review & Plan Smart Batches" [disabled]
+  - contentinfo [ref=f2e34]:
+    - generic [ref=f2e35]:
+      - generic [ref=f2e36]:
+        - generic [ref=f2e37]: WASHWISE
+        - generic [ref=f2e38]: "-"
+        - generic [ref=f2e39]: Rajalakshmi Engineering College
+      - generic [ref=f2e40]:
+        - generic [ref=f2e41]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f2e42]: "-"
+        - generic [ref=f2e43]: Campus Laundry Services

@@ -260,7 +260,7 @@ async function main() {
   }
   console.log('[Storage] Seeded Rack 1-3 & Shelf 1-4 for each hostel');
 
-  // 7. Seed laundry slots for today + next 6 days (7 days total)
+  // 7. Seed laundry slots for today + next 30 days
   const slotTimes = [
     { start: '09:00 AM', end: '10:00 AM' },
     { start: '10:00 AM', end: '11:00 AM' },
@@ -269,15 +269,26 @@ async function main() {
     { start: '03:00 PM', end: '04:00 PM' },
   ];
 
+  // Generate dates using local calendar dates to avoid UTC date shifts.
   const dateList: string[] = [];
-  for (let d = 0; d < 7; d++) {
+
+  for (let d = 0; d < 31; d++) {
     const dt = new Date();
+    dt.setHours(12, 0, 0, 0);
     dt.setDate(dt.getDate() + d);
-    dateList.push(dt.toISOString().split('T')[0]);
+
+    const year = dt.getFullYear();
+    const month = String(dt.getMonth() + 1).padStart(2, '0');
+    const day = String(dt.getDate()).padStart(2, '0');
+
+    dateList.push(`${year}-${month}-${day}`);
   }
+
+  let createdSlots = 0;
 
   for (const code of ['HABITAT', 'THANDALAM', 'GIRLS']) {
     const hostel = hostels[code];
+
     for (const date of dateList) {
       for (const time of slotTimes) {
         const existing = await prisma.laundrySlot.findFirst({
@@ -287,6 +298,7 @@ async function main() {
             startTime: time.start,
           },
         });
+
         if (!existing) {
           await prisma.laundrySlot.create({
             data: {
@@ -298,11 +310,16 @@ async function main() {
               isActive: true,
             },
           });
+
+          createdSlots++;
         }
       }
     }
   }
-  console.log('[Slots] Seeded laundry slots for the next 7 days (5 slots/day per hostel)');
+
+  console.log(
+    `[Slots] Checked the next 31 days. Created ${createdSlots} missing slots.`
+  );
 
   console.log('--- WASHWISE Seed Completed Successfully ---');
   console.log('Total Seeded Users: 13 (1 Admin + 3 Staff + 9 Students)');

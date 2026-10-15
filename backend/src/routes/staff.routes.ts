@@ -9,6 +9,7 @@ import {
   performIntake,
   getOrderDetail,
   completeOrder,
+  staffQrLookup,
 } from '../controllers/staff.controller.js';
 import { confirmStaffAiScan } from '../controllers/aiScan.controller.js';
 
@@ -25,6 +26,9 @@ router.get('/bookings', getStaffBookings);
 
 // Single booking detail
 router.get('/bookings/:id', getBookingDetail);
+
+// Secure staff QR lookup (body: { qrToken })
+router.post('/qr-lookup', staffQrLookup);
 
 // Intake operation (atomic)
 router.post('/bookings/:id/intake', performIntake);

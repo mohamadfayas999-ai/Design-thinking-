@@ -1,0 +1,39 @@
+- generic [ref=f4e3]:
+  - banner [ref=f4e4]:
+    - generic [ref=f4e5]:
+      - link "WASHWISE REC Campus Laundry Management" [ref=f4e6] [cursor=pointer]:
+        - /url: /
+        - generic [ref=f4e11]:
+          - generic [ref=f4e12]:
+            - generic [ref=f4e13]: WASHWISE
+            - generic [ref=f4e14]: REC
+          - paragraph [ref=f4e15]: Campus Laundry Management
+      - generic [ref=f4e16]:
+        - button "Toggle Sound Effects" [ref=f4e17] [cursor=pointer]:
+          - generic [ref=f4e22]: Sound ON
+        - generic [ref=f4e23]:
+          - generic [ref=f4e24]: Rajalakshmi Engineering College
+          - link "Hostel Laundry Portal" [ref=f4e26] [cursor=pointer]:
+            - /url: /
+  - main [ref=f4e27]:
+    - generic [ref=f4e28]:
+      - generic [ref=f4e29]:
+        - button "Back to Main Menu" [ref=f4e30] [cursor=pointer]
+        - generic [ref=f4e34]:
+          - button "REC Hostels" [ref=f4e35] [cursor=pointer]
+          - button "PG Hostel" [ref=f4e36] [cursor=pointer]
+      - generic [ref=f4e38]:
+        - generic [ref=f4e44]:
+          - heading "Rajalakshmi Engineering College" [level=1] [ref=f4e45]
+          - paragraph [ref=f4e46]: Select Your Assigned Campus Hostel
+        - paragraph [ref=f4e47]: "Laundry slots and processing are scoped per campus hostel. Choose your hostel to continue:"
+  - contentinfo [ref=f4e48]:
+    - generic [ref=f4e49]:
+      - generic [ref=f4e50]:
+        - generic [ref=f4e51]: WASHWISE
+        - generic [ref=f4e52]: "-"
+        - generic [ref=f4e53]: Rajalakshmi Engineering College
+      - generic [ref=f4e54]:
+        - generic [ref=f4e55]: "Hostels: Habitat, Thandalam, Girls"
+        - generic [ref=f4e56]: "-"
+        - generic [ref=f4e57]: Campus Laundry Services

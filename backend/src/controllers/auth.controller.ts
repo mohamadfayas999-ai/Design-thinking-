@@ -82,6 +82,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
           message: 'Invalid credentials. User does not exist.',
         });
       }
+
+      // Authoritative environment check: facility must match user's environment
+      if (user.hostel && user.hostel.environment !== user.environment) {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: facility does not match account environment.',
+        });
+      }
     }
 
     // Verify password
@@ -93,11 +101,12 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       });
     }
 
-    // Generate JWT token
+    // Generate JWT token with authoritative environment
     const token = generateToken({
       userId: user.id,
       email: user.email,
       role: user.role as Role,
+      environment: user.environment,
       hostelId: user.hostelId,
     });
 
@@ -113,6 +122,7 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         id: user.id,
         email: user.email,
         role: user.role,
+        environment: user.environment,
         name: displayName,
         hostelId: user.hostelId,
         hostelName: user.hostel?.name || null,
@@ -165,6 +175,7 @@ export async function getMe(req: AuthenticatedRequest, res: Response, next: Next
         id: user.id,
         email: user.email,
         role: user.role,
+        environment: user.environment,
         name: displayName,
         hostelId: user.hostelId,
         hostelName: user.hostel?.name || null,
