@@ -303,6 +303,10 @@ export interface AdminSummaryMetrics {
   totalStudents: number;
   totalStaff: number;
   todayBookings: number;
+  totalBookings?: number;
+  activeBookings?: number;
+  cancelledBookings?: number;
+  upcomingBookings?: number;
   inProgressOrders: number;
   completedOrders: number;
   verifiedOrders: number;
@@ -322,6 +326,9 @@ export interface AdminHostelSummary {
   studentCount: number;
   staffCount: number;
   todayBookingsCount: number;
+  totalBookingsCount?: number;
+  activeBookingsCount?: number;
+  upcomingBookingsCount?: number;
   inProgressCount: number;
   completedCount: number;
   verifiedCount: number;
@@ -366,10 +373,31 @@ export interface AdminOrder {
     endTime: string;
   } | null;
   itemCount: {
+    shirtCount?: number;
+    tshirtCount?: number;
+    pantsCount?: number;
+    jeansCount?: number;
+    shortsCount?: number;
+    totalWeightGrams?: number;
     tShirtShirtCount: number;
     pantsTrackCount: number;
     totalCount: number;
-    isLocked: boolean;
+    isLocked?: boolean;
+  } | null;
+  booking?: {
+    id: string;
+    bookedAt: string;
+    cancelledAt?: string | null;
+    batchGroupId?: string | null;
+    batchNumber?: number;
+    totalBatches?: number;
+    weightGrams?: number | null;
+    slot?: {
+      id: string;
+      date: string;
+      startTime: string;
+      endTime: string;
+    };
   } | null;
   rackShelf: {
     id: string;
@@ -455,6 +483,18 @@ export interface AdminTodaySlot {
   bookedCount: number;
   remainingCapacity: number;
   utilizationPercent: number;
+  bookings?: Array<{
+    id: string;
+    status: string;
+    student: {
+      id: string;
+      name: string;
+      studentId: string;
+    };
+    weightGrams?: number | null;
+    batchNumber?: number | null;
+    totalBatches?: number | null;
+  }>;
 }
 
 export interface AdminStudent {
@@ -470,6 +510,111 @@ export interface AdminStudent {
     used: number;
     max: number;
     remaining: number;
+  };
+  bookingSummary?: {
+    totalBookings: number;
+    activeBookings: number;
+    completedBookings: number;
+  };
+}
+
+export interface AdminBooking {
+  id: string;
+  status: string;
+  bookedAt: string;
+  cancelledAt: string | null;
+  batchGroupId: string | null;
+  batchNumber: number | null;
+  totalBatches: number | null;
+  weightGrams: number | null;
+  student: {
+    id: string;
+    name: string;
+    studentId: string;
+    email?: string;
+    department?: string | null;
+  };
+  hostel: {
+    id: string;
+    name: string;
+    code: string;
+    environment?: string;
+  };
+  slot: {
+    id: string;
+    date: string;
+    startTime: string;
+    endTime: string;
+  };
+  order: {
+    id: string;
+    status: string;
+    itemCount: {
+      shirtCount?: number;
+      tshirtCount?: number;
+      pantsCount?: number;
+      jeansCount?: number;
+      shortsCount?: number;
+      totalWeightGrams?: number;
+      tShirtShirtCount: number;
+      pantsTrackCount: number;
+      totalCount: number;
+      isLocked?: boolean;
+    } | null;
+  } | null;
+}
+
+export interface AdminHistoryItem {
+  id: string;
+  userId: string;
+  orderId: string;
+  user: {
+    id: string;
+    name: string;
+    studentId: string;
+    email: string;
+  };
+  order: {
+    id: string;
+    status: string;
+    submittedAt: string | null;
+    completedAt: string | null;
+    verifiedAt: string | null;
+    hostel: {
+      id: string;
+      name: string;
+      code: string;
+    };
+    slot: {
+      date: string;
+      startTime: string;
+      endTime: string;
+    } | null;
+    itemCount: {
+      totalCount: number;
+      totalWeightGrams?: number;
+      tShirtShirtCount: number;
+      pantsTrackCount: number;
+    } | null;
+  };
+  completedAt: string;
+  verifiedAt: string | null;
+}
+
+export interface AdminNotificationItem {
+  id: string;
+  userId: string;
+  orderId: string;
+  title: string;
+  message: string;
+  type: string;
+  isRead: boolean;
+  createdAt: string;
+  user: {
+    id: string;
+    name: string;
+    studentId: string;
+    email: string;
   };
 }
 

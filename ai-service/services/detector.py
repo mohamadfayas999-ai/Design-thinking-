@@ -1,20 +1,22 @@
 """
 Detector Service
 ================
-Handles loading a YOLOv8 clothing model and running inference.
+Handles loading the Fashionpedia YOLOv8 Nano TorchScript model and running inference.
 
-CLASS MAP — matches the expected YOLOv8 training config:
-  0: shirt
-  1: tshirt
-  2: pant
-  3: jeans
-  4: shorts
-  5: towel
-  6: bedsheet
-  7: other
+MODEL METADATA:
+  Repository: louisJLN/yolo8-fashionpedia
+  Format: TorchScript (results/yolov8n-fashionpedia-1.torchscript)
+  Model path: ai-service/models/clothing_yolov8n.torchscript
+  Classes: 46 Fashionpedia categories (0-45)
 
-This map is kept configurable so it can be updated without
-modifying any other source files.
+WASHWISE CATEGORY MAPPINGS:
+  - 'shirt, blouse' (0)          -> 'shirt'
+  - 'top, t-shirt, sweatshirt' (1) -> 'tshirt'
+  - 'pants' (6)                   -> 'pants'
+  - 'shorts' (7)                  -> 'shorts'
+  - other supported apparel classes -> 'other' (requires unmapped review in booking)
+  - structural garment parts (27-45) and non-garment accessories (13, 18, 19, 23, 24, 26)
+    are excluded from discrete laundry piece counts to prevent double-counting.
 """
 
 import os
@@ -23,43 +25,119 @@ from typing import Optional
 
 logger = logging.getLogger(__name__)
 
-# ── Configurable class map ─────────────────────────────────────
-# These labels MUST match the class indices used when training your
-# custom YOLOv8 model.  If you use a different training config,
-# update only this dictionary.
+# Base directory of the AI service (ai-service/)
+AI_SERVICE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# ── 46 Verified Fashionpedia Class Names & Indices ──────────────
+FASHIONPEDIA_CLASSES: dict[int, str] = {
+    0: "shirt, blouse",
+    1: "top, t-shirt, sweatshirt",
+    2: "sweater",
+    3: "cardigan",
+    4: "jacket",
+    5: "vest",
+    6: "pants",
+    7: "shorts",
+    8: "skirt",
+    9: "coat",
+    10: "dress",
+    11: "jumpsuit",
+    12: "cape",
+    13: "glasses",
+    14: "hat",
+    15: "headband, head covering, hair accessory",
+    16: "tie",
+    17: "glove",
+    18: "watch",
+    19: "belt",
+    20: "leg warmer",
+    21: "tights, stockings",
+    22: "sock",
+    23: "shoe",
+    24: "bag, wallet",
+    25: "scarf",
+    26: "umbrella",
+    27: "hood",
+    28: "collar",
+    29: "lapel",
+    30: "epaulette",
+    31: "sleeve",
+    32: "pocket",
+    33: "neckline",
+    34: "buckle",
+    35: "zipper",
+    36: "applique",
+    37: "bead",
+    38: "bow",
+    39: "flower",
+    40: "fringe",
+    41: "ribbon",
+    42: "rivet",
+    43: "ruffle",
+    44: "sequin",
+    45: "tassel",
+}
+
+# ── Explicit Mapping to WASHWISE Categories ─────────────────────
+# Verified main categories:
+#   shirt, blouse            -> shirt
+#   top, t-shirt, sweatshirt -> tshirt
+#   pants                    -> pants
+#   shorts                   -> shorts
+# Other wearable apparel items -> other (routed to staff/unmapped review)
+# Note: Jeans are categorized as general pants per model training.
+# Neither towels nor bedsheets exist in Fashionpedia; they are not fabricated.
+CATEGORY_MAPPING: dict[int, str] = {
+    0: "shirt",
+    1: "tshirt",
+    2: "other",   # sweater
+    3: "other",   # cardigan
+    4: "other",   # jacket
+    5: "other",   # vest
+    6: "pants",   # pants
+    7: "shorts",  # shorts
+    8: "other",   # skirt
+    9: "other",   # coat
+    10: "other",  # dress
+    11: "other",  # jumpsuit
+    12: "other",  # cape
+    14: "other",  # hat
+    15: "other",  # headband
+    16: "other",  # tie
+    17: "other",  # glove
+    20: "other",  # leg warmer
+    21: "other",  # tights, stockings
+    22: "other",  # sock
+    25: "other",  # scarf
+}
+
+# Target categories exposed by the service
 CLASS_NAMES: dict[int, str] = {
     0: "shirt",
     1: "tshirt",
-    2: "pant",
-    3: "jeans",
-    4: "shorts",
-    5: "towel",
-    6: "bedsheet",
-    7: "other",
+    2: "pants",
+    3: "shorts",
+    4: "other",
 }
 
-# Display-friendly labels (for frontend)
+# Display labels for frontend
 CLASS_DISPLAY: dict[str, str] = {
     "shirt":    "Shirt",
     "tshirt":   "T-Shirt",
-    "pant":     "Pant",
-    "jeans":    "Jeans",
+    "pants":    "Pants",
+    "pant":     "Pants",
     "shorts":   "Shorts",
-    "towel":    "Towel",
-    "bedsheet": "Bedsheet",
     "other":    "Other",
     "unknown":  "Unknown",
 }
 
-# Emoji icons for each class (used by frontend summary)
+# Emoji icons for frontend summary
 CLASS_EMOJI: dict[str, str] = {
     "shirt":    "👔",
     "tshirt":   "👕",
+    "pants":    "👖",
     "pant":     "👖",
-    "jeans":    "👖",
     "shorts":   "🩳",
-    "towel":    "🧺",
-    "bedsheet": "🛏️",
     "other":    "👗",
     "unknown":  "❓",
 }
@@ -67,29 +145,42 @@ CLASS_EMOJI: dict[str, str] = {
 _model: Optional[object] = None
 
 
+def resolve_model_path() -> str:
+    """
+    Resolve the model path relative to the AI service directory (AI_SERVICE_DIR),
+    never relying on the current working directory of the shell or process.
+    """
+    configured = os.getenv("MODEL_PATH", "models/clothing_yolov8n.torchscript")
+    if os.path.isabs(configured):
+        return os.path.normpath(configured)
+    return os.path.normpath(os.path.join(AI_SERVICE_DIR, configured))
+
+
 def load_model() -> bool:
     """
-    Attempt to load the YOLOv8 model from MODEL_PATH.
-    Returns True if the model loaded successfully, False otherwise.
+    Load the YOLOv8 Fashionpedia TorchScript model from the resolved model path.
+    Returns True if successfully loaded, False otherwise.
     """
     global _model
-    model_path = os.getenv("MODEL_PATH", "./models/clothing_yolov8.pt")
-    
+    model_path = resolve_model_path()
+
     if not os.path.exists(model_path):
-        logger.warning(
-            f"YOLOv8 model not found at: {model_path}\n"
-            f"Set MODEL_PATH to your trained clothing_yolov8.pt file.\n"
-            f"Running in MOCK mode."
+        logger.error(
+            f"AI model file not found at: {model_path}\n"
+            f"Resolved relative to AI service directory: {AI_SERVICE_DIR}\n"
+            f"Please verify MODEL_PATH in .env."
         )
+        _model = None
         return False
 
     try:
         from ultralytics import YOLO  # type: ignore
-        _model = YOLO(model_path)
-        logger.info(f"YOLOv8 model loaded from: {model_path}")
+        _model = YOLO(model_path, task="detect")
+        logger.info(f"YOLOv8 Fashionpedia model successfully loaded from: {model_path}")
         return True
     except Exception as e:
-        logger.error(f"Failed to load YOLOv8 model: {e}")
+        logger.error(f"Failed to load TorchScript YOLO model from {model_path}: {e}")
+        _model = None
         return False
 
 
@@ -99,34 +190,50 @@ def get_model():
 
 def run_inference(image_path: str) -> dict:
     """
-    Run YOLOv8 inference on the given image path.
-    Returns a standardised result dict.
+    Execute real TorchScript YOLOv8 inference on the specified image.
+    Maps Fashionpedia detections to WASHWISE categories and preserves genuine
+    bounding boxes and confidence scores.
+
+    Raises RuntimeError if the model is not loaded.
     """
     model = get_model()
     if model is None:
-        raise RuntimeError("Model not loaded. Call load_model() first.")
+        raise RuntimeError(
+            "AI model is not loaded. Ensure MODEL_PATH is valid and load_model() succeeds."
+        )
 
     confidence_threshold = float(os.getenv("CONFIDENCE_THRESHOLD", "0.50"))
 
-    results = model(image_path, conf=confidence_threshold)
+    # Execute YOLO inference using Ultralytics with TorchScript engine
+    results = model(image_path, conf=confidence_threshold, verbose=False)
+
     detections = []
     counts: dict[str, int] = {}
 
     for result in results:
-        if result.boxes is None:
+        if result.boxes is None or len(result.boxes) == 0:
             continue
+
         for box in result.boxes:
             class_idx = int(box.cls[0])
             confidence = float(box.conf[0])
             x1, y1, x2, y2 = [float(v) for v in box.xyxy[0]]
-            
-            class_name = CLASS_NAMES.get(class_idx, "other")
-            
+
+            # Map the Fashionpedia class index to WASHWISE category
+            # If not in CATEGORY_MAPPING (e.g. sub-parts or non-garment accessories),
+            # skip it from discrete clothing piece counts.
+            if class_idx not in CATEGORY_MAPPING:
+                continue
+
+            target_class = CATEGORY_MAPPING[class_idx]
+            raw_class_name = FASHIONPEDIA_CLASSES.get(class_idx, f"class_{class_idx}")
+
             detections.append({
-                "class":      class_name,
-                "classDisplay": CLASS_DISPLAY.get(class_name, class_name.title()),
-                "emoji":      CLASS_EMOJI.get(class_name, "👗"),
+                "class": target_class,
+                "classDisplay": CLASS_DISPLAY.get(target_class, target_class.title()),
+                "emoji": CLASS_EMOJI.get(target_class, "👗"),
                 "confidence": round(confidence, 4),
+                "rawClass": raw_class_name,
                 "bbox": {
                     "x1": round(x1),
                     "y1": round(y1),
@@ -134,7 +241,7 @@ def run_inference(image_path: str) -> dict:
                     "y2": round(y2),
                 },
             })
-            counts[class_name] = counts.get(class_name, 0) + 1
+            counts[target_class] = counts.get(target_class, 0) + 1
 
     avg_confidence = (
         round(sum(d["confidence"] for d in detections) / len(detections), 4)
@@ -142,10 +249,12 @@ def run_inference(image_path: str) -> dict:
     )
 
     return {
+        "isMock": False,
+        "mockWarning": None,
         "detections": detections,
         "summary": {
-            "totalItems":       len(detections),
-            "counts":           counts,
+            "totalItems": len(detections),
+            "counts": counts,
             "averageConfidence": avg_confidence,
         },
     }

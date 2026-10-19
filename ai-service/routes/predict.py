@@ -79,7 +79,7 @@ def predict():
                     "success": False,
                     "error": (
                         "AI model is not loaded. "
-                        "Ensure MODEL_PATH points to a valid .pt file "
+                        "Ensure MODEL_PATH points to a valid model file (e.g. .torchscript or .pt) "
                         "and restart the AI service."
                     ),
                 }), 503

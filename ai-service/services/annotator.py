@@ -16,6 +16,7 @@ from services.detector import CLASS_DISPLAY
 CLASS_COLORS: dict[str, tuple[int, int, int]] = {
     "shirt":    (37, 99, 235),   # blue-600
     "tshirt":   (16, 185, 129),  # emerald-500
+    "pants":    (139, 92, 246),  # violet-500
     "pant":     (139, 92, 246),  # violet-500
     "jeans":    (99, 102, 241),  # indigo-500
     "shorts":   (245, 158, 11),  # amber-500

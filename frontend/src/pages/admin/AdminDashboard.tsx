@@ -47,11 +47,18 @@ import {
   History,
 } from 'lucide-react';
 
+import { PgAdminDashboard } from './PgAdminDashboard';
+
 type AdminTab = 'overview' | 'orders' | 'complaints' | 'storage' | 'directory' | 'audit';
 
 export const AdminDashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+
+  // If authenticated admin belongs to PG_SHARED, render the dedicated PG Admin Dashboard
+  if (user?.environment === 'PG_SHARED') {
+    return <PgAdminDashboard />;
+  }
 
   // Active state
   const [activeTab, setActiveTab] = useState<AdminTab>('overview');
@@ -96,6 +103,9 @@ export const AdminDashboard: React.FC = () => {
   // ── Fetchers ──────────────────────────────────────────────────────────────
 
   const fetchOverview = useCallback(async () => {
+    let summaryError: string | null = null;
+    let slotsError: string | null = null;
+
     try {
       const res = await api.getAdminSummary(selectedHostel);
       if (res.success) {
@@ -105,13 +115,30 @@ export const AdminDashboard: React.FC = () => {
           insights: res.insights,
         });
       }
+    } catch (err: any) {
+      summaryError = err.message || 'Failed to load summary';
+      console.error('[AdminDashboard] getAdminSummary failed:', err);
+    }
+
+    try {
       const slotsRes = await api.getAdminTodaySlots(selectedHostel);
       if (slotsRes.success) {
         setTodaySlots(slotsRes.slots);
         setTodayDateStr(slotsRes.date);
       }
     } catch (err: any) {
-      setErrorMessage(err.message || 'Failed to load summary');
+      slotsError = err.message || 'Failed to load today slots';
+      console.error('[AdminDashboard] getAdminTodaySlots failed:', err);
+    }
+
+    if (summaryError && slotsError) {
+      setErrorMessage(summaryError);
+    } else if (summaryError) {
+      setErrorMessage(summaryError);
+    } else if (slotsError) {
+      setErrorMessage(slotsError);
+    } else {
+      setErrorMessage(null);
     }
   }, [selectedHostel]);
 

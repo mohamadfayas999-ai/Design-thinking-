@@ -13,6 +13,9 @@ import {
   CheckCircle2,
   Layers,
   Activity,
+  Plus,
+  Minus,
+  Scale,
 } from 'lucide-react';
 import { api } from '../../services/api';
 import {
@@ -29,6 +32,25 @@ import {
 } from '../../utils/camera';
 import { Capacitor } from '@capacitor/core';
 
+export interface DetailedGarmentCounts {
+  shirt: number;
+  tshirt: number;
+  pants: number;
+  jeans: number;
+  shorts: number;
+}
+
+export const REFERENCE_WEIGHTS: Record<keyof DetailedGarmentCounts, number> = {
+  shirt: 200,
+  tshirt: 180,
+  pants: 350,
+  jeans: 600,
+  shorts: 200,
+};
+
+export const SESSION_MAX_WEIGHT_GRAMS = 4500;
+export const WEEKLY_ALLOWANCE_MAX_WEIGHT_GRAMS = 7000;
+
 export interface AiLaundryScannerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -41,32 +63,19 @@ export interface AiLaundryScannerModalProps {
       total: number;
       rawSummary: ClothingScanSummary;
       yoloResult: AiClothingScanResult;
+      editedGarments?: DetailedGarmentCounts;
     }
   ) => void;
   onNavigateToBookingWithCounts?: (counts: {
     tShirtShirt: number;
     pantsTrack: number;
     scanId?: string;
+    garments?: DetailedGarmentCounts;
   }) => void;
 }
 
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/jpg'];
-
-// Helper to convert detected classes into the 2 Washwise booking categories
-function calculateBookingCounts(counts: Record<string, number>) {
-  const tShirtShirt = (counts['tshirt'] || 0) + (counts['shirt'] || 0);
-  const pantsTrack =
-    (counts['pant'] || 0) + (counts['jeans'] || 0) + (counts['shorts'] || 0);
-  const others =
-    (counts['towel'] || 0) +
-    (counts['bedsheet'] || 0) +
-    (counts['other'] || 0) +
-    (counts['unknown'] || 0);
-  const total = tShirtShirt + pantsTrack + others;
-
-  return { tShirtShirt, pantsTrack, others, total };
-}
 
 export function AiLaundryScannerModal({
   isOpen,
@@ -81,7 +90,20 @@ export function AiLaundryScannerModal({
   const [error, setError] = useState<string | null>(null);
   const [scanResult, setScanResult] = useState<AiClothingScanResult | null>(null);
   const [viewMode, setViewMode] = useState<'annotated' | 'original'>('annotated');
-  const [selectedDetectionIndex, setSelectedDetectionIndex] = useState<number | null>(null);
+
+  // Editable garment counts state (resident-controlled)
+  const [editedCounts, setEditedCounts] = useState<DetailedGarmentCounts>({
+    shirt: 0,
+    tshirt: 0,
+    pants: 0,
+    jeans: 0,
+    shorts: 0,
+  });
+
+  // Unsupported garments detected by YOLO (e.g. other, towel, bedsheet)
+  const [unsupportedDetections, setUnsupportedDetections] = useState<
+    Array<{ name: string; count: number }>
+  >([]);
 
   // Health status
   const [serviceHealth, setServiceHealth] = useState<AiServiceHealth | null>(null);
@@ -124,6 +146,8 @@ export function AiLaundryScannerModal({
     const objectUrl = URL.createObjectURL(file);
     setPreviewUrl(objectUrl);
     setScanResult(null);
+    setEditedCounts({ shirt: 0, tshirt: 0, pants: 0, jeans: 0, shorts: 0 });
+    setUnsupportedDetections([]);
     playWaterBubbleSound();
   }
 
@@ -140,10 +164,11 @@ export function AiLaundryScannerModal({
       setSelectedFile(file);
       setPreviewUrl(photoUrl);
       setScanResult(null);
+      setEditedCounts({ shirt: 0, tshirt: 0, pants: 0, jeans: 0, shorts: 0 });
+      setUnsupportedDetections([]);
       playWaterBubbleSound();
     } catch (err: any) {
       if (err instanceof CameraCancelledError) {
-        // User closed or cancelled camera
         return;
       }
       if (err instanceof CameraPermissionError) {
@@ -152,7 +177,6 @@ export function AiLaundryScannerModal({
         );
         return;
       }
-      // Web fallback if Capacitor native camera is unavailable
       if (!Capacitor.isNativePlatform()) {
         cameraInputRef.current?.click();
         return;
@@ -173,7 +197,8 @@ export function AiLaundryScannerModal({
     setPreviewUrl(null);
     setScanResult(null);
     setError(null);
-    setSelectedDetectionIndex(null);
+    setEditedCounts({ shirt: 0, tshirt: 0, pants: 0, jeans: 0, shorts: 0 });
+    setUnsupportedDetections([]);
     if (fileInputRef.current) fileInputRef.current.value = '';
     if (cameraInputRef.current) cameraInputRef.current.value = '';
     playWaterBubbleSound();
@@ -204,6 +229,31 @@ export function AiLaundryScannerModal({
       if (response && response.success) {
         setScanResult(response);
         setViewMode('annotated');
+
+        // Extract detected counts and map into 5 approved categories
+        const counts = response.summary?.counts || {};
+        const initial: DetailedGarmentCounts = {
+          shirt: counts['shirt'] || 0,
+          tshirt: counts['tshirt'] || 0,
+          pants: counts['pants'] || counts['pant'] || 0,
+          jeans: counts['jeans'] || 0,
+          shorts: counts['shorts'] || 0,
+        };
+        setEditedCounts(initial);
+
+        // Identify any unsupported categories (e.g. other, towel, bedsheet)
+        const unsupp: Array<{ name: string; count: number }> = [];
+        for (const [cls, cnt] of Object.entries(counts)) {
+          const lower = cls.toLowerCase();
+          if (
+            !['shirt', 'tshirt', 'pants', 'pant', 'jeans', 'shorts'].includes(lower) &&
+            (cnt as number) > 0
+          ) {
+            unsupp.push({ name: cls, count: cnt as number });
+          }
+        }
+        setUnsupportedDetections(unsupp);
+
         playWaterBubbleSound();
       } else {
         throw new Error(response.message || 'AI detection failed to return results.');
@@ -220,20 +270,79 @@ export function AiLaundryScannerModal({
     }
   }
 
+  // Stepper handlers for resident edits
+  function handleQuantityChange(category: keyof DetailedGarmentCounts, delta: number) {
+    setEditedCounts((prev) => {
+      const current = prev[category] || 0;
+      const next = Math.max(0, Math.min(30, current + delta));
+      return { ...prev, [category]: next };
+    });
+    setError(null);
+    playWaterBubbleSound();
+  }
+
+  function handleDirectQuantityInput(category: keyof DetailedGarmentCounts, val: string) {
+    const num = parseInt(val, 10);
+    if (val === '' || val === '0') {
+      setEditedCounts((prev) => ({ ...prev, [category]: 0 }));
+      setError(null);
+      return;
+    }
+    if (!isNaN(num) && num >= 0 && num <= 30) {
+      setEditedCounts((prev) => ({ ...prev, [category]: num }));
+      setError(null);
+    }
+  }
+
+  // Live calculations
+  const totalEditedItems =
+    editedCounts.shirt +
+    editedCounts.tshirt +
+    editedCounts.pants +
+    editedCounts.jeans +
+    editedCounts.shorts;
+
+  const totalEditedWeightGrams =
+    editedCounts.shirt * REFERENCE_WEIGHTS.shirt +
+    editedCounts.tshirt * REFERENCE_WEIGHTS.tshirt +
+    editedCounts.pants * REFERENCE_WEIGHTS.pants +
+    editedCounts.jeans * REFERENCE_WEIGHTS.jeans +
+    editedCounts.shorts * REFERENCE_WEIGHTS.shorts;
+
+  // Recommended batches calculation (max 4500 g per session)
+  const recommendedBatches =
+    totalEditedWeightGrams === 0
+      ? 0
+      : Math.max(1, Math.ceil(totalEditedWeightGrams / SESSION_MAX_WEIGHT_GRAMS));
+
+  const isExceedingWeeklyLimit = totalEditedWeightGrams > WEEKLY_ALLOWANCE_MAX_WEIGHT_GRAMS;
+  const isMultiBatch = totalEditedWeightGrams > SESSION_MAX_WEIGHT_GRAMS;
+
   function handleApplyToBooking() {
     if (!scanResult) return;
+    if (totalEditedItems < 1) {
+      setError('Please add or maintain at least 1 garment item to proceed.');
+      return;
+    }
+    if (isExceedingWeeklyLimit) {
+      setError('Total weight exceeds the 7,000 g weekly allowance. Please adjust quantities.');
+      return;
+    }
+
     playWaterBubbleSound();
 
-    const bookingCounts = calculateBookingCounts(scanResult.summary.counts);
     const primaryScanId = scanResult.scanId || `ai-scan-${Date.now()}`;
+    const tShirtShirt = editedCounts.tshirt + editedCounts.shirt;
+    const pantsTrack = editedCounts.pants + editedCounts.jeans + editedCounts.shorts;
 
-    // Synthetic AiLaundryEstimate for backwards compatibility with booking storage
     const estimate: AiLaundryEstimate = {
-      visibleClothingCount: scanResult.summary.totalItems,
-      clothingType: Object.entries(scanResult.summary.counts)
-        .map(([k, v]) => `${k}:${v}`)
-        .join(', '),
-      mainColor: 'Multi-color',
+      visibleClothingCount: totalEditedItems,
+      clothingType:
+        Object.entries(editedCounts)
+          .filter(([_, v]) => v > 0)
+          .map(([k, v]) => `${k}:${v}`)
+          .join(', ') || 'None',
+      mainColor: 'Resident-verified',
       possibleStain: 'Not checked',
       stainSeverity: 'None',
       confidence:
@@ -252,18 +361,24 @@ export function AiLaundryScannerModal({
 
     if (onScanComplete) {
       onScanComplete(primaryScanId, estimate, {
-        tShirtShirt: bookingCounts.tShirtShirt,
-        pantsTrack: bookingCounts.pantsTrack,
-        total: bookingCounts.total,
-        rawSummary: scanResult.summary,
+        tShirtShirt,
+        pantsTrack,
+        total: totalEditedItems,
+        rawSummary: {
+          ...scanResult.summary,
+          counts: { ...editedCounts },
+          totalItems: totalEditedItems,
+        },
         yoloResult: scanResult,
+        editedGarments: editedCounts,
       });
       onClose();
     } else if (onNavigateToBookingWithCounts) {
       onNavigateToBookingWithCounts({
-        tShirtShirt: bookingCounts.tShirtShirt,
-        pantsTrack: bookingCounts.pantsTrack,
+        tShirtShirt,
+        pantsTrack,
         scanId: primaryScanId,
+        garments: editedCounts,
       });
       onClose();
     } else {
@@ -271,7 +386,18 @@ export function AiLaundryScannerModal({
     }
   }
 
-  const bookingCounts = scanResult ? calculateBookingCounts(scanResult.summary.counts) : null;
+  const garmentCategoriesList: Array<{
+    key: keyof DetailedGarmentCounts;
+    label: string;
+    weight: number;
+    emoji: string;
+  }> = [
+    { key: 'shirt', label: 'Shirt', weight: REFERENCE_WEIGHTS.shirt, emoji: '👔' },
+    { key: 'tshirt', label: 'T-shirt', weight: REFERENCE_WEIGHTS.tshirt, emoji: '👕' },
+    { key: 'pants', label: 'Pants', weight: REFERENCE_WEIGHTS.pants, emoji: '👖' },
+    { key: 'jeans', label: 'Jeans', weight: REFERENCE_WEIGHTS.jeans, emoji: '👖' },
+    { key: 'shorts', label: 'Shorts', weight: REFERENCE_WEIGHTS.shorts, emoji: '🩳' },
+  ];
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
@@ -307,7 +433,7 @@ export function AiLaundryScannerModal({
                 </span>
               </div>
               <p className="text-xs text-cyan-200/80 mt-0.5">
-                Automated object detection & clothing counter
+                Automated object detection with resident-editable quantities
               </p>
             </div>
           </div>
@@ -388,11 +514,11 @@ export function AiLaundryScannerModal({
                   <p className="text-slate-600 leading-relaxed">
                     Spread your laundry flat or take a clear photo of the load. Our YOLOv8
                     neural network identifies individual garments (Shirts, T-shirts, Pants,
-                    Shorts, Towels) and counts them automatically.
+                    Jeans, Shorts). You can review and adjust any quantities before booking.
                   </p>
                   <p className="text-cyan-800 font-semibold text-[11px] pt-1">
-                    ✓ Bounding box visualization &middot; ✓ Auto-calculates counts &middot; ✓
-                    One-click apply to booking
+                    ✓ Bounding box visualization &middot; ✓ Resident editable counts &middot; ✓
+                    Immediate weight recalculation &middot; ✓ No staff approval required
                   </p>
                 </div>
               </div>
@@ -430,25 +556,19 @@ export function AiLaundryScannerModal({
               {/* Supported Detection Tags */}
               <div className="p-3.5 bg-white rounded-xl border border-slate-200">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider block mb-2">
-                  Detectable Garment Categories
+                  Supported Garment Categories & Reference Weights
                 </span>
-                <div className="flex flex-wrap gap-1.5 text-xs">
-                  {[
-                    { label: 'T-Shirt', emoji: '👕' },
-                    { label: 'Shirt', emoji: '👔' },
-                    { label: 'Pant', emoji: '👖' },
-                    { label: 'Jeans', emoji: '👖' },
-                    { label: 'Shorts', emoji: '🩳' },
-                    { label: 'Towel', emoji: '🧖' },
-                    { label: 'Bedsheet', emoji: '🛏️' },
-                    { label: 'Other Fabric', emoji: '👗' },
-                  ].map((cat) => (
+                <div className="flex flex-wrap gap-2 text-xs">
+                  {garmentCategoriesList.map((cat) => (
                     <span
-                      key={cat.label}
-                      className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium flex items-center gap-1 border border-slate-200/80"
+                      key={cat.key}
+                      className="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-700 font-medium flex items-center gap-1.5 border border-slate-200/80"
                     >
                       <span>{cat.emoji}</span>
-                      <span>{cat.label}</span>
+                      <span className="font-semibold">{cat.label}</span>
+                      <span className="text-[10px] text-slate-500 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                        {cat.weight} g
+                      </span>
                     </span>
                   ))}
                 </div>
@@ -494,7 +614,7 @@ export function AiLaundryScannerModal({
                   <button
                     type="button"
                     onClick={resetSelection}
-                    className="absolute top-3 right-3 z-20 bg-slate-900/80 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md transition-all border border-white/20 shadow-sm"
+                    className="absolute top-3 right-3 z-20 bg-slate-900/80 hover:bg-slate-900 text-white px-3 py-1.5 rounded-xl text-xs font-semibold backdrop-blur-md transition-all border border-white/20 shadow-sm cursor-pointer"
                   >
                     Change Photo
                   </button>
@@ -572,7 +692,7 @@ export function AiLaundryScannerModal({
             <div className="p-4 rounded-xl bg-rose-50 border border-rose-200 flex items-start gap-3 text-xs text-rose-900">
               <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
               <div className="flex-1">
-                <span className="font-bold block mb-1">Scan Notice</span>
+                <span className="font-bold block mb-1">Booking Notice</span>
                 <p className="leading-relaxed">{error}</p>
                 <div className="mt-3 flex gap-2">
                   <button
@@ -587,7 +707,7 @@ export function AiLaundryScannerModal({
             </div>
           )}
 
-          {/* AI Result Card */}
+          {/* AI Result Card with Editable Quantity Controls */}
           {scanResult && (
             <div className="space-y-4">
               {/* Mock Warning Banner if running in mock mode */}
@@ -605,18 +725,19 @@ export function AiLaundryScannerModal({
                 </div>
               )}
 
-              {/* Main Results Summary Header */}
+              {/* Main Results Summary & Editable Quantity Interface */}
               <div className="bg-gradient-to-br from-white to-cyan-50/50 border border-cyan-200 rounded-2xl p-4 sm:p-5 shadow-xs space-y-4">
+                {/* Header row: YOLO detections summary */}
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-cyan-100 pb-3">
                   <div>
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
-                      Detection Result
+                      AI Detection Result
                     </span>
                     <div className="flex items-baseline gap-2 mt-0.5">
                       <span className="text-3xl font-extrabold text-slate-900 tracking-tight">
                         {scanResult.summary.totalItems}
                       </span>
-                      <span className="text-sm font-bold text-slate-600">Total Clothes Found</span>
+                      <span className="text-sm font-bold text-slate-600">Items Detected by AI</span>
                     </div>
                   </div>
 
@@ -635,121 +756,168 @@ export function AiLaundryScannerModal({
                   </div>
                 </div>
 
-                {/* Garment Category Count Pills */}
+                {/* Editable Garments Section */}
                 <div>
-                  <span className="text-xs font-bold text-slate-700 block mb-2">
-                    Garment Breakdown
-                  </span>
-                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                    {Object.entries(scanResult.summary.counts).map(([cls, count]) => {
-                      const sampleDetection = scanResult.detections.find((d) => d.class === cls);
+                  <div className="flex items-center justify-between mb-2">
+                    <div>
+                      <span className="text-xs font-bold text-slate-800 block">
+                        Review & Edit Garment Quantities
+                      </span>
+                      <p className="text-[11px] text-slate-500">
+                        Adjust counts if YOLO made a mistake, missed an item, or detected a false positive.
+                      </p>
+                    </div>
+                    <span className="text-[10px] font-bold text-cyan-800 bg-cyan-100 px-2 py-0.5 rounded-full">
+                      Editable
+                    </span>
+                  </div>
+
+                  {/* 5 Garment Stepper Controls */}
+                  <div className="space-y-2">
+                    {garmentCategoriesList.map(({ key, label, weight, emoji }) => {
+                      const count = editedCounts[key];
+                      const subtotal = count * weight;
                       return (
                         <div
-                          key={cls}
-                          className="bg-white p-3 rounded-xl border border-cyan-100 shadow-2xs flex items-center justify-between"
+                          key={key}
+                          className="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200/90 shadow-2xs hover:border-cyan-300 transition-colors"
                         >
-                          <div className="flex items-center gap-2">
-                            <span className="text-xl">{sampleDetection?.emoji || '👕'}</span>
+                          <div className="flex items-center gap-2.5">
+                            <span className="text-xl">{emoji}</span>
                             <div>
-                              <span className="text-xs font-bold text-slate-800 block capitalize">
-                                {sampleDetection?.classDisplay || cls}
-                              </span>
-                              <span className="text-[10px] text-slate-400 font-medium">
-                                Detected
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-bold text-slate-900">{label}</span>
+                                <span className="text-[10px] font-semibold text-slate-500 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
+                                  {weight} g / item
+                                </span>
+                              </div>
+                              <span className="text-[11px] text-slate-500">
+                                Subtotal:{' '}
+                                <strong className="text-slate-800">{subtotal.toLocaleString()} g</strong>
                               </span>
                             </div>
                           </div>
-                          <span className="text-base font-extrabold text-cyan-800 bg-cyan-50 px-2.5 py-0.5 rounded-lg border border-cyan-100">
-                            {count}
-                          </span>
+
+                          {/* Stepper Controls */}
+                          <div className="flex items-center gap-1.5">
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(key, -1)}
+                              disabled={count <= 0}
+                              className="w-8 h-8 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold transition-colors cursor-pointer"
+                              aria-label={`Decrease ${label} count`}
+                            >
+                              <Minus className="w-3.5 h-3.5" />
+                            </button>
+                            <input
+                              type="number"
+                              min={0}
+                              max={30}
+                              value={count}
+                              onChange={(e) => handleDirectQuantityInput(key, e.target.value)}
+                              className="w-12 text-center text-sm font-extrabold text-slate-900 border border-slate-300 rounded-lg py-1 focus:outline-none focus:ring-2 focus:ring-cyan-500 bg-white"
+                              aria-label={`${label} quantity`}
+                            />
+                            <button
+                              type="button"
+                              onClick={() => handleQuantityChange(key, 1)}
+                              disabled={count >= 30}
+                              className="w-8 h-8 rounded-lg border border-slate-300 bg-slate-50 hover:bg-slate-100 disabled:opacity-30 disabled:cursor-not-allowed flex items-center justify-center text-slate-700 font-bold transition-colors cursor-pointer"
+                              aria-label={`Increase ${label} count`}
+                            >
+                              <Plus className="w-3.5 h-3.5" />
+                            </button>
+                          </div>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                {/* Individual BBox Detections List */}
-                {scanResult.detections.length > 0 && (
-                  <div className="pt-2">
-                    <span className="text-xs font-bold text-slate-700 block mb-2">
-                      Individual Detected Objects ({scanResult.detections.length})
-                    </span>
-                    <div className="max-h-40 overflow-y-auto space-y-1.5 pr-1">
-                      {scanResult.detections.map((det, idx) => (
-                        <div
-                          key={idx}
-                          onMouseEnter={() => setSelectedDetectionIndex(idx)}
-                          onMouseLeave={() => setSelectedDetectionIndex(null)}
-                          className={`p-2 rounded-xl text-xs flex items-center justify-between border transition-all ${
-                            selectedDetectionIndex === idx
-                              ? 'bg-cyan-100/70 border-cyan-400'
-                              : 'bg-white border-slate-200/80 hover:bg-slate-50'
-                          }`}
-                        >
-                          <div className="flex items-center gap-2">
-                            <span>{det.emoji}</span>
-                            <span className="font-bold text-slate-800">
-                              #{idx + 1} {det.classDisplay}
-                            </span>
-                            <span className="text-[10px] text-slate-400 font-mono">
-                              [{Math.round(det.bbox.x1)}, {Math.round(det.bbox.y1)}]
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2">
-                            <div className="w-16 bg-slate-100 rounded-full h-1.5 overflow-hidden">
-                              <div
-                                className="bg-cyan-600 h-full rounded-full"
-                                style={{ width: `${Math.round(det.confidence * 100)}%` }}
-                              />
-                            </div>
-                            <span className="font-extrabold text-slate-700 text-[11px] w-9 text-right">
-                              {Math.round(det.confidence * 100)}%
-                            </span>
-                          </div>
-                        </div>
-                      ))}
+                {/* Unsupported items notification banner if any were detected */}
+                {unsupportedDetections.length > 0 && (
+                  <div className="p-3 bg-amber-50/90 border border-amber-200 rounded-xl text-xs text-amber-950 space-y-1">
+                    <div className="flex items-center gap-1.5 font-bold text-amber-900">
+                      <Info className="w-4 h-4 text-amber-700 flex-shrink-0" />
+                      <span>Unsupported Fabric Items Detected by AI</span>
                     </div>
+                    <p className="text-[11px] text-amber-800 leading-relaxed pl-5">
+                      The AI detected{' '}
+                      <strong>
+                        {unsupportedDetections.map((d) => `${d.count} ${d.name}`).join(', ')}
+                      </strong>
+                      . Items outside our approved categories (Shirt, T-shirt, Pants, Jeans, Shorts)
+                      do not have standard reference weights and cannot be automatically weighed. You can
+                      adjust your supported counts above or use manual entry if needed.
+                    </p>
                   </div>
                 )}
 
-                {/* Booking Auto-Fill Formula Preview */}
-                {bookingCounts && (
-                  <div className="p-3.5 bg-gradient-to-r from-water-50 via-sky-50 to-cyan-50 border border-water-200 rounded-xl space-y-2">
-                    <div className="flex items-center justify-between text-xs font-bold text-water-950">
-                      <span>WASHWISE Booking Mapping</span>
-                      <span className="text-[10px] font-semibold text-water-700">
-                        Max 20 clothes limit
+                {/* Real-time Weight & Batch Recommendation Panel */}
+                <div className="p-3.5 bg-gradient-to-r from-water-50 via-sky-50 to-cyan-50 border border-water-200 rounded-xl space-y-2.5">
+                  <div className="flex items-center justify-between text-xs font-bold text-water-950">
+                    <span className="flex items-center gap-1.5">
+                      <Scale className="w-4 h-4 text-water-700" />
+                      Live Weight & Batch Planning Preview
+                    </span>
+                    <span className="text-[10px] font-semibold text-water-700">
+                      Limit: 4,500 g / batch &middot; 7,000 g / week
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-2 text-xs">
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-water-100">
+                      <span className="text-[11px] text-slate-500 block">Total Garments:</span>
+                      <span className="font-extrabold text-slate-900 text-sm">
+                        {totalEditedItems} item{totalEditedItems === 1 ? '' : 's'}
                       </span>
                     </div>
-                    <div className="grid grid-cols-2 gap-2 text-xs">
-                      <div className="bg-white/90 p-2 rounded-lg border border-water-100">
-                        <span className="text-[11px] text-slate-500 block">T-shirt / Shirt:</span>
-                        <span className="font-bold text-water-800 text-sm">
-                          {bookingCounts.tShirtShirt} items
-                        </span>
-                      </div>
-                      <div className="bg-white/90 p-2 rounded-lg border border-water-100">
-                        <span className="text-[11px] text-slate-500 block">Pants / Track:</span>
-                        <span className="font-bold text-water-800 text-sm">
-                          {bookingCounts.pantsTrack} items
-                        </span>
-                      </div>
+                    <div className="bg-white/90 p-2.5 rounded-lg border border-water-100">
+                      <span className="text-[11px] text-slate-500 block">Estimated Weight:</span>
+                      <span
+                        className={`font-extrabold text-sm ${
+                          isExceedingWeeklyLimit
+                            ? 'text-red-600'
+                            : isMultiBatch
+                            ? 'text-amber-600'
+                            : 'text-water-700'
+                        }`}
+                      >
+                        {totalEditedWeightGrams.toLocaleString()} g
+                      </span>
                     </div>
-                    {bookingCounts.others > 0 && (
-                      <p className="text-[11px] text-slate-500 italic">
-                        * Note: {bookingCounts.others} other items (towels/bedsheets) will be
-                        counted by staff at physical intake.
-                      </p>
+                  </div>
+
+                  {/* Batch Recommendation Notice */}
+                  <div className="text-[11px] font-medium text-slate-600 pt-0.5">
+                    {totalEditedItems === 0 ? (
+                      <span className="text-slate-500 italic">
+                        Select at least 1 garment to see batch planning recommendations.
+                      </span>
+                    ) : isExceedingWeeklyLimit ? (
+                      <span className="text-red-700 font-bold">
+                        ⚠️ Exceeds 7,000 g weekly allowance! Please reduce garment quantities.
+                      </span>
+                    ) : isMultiBatch ? (
+                      <span className="text-amber-800 font-semibold">
+                        ℹ️ Requires {recommendedBatches} batches (weight exceeds 4,500 g session limit).
+                        Multi-batch booking will allocate separate slots automatically.
+                      </span>
+                    ) : (
+                      <span className="text-emerald-700 font-semibold">
+                        ✓ Fits in a single session (within 4,500 g session limit).
+                      </span>
                     )}
                   </div>
-                )}
+                </div>
 
-                {/* Disclaimer */}
-                <div className="p-2.5 rounded-xl bg-amber-50/90 border border-amber-200/80 text-[11px] text-amber-900 flex items-start gap-2">
-                  <Info className="w-3.5 h-3.5 text-amber-700 flex-shrink-0 mt-0.5" />
+                {/* Resident self-verification disclaimer */}
+                <div className="p-2.5 rounded-xl bg-cyan-50/90 border border-cyan-200/80 text-[11px] text-cyan-950 flex items-start gap-2">
+                  <CheckCircle2 className="w-3.5 h-3.5 text-cyan-700 flex-shrink-0 mt-0.5" />
                   <span>
-                    <strong>Verification policy:</strong> AI results provide fast assisted counts.
-                    Laundry staff will physically verify all clothes at the hostel intake counter.
+                    <strong>Resident verified:</strong> You have full control to review and adjust these
+                    quantities. Your confirmed counts are applied directly to the booking system without
+                    requiring staff pre-approval.
                   </span>
                 </div>
               </div>
@@ -766,13 +934,12 @@ export function AiLaundryScannerModal({
                 <button
                   type="button"
                   onClick={handleApplyToBooking}
-                  className="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-water-700 to-cyan-700 text-white text-xs font-bold hover:from-water-800 hover:to-cyan-800 transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
+                  disabled={totalEditedItems < 1 || isExceedingWeeklyLimit}
+                  className="flex-1 px-5 py-3 rounded-xl bg-gradient-to-r from-water-700 to-cyan-700 text-white text-xs font-bold hover:from-water-800 hover:to-cyan-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2 shadow-md hover:shadow-lg cursor-pointer"
                 >
                   <CheckCircle2 className="w-4 h-4 text-cyan-200" />
                   <span>
-                    {onScanComplete
-                      ? `Apply ${scanResult.summary.totalItems} Items to Booking`
-                      : `Book Slot with ${scanResult.summary.totalItems} Items`}
+                    Apply {totalEditedItems} Garments ({totalEditedWeightGrams.toLocaleString()} g) to Booking
                   </span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
@@ -784,4 +951,5 @@ export function AiLaundryScannerModal({
     </div>
   );
 }
+
 export default AiLaundryScannerModal;

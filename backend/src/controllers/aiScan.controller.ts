@@ -218,19 +218,11 @@ export async function confirmStaffAiScan(
     }
 
     const { id: bookingId } = req.params;
-    const {
-      confirmedType,
-      confirmedColor,
-      confirmedStain,
-      confirmedSeverity,
-      confirmedRecommendation,
-    } = req.body;
 
     const booking = await prisma.slotBooking.findUnique({
       where: { id: bookingId },
       include: {
         slot: true,
-        aiScan: true,
       },
     });
 
@@ -246,56 +238,10 @@ export async function confirmStaffAiScan(
       });
     }
 
-    if (!booking.aiScan) {
-      return res.status(404).json({
-        success: false,
-        message: 'No AI scan is associated with this booking.',
-      });
-    }
-
-    // Update staff confirmation while keeping original AI estimate intact
-    const updated = await prisma.aiScan.update({
-      where: { id: booking.aiScan.id },
-      data: {
-        staffConfirmed: true,
-        confirmedType: confirmedType || booking.aiScan.clothingType,
-        confirmedColor: confirmedColor || booking.aiScan.mainColor,
-        confirmedStain: confirmedStain || booking.aiScan.possibleStain,
-        confirmedSeverity: confirmedSeverity || booking.aiScan.stainSeverity,
-        confirmedRecommendation:
-          confirmedRecommendation || `${booking.aiScan.washMode} (${booking.aiScan.preTreatment})`,
-        confirmedAt: new Date(),
-        confirmedByStaffId: staff.id,
-      },
-    });
-
+    // Staff verification of AI detections is removed; resident self-verifies.
     return res.status(200).json({
       success: true,
-      message: 'AI observations confirmed by staff.',
-      aiScan: {
-        id: updated.id,
-        // Original AI estimate preserved
-        aiEstimate: {
-          visibleClothingCount: updated.visibleClothingCount,
-          clothingType: updated.clothingType,
-          mainColor: updated.mainColor,
-          possibleStain: updated.possibleStain,
-          stainSeverity: updated.stainSeverity,
-          washMode: updated.washMode,
-          preTreatment: updated.preTreatment,
-          detergentLevel: updated.detergentLevel,
-        },
-        // Staff confirmed operational values
-        staffConfirmed: {
-          isConfirmed: updated.staffConfirmed,
-          confirmedType: updated.confirmedType,
-          confirmedColor: updated.confirmedColor,
-          confirmedStain: updated.confirmedStain,
-          confirmedSeverity: updated.confirmedSeverity,
-          confirmedRecommendation: updated.confirmedRecommendation,
-          confirmedAt: updated.confirmedAt,
-        },
-      },
+      message: 'AI scan verification is resident-controlled and no longer required for staff intake.',
     });
   } catch (error) {
     next(error);

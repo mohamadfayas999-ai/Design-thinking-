@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence, useReducedMotion } from 'framer-motion';
 import {
   Calendar,
@@ -211,6 +211,7 @@ const SlotCard: React.FC<SlotCardProps> = ({ slot, isSelected, onSelect }) => {
 
 export const BookLaundryPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const shouldReduceMotion = useReducedMotion();
 
   // Data
@@ -246,12 +247,14 @@ export const BookLaundryPage: React.FC = () => {
   // AI Scanner state (optional)
   const [isScannerOpen, setIsScannerOpen] = useState(false);
   const [aiScanId, setAiScanId] = useState<string | null>(null);
+  void aiScanId;
   const [aiScanData, setAiScanData] = useState<AiLaundryEstimate | null>(null);
 
   // Submission
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [confirmedBooking, setConfirmedBooking] = useState<ActiveBooking | null>(null);
+  void setConfirmedBooking;
 
   // Active booking guard & QR state
   const [existingActiveBooking, setExistingActiveBooking] = useState<ActiveBooking | null>(null);
@@ -298,6 +301,22 @@ export const BookLaundryPage: React.FC = () => {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // Support prefilled garments if navigated from dashboard AI scanner
+  useEffect(() => {
+    if (location.state && (location.state as any).prefilledGarments) {
+      const prefilled = (location.state as any).prefilledGarments;
+      setGarments({
+        shirt: Number(prefilled.shirt) || 0,
+        tshirt: Number(prefilled.tshirt) || 0,
+        pants: Number(prefilled.pants) || 0,
+        jeans: Number(prefilled.jeans) || 0,
+        shorts: Number(prefilled.shorts) || 0,
+      });
+      setUnresolvedItems([]);
+      setCountError(null);
+    }
+  }, [location.state]);
 
   // Garment totals and weight calculation (Phase 3)
   const totalGarments =
@@ -407,28 +426,6 @@ export const BookLaundryPage: React.FC = () => {
     }
   };
 
-  const handleConfirmBooking = async () => {
-    if (!selectedSlot || !isGarmentsValid) return;
-    setIsSubmitting(true);
-    setSubmitError(null);
-    try {
-      const res = await api.bookSlot({
-        slotId: selectedSlot.id,
-        tShirtShirtCount: garments.shirt + garments.tshirt,
-        pantsTrackCount: garments.pants + garments.jeans + garments.shorts,
-        aiScanId: aiScanId || undefined,
-      });
-      if (res.success && res.booking) {
-        setConfirmedBooking(res.booking);
-        setStep(4);
-        loadData();
-      }
-    } catch (err: any) {
-      setSubmitError(err.message || 'Booking failed. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   // Phase 4: Atomic Multi-Batch Confirmation Handler
   const handleConfirmMultiBatch = async () => {
@@ -980,17 +977,18 @@ export const BookLaundryPage: React.FC = () => {
                     <Sparkles className="w-3.5 h-3.5 text-cyan-600" />
                     <span className="text-xs font-bold text-cyan-950">AI Scan Attached</span>
                     <span className="text-[9px] font-extrabold uppercase bg-cyan-200 text-cyan-900 px-1.5 py-0.5 rounded">
-                      AI Estimate
+                      Resident Verified
                     </span>
                   </div>
-                  <span className="text-[11px] text-cyan-800 font-medium">
-                    Staff verification required
+                  <span className="text-[11px] text-emerald-700 font-semibold flex items-center gap-1">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Verified by Resident
                   </span>
                 </div>
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
                   <div className="bg-white p-2 rounded-lg border border-cyan-100">
-                    <span className="text-[10px] text-slate-400 block">AI Visible Estimate</span>
+                    <span className="text-[10px] text-slate-400 block">AI Detected Items</span>
                     <span className="font-bold text-slate-800">{aiScanData.visibleClothingCount} items</span>
                   </div>
                   <div className="bg-white p-2 rounded-lg border border-cyan-100">
@@ -998,10 +996,8 @@ export const BookLaundryPage: React.FC = () => {
                     <span className="font-bold text-slate-800">{aiScanData.clothingType}</span>
                   </div>
                   <div className="bg-white p-2 rounded-lg border border-cyan-100">
-                    <span className="text-[10px] text-slate-400 block">Color / Stain</span>
-                    <span className="font-bold text-slate-800">
-                      {aiScanData.mainColor} &middot; {aiScanData.stainSeverity}
-                    </span>
+                    <span className="text-[10px] text-slate-400 block">Verification Status</span>
+                    <span className="font-bold text-slate-800">Resident Confirmed</span>
                   </div>
                   <div className="bg-white p-2 rounded-lg border border-cyan-100">
                     <span className="text-[10px] text-slate-400 block">Care Mode</span>
@@ -1011,8 +1007,7 @@ export const BookLaundryPage: React.FC = () => {
 
                 <div className="flex items-center justify-between text-[11px] text-slate-600 bg-white/70 px-3 py-1.5 rounded-lg border border-cyan-100">
                   <span><strong>Student garments:</strong> {totalGarments} items ({totalWeightGrams} g)</span>
-                  <span><strong>AI visible estimate:</strong> {aiScanData.visibleClothingCount} clothes</span>
-                  <span className="text-amber-700 font-semibold">Staff physically verifies weight at intake</span>
+                  <span className="text-emerald-700 font-semibold">Self-verified for direct booking</span>
                 </div>
               </div>
             )}
@@ -1557,35 +1552,27 @@ export const BookLaundryPage: React.FC = () => {
       )}
       </AnimatePresence>
 
-      {/* Optional AI Laundry Scanner Modal */}
+      {/* AI Laundry Scanner Modal */}
       <AiLaundryScannerModal
         isOpen={isScannerOpen}
         onClose={() => setIsScannerOpen(false)}
         onScanComplete={(scanId, estimate, detectedCounts) => {
           setAiScanId(scanId);
           setAiScanData(estimate);
-          if (detectedCounts?.rawSummary?.counts) {
+          if (detectedCounts?.editedGarments) {
+            setGarments(detectedCounts.editedGarments);
+            setUnresolvedItems([]); // Resident confirmed supported counts: clear unresolved so booking is unblocked!
+            setCountError(null);
+          } else if (detectedCounts?.rawSummary?.counts) {
             const raw = detectedCounts.rawSummary.counts;
             setGarments({
               shirt: raw['shirt'] || 0,
               tshirt: raw['tshirt'] || 0,
-              pants: raw['pant'] || 0,
+              pants: raw['pants'] || raw['pant'] || 0,
               jeans: raw['jeans'] || 0,
               shorts: raw['shorts'] || 0,
             });
-
-            const unapproved: Array<{ className: string; count: number; reason: string }> = [];
-            for (const [cls, cnt] of Object.entries(raw)) {
-              const lower = cls.toLowerCase();
-              if (!['shirt', 'tshirt', 'pant', 'jeans', 'shorts'].includes(lower) && cnt > 0) {
-                unapproved.push({
-                  className: cls,
-                  count: cnt,
-                  reason: `Item class "${cls}" has no approved reference weight and requires classification/review.`,
-                });
-              }
-            }
-            setUnresolvedItems(unapproved);
+            setUnresolvedItems([]);
             setCountError(null);
           } else if (detectedCounts) {
             setGarments({
@@ -1595,6 +1582,7 @@ export const BookLaundryPage: React.FC = () => {
               jeans: 0,
               shorts: 0,
             });
+            setUnresolvedItems([]);
             setCountError(null);
           }
         }}

@@ -74,6 +74,20 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       });
     }
 
+    // Specific staff facility isolation: Staff operates exclusively in COLLEGE hostels
+    if (role === Role.STAFF) {
+      const targetHostel = await prisma.hostel.findUnique({
+        where: { id: hostelId },
+        select: { id: true, environment: true },
+      });
+      if (!targetHostel || targetHostel.environment !== 'COLLEGE') {
+        return res.status(403).json({
+          success: false,
+          message: 'Access restricted: Laundry Staff operations are strictly restricted to REC college hostels.',
+        });
+      }
+    }
+
     // Verify hostel matches if student or staff
     if (role === Role.STUDENT || role === Role.STAFF) {
       if (!user.hostelId || user.hostelId !== hostelId) {
@@ -112,7 +126,9 @@ export async function login(req: Request, res: Response, next: NextFunction) {
 
     // Format safe response object (omitting passwordHash and opaque QR token)
     const displayName =
-      user.studentProfile?.name || user.staffProfile?.name || 'College Laundry Administrator';
+      user.studentProfile?.name ??
+      user.staffProfile?.name ??
+      (user.environment === 'PG_SHARED' ? 'PG Hostel Administrator' : 'College Laundry Administrator');
 
     return res.status(200).json({
       success: true,
@@ -125,11 +141,11 @@ export async function login(req: Request, res: Response, next: NextFunction) {
         environment: user.environment,
         name: displayName,
         hostelId: user.hostelId,
-        hostelName: user.hostel?.name || null,
-        studentId: user.studentProfile?.studentId || null,
-        department: user.studentProfile?.department || null,
-        admissionYear: user.studentProfile?.admissionYear || null,
-        staffId: user.staffProfile?.staffId || null,
+        hostelName: user.hostel?.name ?? null,
+        studentId: user.studentProfile?.studentId ?? null,
+        department: user.studentProfile?.department ?? null,
+        admissionYear: user.studentProfile?.admissionYear ?? null,
+        staffId: user.staffProfile?.staffId ?? null,
       },
     });
   } catch (error) {
@@ -167,7 +183,9 @@ export async function getMe(req: AuthenticatedRequest, res: Response, next: Next
     }
 
     const displayName =
-      user.studentProfile?.name || user.staffProfile?.name || 'College Laundry Administrator';
+      user.studentProfile?.name ??
+      user.staffProfile?.name ??
+      (user.environment === 'PG_SHARED' ? 'PG Hostel Administrator' : 'College Laundry Administrator');
 
     return res.status(200).json({
       success: true,
@@ -178,11 +196,11 @@ export async function getMe(req: AuthenticatedRequest, res: Response, next: Next
         environment: user.environment,
         name: displayName,
         hostelId: user.hostelId,
-        hostelName: user.hostel?.name || null,
-        studentId: user.studentProfile?.studentId || null,
-        department: user.studentProfile?.department || null,
-        admissionYear: user.studentProfile?.admissionYear || null,
-        staffId: user.staffProfile?.staffId || null,
+        hostelName: user.hostel?.name ?? null,
+        studentId: user.studentProfile?.studentId ?? null,
+        department: user.studentProfile?.department ?? null,
+        admissionYear: user.studentProfile?.admissionYear ?? null,
+        staffId: user.staffProfile?.staffId ?? null,
       },
     });
   } catch (error) {

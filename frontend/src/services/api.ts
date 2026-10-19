@@ -20,6 +20,9 @@ import {
   AdminStudent,
   AdminStaff,
   AdminAuditLog,
+  AdminBooking,
+  AdminHistoryItem,
+  AdminNotificationItem,
   AiClothingScanResult,
   AiServiceHealth,
   SmartPlanningResponse,
@@ -91,7 +94,13 @@ export const api = {
   checkHealth: () => request<ApiResponse>('/health'),
 
   // Hostels
-  getHostels: () => request<ApiResponse<Hostel[]>>('/hostels'),
+  getHostels: (params?: { environment?: string; role?: string }) => {
+    const search = new URLSearchParams();
+    if (params?.environment) search.set('environment', params.environment);
+    if (params?.role) search.set('role', params.role);
+    const qs = search.toString() ? `?${search.toString()}` : '';
+    return request<ApiResponse<Hostel[]>>(`/hostels${qs}`);
+  },
 
   // Auth
   login: (credentials: {
@@ -376,9 +385,45 @@ export const api = {
   },
 
   // Admin: get today's slots across hostels
-  getAdminTodaySlots: (hostelId?: string) => {
-    const query = hostelId && hostelId !== 'ALL' ? `?hostelId=${hostelId}` : '';
-    return request<{ success: boolean; date: string; slots: AdminTodaySlot[] }>(`/admin/slots/today${query}`);
+  getAdminTodaySlots: (hostelId?: string, date?: string) => {
+    const params = new URLSearchParams();
+    if (hostelId && hostelId !== 'ALL') params.set('hostelId', hostelId);
+    if (date) params.set('date', date);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return request<{ success: boolean; date: string; slots: AdminTodaySlot[] }>(`/admin/slots/today${qs}`);
+  },
+
+  // Admin: get all bookings with filters (scoped to admin environment)
+  getAdminBookings: (filters?: {
+    hostelId?: string;
+    status?: string;
+    date?: string;
+    search?: string;
+  }) => {
+    const params = new URLSearchParams();
+    if (filters?.hostelId && filters.hostelId !== 'ALL') params.set('hostelId', filters.hostelId);
+    if (filters?.status && filters.status !== 'ALL') params.set('status', filters.status);
+    if (filters?.date) params.set('date', filters.date);
+    if (filters?.search) params.set('search', filters.search);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return request<{ success: boolean; count: number; bookings: AdminBooking[] }>(`/admin/bookings${qs}`);
+  },
+
+  // Admin: get laundry history (scoped to admin environment)
+  getAdminHistory: (filters?: { hostelId?: string; search?: string }) => {
+    const params = new URLSearchParams();
+    if (filters?.hostelId && filters.hostelId !== 'ALL') params.set('hostelId', filters.hostelId);
+    if (filters?.search) params.set('search', filters.search);
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return request<{ success: boolean; count: number; history: AdminHistoryItem[] }>(`/admin/history${qs}`);
+  },
+
+  // Admin: get notifications (scoped to admin environment)
+  getAdminNotifications: (filters?: { limit?: number }) => {
+    const params = new URLSearchParams();
+    if (filters?.limit) params.set('limit', String(filters.limit));
+    const qs = params.toString() ? `?${params.toString()}` : '';
+    return request<{ success: boolean; count: number; notifications: AdminNotificationItem[] }>(`/admin/notifications${qs}`);
   },
 
   // Admin: get students list (scoped, sanitized, with monthly usage)

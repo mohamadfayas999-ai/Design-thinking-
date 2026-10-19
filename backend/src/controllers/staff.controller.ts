@@ -35,6 +35,14 @@ export async function getStaffDashboard(
       return res.status(404).json({ success: false, message: 'Staff profile not found' });
     }
 
+    const requestedHostelId = req.query.hostelId as string | undefined;
+    if (requestedHostelId && requestedHostelId !== staff.hostelId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: Staff cannot access facilities outside their assigned REC hostel.',
+      });
+    }
+
     const hostelId = staff.hostelId;
     const today = new Date().toISOString().split('T')[0];
 
@@ -148,6 +156,14 @@ export async function getStaffBookings(
       return res.status(404).json({ success: false, message: 'Staff profile not found' });
     }
 
+    const requestedHostelId = req.query.hostelId as string | undefined;
+    if (requestedHostelId && requestedHostelId !== staff.hostelId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: Staff cannot access facilities outside their assigned REC hostel.',
+      });
+    }
+
     const hostelId = staff.hostelId;
     const { date, status, search } = req.query;
 
@@ -202,10 +218,8 @@ export async function getStaffBookings(
             hostelId: true,
           },
         },
-        aiScan: true,
         laundryOrder: {
           include: {
-            aiScan: true,
             itemCount: {
               select: {
                 shirtCount: true,
@@ -253,7 +267,6 @@ export async function getStaffBookings(
         weightGrams: b.weightGrams,
         student: b.student,
         slot: b.slot,
-        aiScan: b.aiScan || b.laundryOrder?.aiScan || null,
         laundryOrder: b.laundryOrder
           ? {
               id: b.laundryOrder.id,
@@ -305,12 +318,10 @@ export async function getBookingDetail(
           },
         },
         slot: true,
-        aiScan: true,
         laundryOrder: {
           include: {
             itemCount: true,
             rackShelf: true,
-            aiScan: true,
             staff: {
               select: { name: true, staffId: true },
             },
@@ -354,6 +365,14 @@ export async function getStorage(
     const staff = await getStaffProfile(req.user.userId);
     if (!staff) {
       return res.status(404).json({ success: false, message: 'Staff profile not found' });
+    }
+
+    const requestedHostelId = req.query.hostelId as string | undefined;
+    if (requestedHostelId && requestedHostelId !== staff.hostelId) {
+      return res.status(403).json({
+        success: false,
+        message: 'Access restricted: Staff cannot access facilities outside their assigned REC hostel.',
+      });
     }
 
     const locations = await prisma.rackShelfLocation.findMany({
@@ -431,7 +450,7 @@ export async function performIntake(
     }
 
     const { id: bookingId } = req.params;
-    const { tShirtShirtCount, pantsTrackCount, rackShelfId, aiScanConfirmation } = req.body;
+    const { tShirtShirtCount, pantsTrackCount, rackShelfId } = req.body;
 
     // ── 1. Rack/shelf required ──
     if (!rackShelfId) {
@@ -474,9 +493,8 @@ export async function performIntake(
       include: {
         slot: true,
         student: true,
-        aiScan: true,
         laundryOrder: {
-          include: { itemCount: true, aiScan: true },
+          include: { itemCount: true },
         },
       },
     });
@@ -650,25 +668,7 @@ export async function performIntake(
       // We keep SlotBooking as BOOKED since it was successfully booked
       // (the order status is what shows IN_PROGRESS)
 
-      // If staff confirmed or corrected AI observations, update AiScan
-      const targetAiScan = booking.aiScan || booking.laundryOrder?.aiScan;
-      if (aiScanConfirmation && targetAiScan) {
-        await tx.aiScan.update({
-          where: { id: targetAiScan.id },
-          data: {
-            staffConfirmed: true,
-            confirmedType: aiScanConfirmation.confirmedType || targetAiScan.clothingType,
-            confirmedColor: aiScanConfirmation.confirmedColor || targetAiScan.mainColor,
-            confirmedStain: aiScanConfirmation.confirmedStain || targetAiScan.possibleStain,
-            confirmedSeverity: aiScanConfirmation.confirmedSeverity || targetAiScan.stainSeverity,
-            confirmedRecommendation:
-              aiScanConfirmation.confirmedRecommendation ||
-              `${targetAiScan.washMode} (${targetAiScan.preTreatment})`,
-            confirmedAt: now,
-            confirmedByStaffId: staff.id,
-          },
-        });
-      }
+
 
       // Create AuditLog
       await tx.auditLog.create({
@@ -1005,11 +1005,9 @@ export async function staffQrLookup(
             hostelId: true,
           },
         },
-        aiScan: true,
         laundryOrder: {
           include: {
             itemCount: true,
-            aiScan: true,
           },
         },
       },
@@ -1048,7 +1046,6 @@ export async function staffQrLookup(
           endTime: b.slot.endTime,
           hostelId: b.slot.hostelId,
         },
-        aiScan: b.aiScan || b.laundryOrder?.aiScan || null,
         laundryOrder: b.laundryOrder
           ? {
               id: b.laundryOrder.id,

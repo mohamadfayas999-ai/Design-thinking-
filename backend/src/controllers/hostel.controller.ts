@@ -25,7 +25,15 @@ export async function getHostels(req: Request, res: Response, next: NextFunction
       }
     }
 
-    // 2. If unauthenticated, allow query param filtering by environment
+    // 2. If staff role is requested, laundry staff exclusively operates in COLLEGE environment
+    if (!effectiveEnvironment && req.query.role) {
+      const qRole = String(req.query.role).toUpperCase();
+      if (qRole === 'STAFF') {
+        effectiveEnvironment = EnvironmentType.COLLEGE;
+      }
+    }
+
+    // 3. If unauthenticated, allow query param filtering by environment
     if (!effectiveEnvironment && req.query.environment) {
       const qEnv = String(req.query.environment).toUpperCase();
       if (qEnv === EnvironmentType.COLLEGE || qEnv === EnvironmentType.PG_SHARED) {

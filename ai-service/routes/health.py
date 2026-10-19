@@ -2,7 +2,7 @@
 
 import os
 from flask import Blueprint, jsonify
-from services.detector import get_model, CLASS_NAMES
+from services.detector import get_model, CLASS_NAMES, resolve_model_path
 
 health_bp = Blueprint("health", __name__)
 
@@ -18,7 +18,7 @@ def health():
         "service":     "WASHWISE AI Clothing Detection",
         "mode":        ai_mode,
         "modelLoaded": model_loaded,
-        "modelPath":   os.getenv("MODEL_PATH", "./models/clothing_yolov8.pt"),
+        "modelPath":   resolve_model_path(),
         "classes":     list(CLASS_NAMES.values()),
         "threshold":   float(os.getenv("CONFIDENCE_THRESHOLD", "0.50")),
     })

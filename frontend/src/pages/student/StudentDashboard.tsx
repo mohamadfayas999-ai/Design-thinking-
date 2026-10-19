@@ -1065,8 +1065,8 @@ export const StudentDashboard: React.FC = () => {
       <AiLaundryScannerModal
         isOpen={isAiScannerOpen}
         onClose={() => setIsAiScannerOpen(false)}
-        onNavigateToBookingWithCounts={(_counts) => {
-          navigate('/student/book');
+        onNavigateToBookingWithCounts={(counts) => {
+          navigate('/student/book', { state: { prefilledGarments: counts.garments } });
         }}
       />
     </PageTransition>

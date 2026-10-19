@@ -12,21 +12,6 @@ import { ErrorAlert } from '../../components/common/ErrorAlert';
 import { PageTransition } from '../../components/common/PageTransition';
 import { stepVariants } from '../../utils/animations';
 
-const DEMO_STAFF: Record<string, { email: string; name: string }> = {
-  HABITAT: {
-    email: 'habitatstaff1@rajalakshmi.edu.in',
-    name: 'Habitat Staff 1',
-  },
-  THANDALAM: {
-    email: 'thandalamstaff1@rajalakshmi.edu.in',
-    name: 'Thandalam Staff 1',
-  },
-  GIRLS: {
-    email: 'girlsstaff1@rajalakshmi.edu.in',
-    name: 'Girls Staff 1',
-  },
-};
-
 export const StaffLoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { login } = useAuth();
@@ -43,11 +28,15 @@ export const StaffLoginPage: React.FC = () => {
   useEffect(() => {
     async function fetchHostels() {
       try {
-        const res = await api.getHostels();
+        const res = await api.getHostels({ role: 'STAFF', environment: 'COLLEGE' });
         if (res.data) {
-          setHostels(res.data);
-          if (res.data.length > 0) {
-            setSelectedHostelId(res.data[0].id);
+          // Strictly include only the three REC hostels (Girls, Thandalam, Habitat)
+          const allowedHostels = res.data.filter(
+            (h) => (!h.environment || h.environment === 'COLLEGE') && ['GIRLS', 'THANDALAM', 'HABITAT'].includes(h.code.toUpperCase())
+          );
+          setHostels(allowedHostels);
+          if (allowedHostels.length > 0) {
+            setSelectedHostelId(allowedHostels[0].id);
           }
         }
       } catch (err: any) {
@@ -243,35 +232,12 @@ export const StaffLoginPage: React.FC = () => {
                 </div>
               </form>
 
-              {/* Demo Credentials Quick-Fill helper — Hostel-scoped */}
-              {selectedHostel && DEMO_STAFF[selectedHostel.code] && (
-                <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 mb-2.5">
-                    {selectedHostel.name} Staff Demo Credentials:
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEmail(DEMO_STAFF[selectedHostel.code].email);
-                      setPassword('laundrystaff123');
-                      setError(null);
-                    }}
-                    className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-amber-300 hover:bg-amber-50/50 text-xs text-slate-600 transition-colors focus:outline-none focus:ring-1 focus:ring-amber-400 flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="font-bold text-slate-800 block text-xs">
-                        {DEMO_STAFF[selectedHostel.code].name} ({selectedHostel.name})
-                      </span>
-                      <span className="text-[11px] text-slate-500 font-mono">
-                        {DEMO_STAFF[selectedHostel.code].email}
-                      </span>
-                    </div>
-                    <span className="text-[11px] font-semibold text-amber-800 bg-amber-50 px-2 py-1 rounded-md border border-amber-200">
-                      Auto-fill
-                    </span>
-                  </button>
-                </div>
-              )}
+              {/* Staff sign-in guidance */}
+              <div className="mt-8 pt-5 border-t border-dashed border-slate-200">
+                <p className="text-xs text-slate-500 text-center">
+                  Sign in using your assigned laundry staff credentials.
+                </p>
+              </div>
             </Card>
           </motion.div>
         )}
