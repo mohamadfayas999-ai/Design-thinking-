@@ -22,6 +22,17 @@ WASHWISE CATEGORY MAPPINGS:
 import os
 import logging
 from typing import Optional
+import torch
+
+# ── Container / Render CPU Optimizations ────────────────────────
+# Restrict PyTorch to 1 CPU thread to avoid thread contention, high context
+# switching overhead, and memory spikes on shared container environments.
+try:
+    torch.set_num_threads(1)
+    if hasattr(torch, "set_num_interop_threads"):
+        torch.set_num_interop_threads(1)
+except Exception:
+    pass
 
 logger = logging.getLogger(__name__)
 
@@ -204,8 +215,17 @@ def run_inference(image_path: str) -> dict:
 
     confidence_threshold = float(os.getenv("CONFIDENCE_THRESHOLD", "0.50"))
 
-    # Execute YOLO inference using Ultralytics with TorchScript engine
-    results = model(image_path, conf=confidence_threshold, verbose=False)
+    # Execute YOLO inference using Ultralytics with TorchScript engine.
+    # imgsz=640 standardizes image scale to prevent memory spikes on phone photos.
+    # torch.inference_mode() prevents tracking gradients and intermediate graph tensors.
+    with torch.inference_mode():
+        results = model(
+            image_path,
+            imgsz=640,
+            conf=confidence_threshold,
+            verbose=False,
+            device="cpu",
+        )
 
     detections = []
     counts: dict[str, int] = {}
