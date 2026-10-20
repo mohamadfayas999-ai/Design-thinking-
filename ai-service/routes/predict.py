@@ -71,18 +71,20 @@ def predict():
         # ── Run detection ───────────────────────────────────────
         ai_mode = os.getenv("AI_MODE", "mock").lower()
         if ai_mode == "production":
-            from services.detector import run_inference, get_model, load_model
+            from services.detector import run_inference, get_model
+
+            # Never try to reload a large model during a user request.
+            # If startup loading failed, return immediately instead of timing out.
             if get_model() is None:
-                load_model()
-            if get_model() is None:
+                logger.error("Prediction rejected: AI model is not loaded.")
                 return jsonify({
                     "success": False,
                     "error": (
-                        "AI model is not loaded. "
-                        "Ensure MODEL_PATH points to a valid model file (e.g. .torchscript or .pt) "
-                        "and restart the AI service."
-                    ),
-                }), 503
+                        "The clothing detection model is unavailable. "
+                        "Please try again after the AI service has restarted."
+                ),
+            }), 503
+
             result = run_inference(temp_path)
         else:
             # MOCK mode (no .pt model required)
