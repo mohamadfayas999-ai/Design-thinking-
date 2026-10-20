@@ -7,6 +7,5 @@ env/
 uploads/*
 !uploads/.gitkeep
 models/*.pt
-models/*.torchscript
 models/*.onnx
 !models/.gitkeep
