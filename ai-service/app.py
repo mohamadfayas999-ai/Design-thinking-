@@ -37,15 +37,18 @@ def create_app():
     # In production mode, attempt to load the YOLO model
     ai_mode = os.getenv("AI_MODE", "mock").lower()
     if ai_mode == "production":
-        try:
-            from services.detector import load_model
-            load_model()
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning(
-                f"Could not load YOLO model on startup: {e}. Running in standby mode."
-            )
+        import logging
+        from services.detector import load_model
 
+        logger = logging.getLogger(__name__)
+        logger.info("Starting clothing detection model loading...")
+
+        loaded = load_model()
+
+        if loaded:
+            logger.info("Clothing detection model loaded successfully.")
+        else:
+            logger.error("Clothing detection model failed to load.")    
     return app
 
 
